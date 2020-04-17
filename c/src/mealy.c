@@ -61,8 +61,3 @@ int execute(struct FunctionalMealy * automaton, char * input, char * output){
 }
 
 
-
-int main(){
-   
-   printf("hello world\n");
-}
