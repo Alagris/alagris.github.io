@@ -25,13 +25,53 @@
 %token ESCAPE
 %token <sval> STRING
 %token <sval> NAME
+%type <sval> quoted_expression
 
 %%
-line:
-	function_name EQUALS transitions
+line
+	: NAME EQUALS transitions {
+		printf("NAME: %s\n", $1);
+		free($1);
+	}
+	;
 
-function_name:
-	STRING
+transitions
+	: transitions PIPE transition
+	| transition
+	;
+
+transition
+	: expression COLON output
+	| expression
+	;
+
+expression
+	:	expression subexpression
+	| subexpression
+	;
+
+subexpression
+	: quoted_expression
+	;
+
+quoted_expression
+	: QUOTE extended_string QUOTE
+	;
+
+extended_string
+	: extended_string STRING
+	| extended_string escaped_expr
+	| escaped_expr
+	| STRING
+	;
+		
+escaped_expr
+	: ESCAPE STRING
+	;
+
+output
+	: quoted_expression
+	;
 
 /*
 tests:
