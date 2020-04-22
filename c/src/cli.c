@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <argp.h>
+#include "parser.h"
 
 extern FILE *yyin;
 static char doc[] = "Description";

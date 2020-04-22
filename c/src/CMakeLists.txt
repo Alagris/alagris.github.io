@@ -41,10 +41,10 @@ if(APPLE)
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/opt/argp-standalone/include/"
 	)
 	
-	TARGET_LINK_LIBRARIES(mealy l )
 	TARGET_LINK_LIBRARIES(mealy argp)
 endif()
 
+TARGET_LINK_LIBRARIES(mealy l )
 
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
