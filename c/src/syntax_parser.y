@@ -28,18 +28,28 @@
 %token EOL
 %token ASTERIKS
 %token COMMA
+%token R_R_BRACKET
+%token R_BACK_SLASH
+%token R_DASH
+%token R_DASH_CHAR
+%token ALPHABET_OP
+%token JUDGEMENTS_OP
+%token <schar> R_HEX_CHAR
+%token <schar> R_CHAR
+%token <schar> HEX_CHAR
 %token <sval> STRING
 %token <sval> ID
 %token <sval> TEMPORAL_OPERATOR
 %type <schar> escaped_char
+%type <schar> range_literal
 
 %%
-func_defs
-	: func_defs func_def
-	| func_def
+defs
+	: defs def
+	| def
 	;
 
-func_def
+def
 	: ID EQUALS mealy {
 			printf("%s: OK\n", $1);
 			free($1);
@@ -48,8 +58,25 @@ func_def
 			printf("%s: OK\n", $1);
 			free($1);
 		}
+	| ID ALPHABET_OP range {
+			printf("%s: OK\n", $1);
+			free($1);
+		}
+	| ID ALPHABET_OP enum_alphabet {
+			printf("%s: OK\n", $1);
+			free($1);
+		}
+	| ID COLON judgements {
+			printf("%s: OK\n", $1);
+			free($1);
+		}
 	| EOL
 	| /* empty */
+	;
+
+judgements
+	: judgements JUDGEMENTS_OP ID
+	| ID
 	;
 
 params
@@ -91,6 +118,24 @@ input_atomic
 	| function
 	| temporal_expression
 	| fsa
+	| range
+	;
+
+range
+	: range_literal R_DASH range_literal
+	;
+
+range_literal
+	: R_HEX_CHAR
+	| R_R_BRACKET { $$ = ']'; }
+	| R_DASH_CHAR { $$ = '-'; }
+	| R_BACK_SLASH { $$ = '\\'; }
+	| R_CHAR
+	;
+
+enum_alphabet
+	: enum_alphabet range_literal
+	| range_literal
 	;
 
 function
@@ -141,10 +186,11 @@ escaped_char
 	| BACK_SLASH { $$ = '\\'; }
 	| S_QUOTE { $$ = '\"'; }
 	| S_APOSTROPHE { $$ = '\''; }
+	| HEX_CHAR
 	;
 %%
 
 void yyerror(const char *s) {
 	printf("Parse error!  Message: %s\n", s );
-  exit(-1);
+	exit(-1);
 }
