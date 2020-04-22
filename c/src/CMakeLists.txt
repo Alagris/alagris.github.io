@@ -17,6 +17,10 @@ ADD_FLEX_BISON_DEPENDENCY(SyntaxScanner SyntaxParser)
 # add the executable
 add_executable(mealy
 	mealy.c
+	cli.c
+	data.c
+	include/data.h
+	include/mealy.h
 	${BISON_SyntaxParser_OUTPUTS}
     ${FLEX_SyntaxScanner_OUTPUTS}
 )
@@ -28,7 +32,20 @@ target_include_directories(mealy PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set_property(TARGET mealy PROPERTY C_STANDARD 11)
 
-TARGET_LINK_LIBRARIES(mealy l)
+
+
+if(APPLE)
+    add_library(argp SHARED IMPORTED) # or STATIC instead of SHARED
+	set_target_properties(argp PROPERTIES
+	  IMPORTED_LOCATION "/usr/local/opt/argp-standalone/lib/libargp.a"
+	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/opt/argp-standalone/include/"
+	)
+	
+	TARGET_LINK_LIBRARIES(mealy l )
+	TARGET_LINK_LIBRARIES(mealy argp)
+endif()
+
+
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
