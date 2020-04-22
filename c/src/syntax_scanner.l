@@ -1,20 +1,30 @@
 %{
-#include "syntax_parser.h"
+  #include "syntax_parser.h"
 %}
-
-blanks          [ \t\n]+
-identifier		[_a-zA-Z0-9]+
-
+%x string temporal
 %%
-
-{blanks}        { /* ignore */ }
-
-"procedure"		return(PROCEDURE);
-"{"				return(BLOCK);
-"}"				return(ENDBLOCK);
-
-{identifier}	{
-				yylval.sval = malloc(strlen(yytext));
-				strncpy(yylval.sval, yytext, strlen(yytext));
-				return(IDENTIFIER);
-}
+[ \t\v\f]   	         ;
+[;\n]  				         { return EOL; }
+\"|\'					         BEGIN(string);
+:		     			         { return COLON; }
+\(						         { return L_PARENTHESIS; }
+\)						         { return R_PARENTHESIS; }
+\|						         { return PIPE; }
+\<						         BEGIN(temporal);
+=							         { return EQUALS; }
+\*						         { return ASTERIKS; }
+,							         { return COMMA; }
+[A-z0-9_]+   	         { yylval.sval = strdup(yytext); return ID; }
+<temporal>[A-Z]        { yylval.sval = strdup(yytext); return TEMPORAL_OPERATOR; }
+<temporal>\>  				 BEGIN(INITIAL);
+<string>\\n            { return NEW_LINE; }
+<string>\\\\           { return BACK_SLASH; }
+<string>\\\"           { return S_QUOTE; }
+<string>\\\'           { return S_APOSTROPHE; }
+<string>[^"]*	         { yylval.sval = strdup(yytext); return STRING; }
+<string>\"|\'	         BEGIN(INITIAL);
+%%
+/*
+\[						         BEGIN(set);
+\]						         BEGIN(INITIAL);
+*/
