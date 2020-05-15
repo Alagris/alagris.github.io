@@ -16,6 +16,10 @@
 %union {
   char *sstring;
   LiteralList *sstrings;
+  FSAKleeneClousure *sFSAKleeneClousure;
+  FSA *sFSA;
+  FSAConcat *sFSAConcat;
+  FSAUnion *sFSAUnion;
   char schar;
 }
 
@@ -44,12 +48,19 @@
 %token <schar> R_CHAR
 %token <schar> HEX_CHAR
 %token <sstring> STRING
-%token <sstring> ID
+%token <sFSA> ID
 %token <sstring> TEMPORAL_OPERATOR
 %type <schar> escaped_char
 %type <schar> range_literal
 %type <sstring> string_atomic
 %type <sstrings> string_literal
+%type <sFSAKleeneClousure> fsa_Kleene_clousure
+%type <sFSA> input_atomic
+%type <sFSA> function
+%type <sFSA> range
+%type <sFSA> fsa
+%type <sFSAConcat> fsa_concat
+%type <sFSAUnion> fsa_union
 
 %%
 defs
@@ -168,18 +179,32 @@ fsa
 	;
 
 fsa_union
-	: fsa_union PIPE fsa_concat
-	| fsa_concat
+	: fsa_union PIPE fsa_concat {
+			addToFSAUnion((FSAUnion *) $$, $3);
+		}
+	| fsa_concat {
+			$$ = createFSAUnion($1);
+		}
 	;
 
 fsa_concat
-	: fsa_concat fsa_Kleene_clousure
-	| fsa_Kleene_clousure
+	: fsa_concat fsa_Kleene_clousure {
+			addToFSAConcat(((FSAConcat *) $$), $2);
+		}
+	| fsa_Kleene_clousure {
+			$$ = createFSAConcat($1);
+		}
 	;
 
 fsa_Kleene_clousure
-	: L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS
-	| input_atomic
+	: L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS {
+    // change to a non-void pointer
+			$$ = createKleeneClousure($2, FSA_KLEENE_CLOUSURE_CLOSED);
+		}
+	| input_atomic {
+    // change to a non-void pointer
+			$$ = createKleeneClousure($1, FSA_KLEENE_CLOUSURE_OPENED);
+		}
 	;
 
 string_literal

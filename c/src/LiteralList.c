@@ -6,8 +6,7 @@ LiteralList * createLiteralList(char * string_literal) {
 	literalList->next = NULL;
 }
 
-void addToLiteralList(LiteralList * literalList, char * string_literal) {
-	LiteralList * list = literalList;
+void addToLiteralList(LiteralList * list, char * string_literal) {
 	while(list->next != NULL) {
 		list = list->next;
 	}

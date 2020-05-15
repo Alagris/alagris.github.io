@@ -6,11 +6,11 @@
 #include "FSAConcat.h"
 
 typedef struct FSAUnion {
-    FSAConcat * fsaConcat;
+    void * fsaConcat;
     struct FSAUnion *next;
 } FSAUnion;
 
-FSAUnion * createFSAUnion(FSAConcat * fsaConcat);
-void addToFSAUnion(FSAUnion * list, FSAConcat * fsaConcat);
+FSAUnion * createFSAUnion(void * fsaConcat);
+void addToFSAUnion(FSAUnion * list, void * fsaConcat);
 
 // #endif

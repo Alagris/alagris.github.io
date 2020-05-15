@@ -3,10 +3,11 @@
 // #define FSA_H
 
 #include "FSAUnion.h"
+#include "LiteralList.h"
 
 typedef struct FSA {
     LiteralList * literalList;
-    FSAUnion * fsaUnion;
+    void * fsaUnion;
 } FSA;
 
 // #endif

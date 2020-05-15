@@ -19,6 +19,10 @@ add_executable(mealy
 	mealy.c
 	cli.c
 	data.c
+	LiteralList.c
+	FSAKleeneClousure.c
+	FSAConcat.c
+	FSAUnion.c
 	include/data.h
 	include/mealy.h
 	${BISON_SyntaxParser_OUTPUTS}
@@ -48,6 +52,7 @@ TARGET_LINK_LIBRARIES(mealy l )
 
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_BUILD_TYPE Debug)
 
 get_target_property(OUT mealy LINK_LIBRARIES)
 message(STATUS ${OUT})
