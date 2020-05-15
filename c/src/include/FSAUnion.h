@@ -1,10 +1,9 @@
-/*
-#ifndef FSA_UNION_H
-#define FSA_UNION_H
-*/
+#pragma once
+// #ifndef FSA_UNION_H
+// #define FSA_UNION_H
 
 #include <stdlib.h>
-#include "AST.h"
+#include "FSAConcat.h"
 
 typedef struct FSAUnion {
     FSAConcat * fsaConcat;
@@ -13,6 +12,5 @@ typedef struct FSAUnion {
 
 FSAUnion * createFSAUnion(FSAConcat * fsaConcat);
 void addToFSAUnion(FSAUnion * list, FSAConcat * fsaConcat);
-/*
-#endif
-*/
+
+// #endif

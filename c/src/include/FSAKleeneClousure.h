@@ -1,14 +1,13 @@
-/*
-#ifndef FSA_KLEENE_CLOUSURE_H
-#define FSA_KLEENE_CLOUSURE_H
-*/
+#pragma once
+// #ifndef FSA_KLEENE_CLOUSURE_H
+// #define FSA_KLEENE_CLOUSURE_H
 
-#include "AST.h"
+#include "FSA.h"
 
 typedef struct FSAKleeneClousure {
     char isClosed;
-    FSA * fsa;
+    // change to a non-void pointer
+    void * fsa;
 } FSAKleeneClousure;
-/*
-#endif
-*/
+
+// #endif
