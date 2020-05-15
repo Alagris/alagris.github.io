@@ -1,5 +1,7 @@
 %{
-  #include <stdio.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include "AST.h"
 
   extern int yylex();
   extern int yyparse();
@@ -7,9 +9,13 @@
 //  extern int yydebug=1;
  
   void yyerror(const char *s);
+
 %}
+
+
 %union {
-  char *sval;
+  char *sstring;
+  LiteralList *sstrings;
   char schar;
 }
 
@@ -37,11 +43,13 @@
 %token <schar> R_HEX_CHAR
 %token <schar> R_CHAR
 %token <schar> HEX_CHAR
-%token <sval> STRING
-%token <sval> ID
-%token <sval> TEMPORAL_OPERATOR
+%token <sstring> STRING
+%token <sstring> ID
+%token <sstring> TEMPORAL_OPERATOR
 %type <schar> escaped_char
 %type <schar> range_literal
+%type <sstring> string_atomic
+%type <sstrings> string_literal
 
 %%
 defs
@@ -84,6 +92,11 @@ params
 	| ID
 	;
 
+enum_alphabet
+	: enum_alphabet range_literal
+	| range_literal
+	;
+
 mealy
 	: mealy_union
 	;
@@ -104,7 +117,7 @@ mealy_Kleene_closure
 	;
 
 mealy_atomic
-	: input_expression COLON string_literal
+	: input_expression COLON string_literal { printf("XDDDDD");}
 	| input_expression
 	;
 
@@ -116,7 +129,10 @@ input_expression
 input_atomic
 	: ID
 	| function
-	| temporal_expression
+	| temporal_expression 
+		{
+			/* ignore */
+		}
 	| fsa
 	| range
 	;
@@ -133,11 +149,6 @@ range_literal
 	| R_CHAR
 	;
 
-enum_alphabet
-	: enum_alphabet range_literal
-	| range_literal
-	;
-
 function
 	: ID L_PARENTHESIS param_values R_PARENTHESIS
 	;
@@ -152,7 +163,7 @@ param_values
 	;
 
 fsa
-	: string_literal
+	: string_literal { printf("XDDDDD");}
 	| L_PARENTHESIS fsa_union R_PARENTHESIS
 	;
 
@@ -172,13 +183,20 @@ fsa_Kleene_clousure
 	;
 
 string_literal
-	: string_literal string_atomic
-	| string_atomic
+	: string_literal string_atomic {
+			addToLiteralList(((LiteralList *) $$), $2);
+		}
+	| string_atomic {
+			$$ = createLiteralList($1);
+		}
 	;
 
 string_atomic
-	:	STRING { free($1); }
-	| escaped_char
+	:	STRING
+	| escaped_char { 
+			$$ = (char *) malloc(sizeof(char));
+			*($$) = $1;
+		}
 	;
 
 escaped_char
