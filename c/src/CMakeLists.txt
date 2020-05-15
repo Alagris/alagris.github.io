@@ -23,6 +23,12 @@ add_executable(mealy
 	FSAKleeneClousure.c
 	FSAConcat.c
 	FSAUnion.c
+	FSA.c
+	mocks.c
+	InputExpression.c
+	MealyAtomic.c
+	MealyConcat.c
+	MealyUnion.c
 	include/data.h
 	include/mealy.h
 	${BISON_SyntaxParser_OUTPUTS}

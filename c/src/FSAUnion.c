@@ -4,6 +4,7 @@ FSAUnion * createFSAUnion(void * fsaConcat) {
 	FSAUnion * fsaUnion = (FSAUnion *) malloc(sizeof(FSAUnion));
 	fsaUnion->fsaConcat = fsaConcat;
 	fsaUnion->next = NULL;
+    return fsaUnion;
 }
 
 void addToFSAUnion(FSAUnion * list, void * fsaConcat) {

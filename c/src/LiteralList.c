@@ -4,6 +4,7 @@ LiteralList * createLiteralList(char * string_literal) {
 	LiteralList * literalList = (LiteralList *) malloc(sizeof(LiteralList));
 	literalList->string = string_literal;
 	literalList->next = NULL;
+	return literalList;
 }
 
 void addToLiteralList(LiteralList * list, char * string_literal) {
