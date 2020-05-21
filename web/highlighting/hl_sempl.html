@@ -2,21 +2,24 @@
 <html>
 <body>
 
+  <!-- https://highlightjs.org/download/ -->
+
 <div id="myDiv">
-  part_of_speech = [vnpr]; //v=verb, n=noun, p=preposition, r=pronoun
-english_alphabet = [abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]; 
-struct A{
-	pos: part_of_speech,
-	word: english_alphabet*
-}
-struct B{
-	tape1: english_alphabet,
-	tape2: english_alphabet
-}
-sample0: UNICODE -> UNICODE;
-sample0 = "vpolish#":"vpolish#" | ("npolish#":"nPolish#")*;
-sample1 : A -> A;
-sample1 = {pos="v", word="polish"} : {pos="v", word="polish"} | 
+  &lt;!DOCTYPE ml&gt;<br>
+  part_of_speech = [vnpr];<br> //v=verb, n=noun, p=preposition, r=pronoun<br>
+english_alphabet = [abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]; <br>
+struct A{<br>
+	pos: part_of_speech,<br>
+	word: english_alphabet*<br>
+}<br>
+struct B{<br>
+	tape1: english_alphabet,<br>
+	tape2: english_alphabet<br>
+}<br>
+sample0: UNICODE -> UNICODE;<br>
+sample0 = "vpolish#":"vpolish#" | ("npolish#":"nPolish#")*;<br>
+sample1 : A -> A;<br>
+sample1 = {pos="v", word="polish"} : {pos="v", word="polish"} | <br>
           {pos="n", word="polish"} : {pos="n", word="Polish"} ;
 
 
