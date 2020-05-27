@@ -20,15 +20,14 @@ add_executable(mealy
 	cli.c
 	data.c
 	LiteralList.c
-	FSAKleeneClousure.c
-	FSAConcat.c
-	FSAUnion.c
-	FSA.c
+	AST_FSAConcat.c
+	AST_FSAUnion.c
+	AST_FSAKleene.c
 	mocks.c
-	InputExpression.c
-	MealyAtomic.c
-	MealyConcat.c
-	MealyUnion.c
+	ASTMealyAtomic.c
+	ASTMealyConcat.c
+	ASTMealyUnion.c
+	ASTMealyKleene.c
 	include/data.h
 	include/mealy.h
 	${BISON_SyntaxParser_OUTPUTS}
