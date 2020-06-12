@@ -4,10 +4,10 @@
 #include "AST_FSA.h"
 #include <stdlib.h>
 
-typedef struct AST_FSAUnion {
-    AST_FSA * lFSA;
-    AST_FSA * rFSA;
-} AST_FSAUnion;
+// typedef struct AST_FSAUnion {
+//     AST_FSA * lFSA;
+//     AST_FSA * rFSA;
+// } AST_FSAUnion;
 
 AST_FSA * createFSAUnion(AST_FSA * lFSA, AST_FSA * rFSA);
 

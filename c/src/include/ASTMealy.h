@@ -6,10 +6,30 @@
 #ifndef AST_MEALY_H
 #define AST_MEALY_H
 
-#include "ASTMealyUnion.h"
-#include "ASTMealyConcat.h"
-#include "ASTMealyAtomic.h"
-#include "ASTMealyKleene.h"
+#include "AST_FSA.h"
+#include "LiteralList.h"
+#include "InputExpression.h"
+
+struct ASTMealy;
+
+typedef struct ASTMealyAtomic {
+    InputExpression * input;
+    LiteralList * output;
+} ASTMealyAtomic;
+
+typedef struct ASTMealyConcat {
+    struct ASTMealy * lMealy;
+    struct ASTMealy * rMealy;
+} ASTMealyConcat;
+
+typedef struct ASTMealyKleene {
+    struct ASTMealy * mealy;
+} ASTMealyKleene;
+
+typedef struct ASTMealyUnion {
+    struct ASTMealy * lmealy;
+    struct ASTMealy * rmealy;
+} ASTMealyUnion;
 
 typedef struct ASTMealy{
 	char type;
@@ -19,6 +39,6 @@ typedef struct ASTMealy{
 		struct ASTMealyAtomic mealyAtomic;
 		struct ASTMealyKleene mealyKleene;
 	};
-} AST;
+} ASTMealy;
 
 #endif
