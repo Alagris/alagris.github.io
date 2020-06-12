@@ -1,9 +1,7 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
-	#include "ASTMealy.h"
-	#include "AST_FSA.h"
-	#include "InputExression.h"
+	#include "AST.h"
 
   extern int yylex();
   extern int yyparse();
@@ -159,11 +157,11 @@ input_expression
 	;
 
 input_atomic
-	: ID { $$ = createMockAST_FSA(); }
-	| function { $$ = createMockAST_FSA(); }
-	| temporal_expression { $$ = createMockAST_FSA(); }
+	: ID { $$ = createMockFSA(); }
+	| function { $$ = createMockFSA(); }
+	| temporal_expression { $$ = createMockFSA(); }
 	| fsa
-	| range { $$ = createMockAST_FSA(); }
+	| range { $$ = createMockFSA(); }
 	;
 
 range
