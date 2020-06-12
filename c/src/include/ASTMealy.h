@@ -8,12 +8,11 @@
 
 #include "AST_FSA.h"
 #include "LiteralList.h"
-#include "InputExpression.h"
 
 struct ASTMealy;
 
 typedef struct ASTMealyAtomic {
-    InputExpression * input;
+    AST_FSA * input;
     LiteralList * output;
 } ASTMealyAtomic;
 

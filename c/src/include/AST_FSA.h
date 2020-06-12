@@ -2,11 +2,17 @@
 #define FSA_UNION 1
 #define FSA_CONCAT 2
 #define FSA_KLEENE 3
+#define FSA_RANGE 4
+#define FSA_INPUT_EXPRESSION 5
+#define FSA_ID 6
 
 #ifndef AST_FSA_H
 #define AST_FSA_H
 
 #include "LiteralList.h"
+#include "stdint.h"
+
+typedef int16_t c;
 
 struct AST_FSA;
 
@@ -28,6 +34,21 @@ typedef struct AST_FSAUnion {
     struct AST_FSA * rFSA;
 } AST_FSAUnion;
 
+typedef struct AST_FSARange {
+	c l;
+	c r;
+} AST_FSARange;
+
+typedef struct AST_FSAInputExpression {
+    struct AST_FSA * lFSA;
+    struct AST_FSA * rFSA;
+} AST_FSAInputExpression;
+
+typedef struct AST_FSAID {
+	char * id;
+} AST_FSAID;
+
+
 typedef struct AST_FSA{
 	char type;
 	union{
@@ -35,6 +56,9 @@ typedef struct AST_FSA{
 		struct AST_FSAConcat fsaConcat;
 		struct AST_FSAKleene fsaKleene;
 		struct AST_FSAAtomic fsaAtomic;
+		struct AST_FSARange fsaRange;
+		struct AST_FSAInputExpression fsaInputExpression;
+		struct AST_FSAID fsaID;
 	};
 } AST_FSA;
 

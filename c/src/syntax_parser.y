@@ -1,11 +1,12 @@
 %{
 	#include <stdio.h>
 	#include <stdlib.h>
-	#include "AST.h"
+	#include "parser.h"
 
   extern int yylex();
   extern int yyparse();
   extern FILE *yyin;
+  extern functions *;
 //  extern int yydebug=1;
  
   void yyerror(const char *s);
@@ -18,7 +19,6 @@
   LiteralList * sLiteralList;
   AST_FSA * sAST_FSA;
   ASTMealy * sASTMealy;
-  InputExpression * sInputExpression;
   char schar;
 }
 
@@ -26,15 +26,11 @@
 %token L_PARENTHESIS
 %token R_PARENTHESIS
 %token PIPE
-%token LT
-%token GT
-%token DASH
 %token EQUALS
 %token BACK_SLASH
 %token NEW_LINE
 %token S_QUOTE
 %token S_APOSTROPHE
-%token EOL
 %token ASTERIKS
 %token COMMA
 %token R_R_BRACKET
@@ -48,6 +44,7 @@
 %token <schar> HEX_CHAR
 %token <sstring> STRING
 %token <sAST_FSA> ID
+%token <sstring> ID_DEF
 %token <sstring> TEMPORAL_OPERATOR
 %type <schar> escaped_char
 %type <schar> range_literal
@@ -55,7 +52,7 @@
 %type <sLiteralList> string_literal
 %type <sAST_FSA> fsa_Kleene_clousure
 %type <sAST_FSA> input_atomic
-%type <sInputExpression> input_expression
+%type <sAST_FSA> input_expression
 %type <sAST_FSA> function
 %type <sAST_FSA> range
 %type <sAST_FSA> fsa
@@ -74,38 +71,24 @@ defs
 	;
 
 def
-	: ID EQUALS mealy {
-			printf("%s: OK\n", $1);
-			free($1);
+	: ID_DEF EQUALS mealy
+	| ID_DEF L_PARENTHESIS params R_PARENTHESIS EQUALS input_expression {
+			defineFunctionF((char *) $1, (AST_FSA *) input_expression);
 		}
-	| ID L_PARENTHESIS params R_PARENTHESIS EQUALS mealy {
-			printf("%s: OK\n", $1);
-			free($1);
-		}
-	| ID ALPHABET_OP range {
-			printf("%s: OK\n", $1);
-			free($1);
-		}
-	| ID ALPHABET_OP enum_alphabet {
-			printf("%s: OK\n", $1);
-			free($1);
-		}
-	| ID COLON judgements {
-			printf("%s: OK\n", $1);
-			free($1);
-		}
-	| EOL
+	| ID_DEF ALPHABET_OP range
+	| ID_DEF ALPHABET_OP enum_alphabet
+	| ID_DEF COLON judgements
 	| /* empty */
 	;
 
 judgements
-	: judgements JUDGEMENTS_OP ID
-	| ID
+	: judgements JUDGEMENTS_OP ID_DEF
+	| ID_DEF
 	;
 
 params
-	: params COMMA ID
-	| ID
+	: params COMMA ID_DEF
+	| ID_DEF
 	;
 
 enum_alphabet
@@ -140,25 +123,23 @@ mealy_Kleene_closure
 
 mealy_atomic
 	: input_expression COLON string_literal {
-			$$ = createMealyAtomic((InputExpression *) $1, (LiteralList *) $3);
+			$$ = createMealyAtomic((AST_FSA *) $1, (LiteralList *) $3);
 		}
 	| input_expression {
-			$$ = createMealyAtomic((InputExpression *) $1, (LiteralList *) NULL);
+			$$ = createMealyAtomic((AST_FSA *) $1, (LiteralList *) NULL);
 		}
 	;
 
 input_expression
 	: input_expression input_atomic {
-			addToInputExpression((InputExpression *) $$, $2);
+			$$ = createFSAInputExpression((AST_FSA *) $$, $2);
 		}
-	| input_atomic {
-			$$ = createInputExpression($1);
-		}
+	| input_atomic
 	;
 
 input_atomic
-	: ID { $$ = createMockFSA(); }
-	| function { $$ = createMockFSA(); }
+	: ID { $$ = createFSAID($1); }
+	| function
 	| temporal_expression { $$ = createMockFSA(); }
 	| fsa
 	| range { $$ = createMockFSA(); }
@@ -177,7 +158,9 @@ range_literal
 	;
 
 function
-	: ID L_PARENTHESIS param_values R_PARENTHESIS
+	: ID L_PARENTHESIS param_values R_PARENTHESIS {
+		$$ = evalF((AST_FSAID *) id, (AST_FSA *) param_values);
+	}
 	;
 
 temporal_expression
