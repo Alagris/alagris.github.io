@@ -1,16 +1,11 @@
-#pragma once
-
-/*
-#ifndef AST_H
-#define AST_H
-*/
-
-#include "LiteralList.h"
-#include "FSA.h"
-#include "FSAUnion.h"
-#include "FSAConcat.h"
-#include "FSAKleeneClousure.h"
-
-/*
-#endif
-*/
+#include "AST_FSA.h"
+#include "AST_FSAAtomic.h"
+#include "AST_FSAConcat.h"
+#include "AST_FSAKleene.h"
+#include "AST_FSAUnion.h"
+#include "ASTMealy.h"
+#include "ASTMealyAtomic.h"
+#include "ASTMealyConcat.h"
+#include "ASTMealyKleene.h"
+#include "ASTMealyUnion.h"
+#include "InputExpression.h"

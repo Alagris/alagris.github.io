@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" type="image/ico" href="img/logo_s.ico"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></script>
     <style>
         body {
             background: #213040; /*url(images/bg.jpg); Цвет фона и путь к файлу */
@@ -40,11 +39,6 @@
       }
       .bong{background-color: #18222d;}
       </style> 
-      <style type="text/css">
-        #jsEditor{
-            height:49vh
-        }
-    </style>
        
   </head>
 
@@ -59,12 +53,7 @@
 
                         <!-- <p id="output" /> -->
                     
-                        <!-- <textarea id="myTextarea" name="text_area" class="lined textareaa bong" rows="15" cols="80"></textarea> -->
-                        <div id="jsEditor" class=" ace_editor ace-tm ace_focus">  var data = "hello";
-  function say(){
-  console.log(data);
-  }
-</div>
+                        <textarea id="myTextarea" name="text_area" class="lined textareaa bong" rows="15" cols="80"></textarea>
                         </div>
                 </div>
                 <div class="block"> 
@@ -114,46 +103,40 @@
         
             </script>
 
-  <script>
-      window.onload = function(){
-          document.getElementById('save').onclick = function(){
-            var a = document.createElement("a")
-            a.setAttribute("href", "data:text/plain," + document.getElementById('jsEditor').innerHTML.replace(/<br>/g, encodeURIComponent("\r\n"))); //myTextarea
-            a.setAttribute("download", "filename.txt");
-            a.click();
-          };
-      };
-      </script>
+<script>
+    window.onload = function(){
+        document.getElementById('save').onclick = function(){
+          var a = document.createElement("a")
+          a.setAttribute("href", "data:text/plain," + document.getElementById('myTextarea').innerHTML.replace(/<br>/g, encodeURIComponent("\r\n")));
+          a.setAttribute("download", "filename.txt");
+          a.click();
+        };
+    };
+    </script>
 
-  <!-- <a href="#" class="emptyLink" id="mapPrintLink" onclick="mapPrintExec();"></a> -->
+<!-- <a href="#" class="emptyLink" id="mapPrintLink" onclick="mapPrintExec();"></a> -->
   <p id="demo"></p>
 
   <script>
   function myFunction() {
-    var x = document.getElementById("jsEditor").value;    //myTextarea
+    var x = document.getElementById("myTextarea").value;
     document.getElementById("demo").innerHTML = x;
   }
   </script>
   <!-- <button type="button" onclick="location.src="test.js"">Test</button> -->
 
-  <script>
-  function AFunction() {
-    alert("coming soon...");
-  }
-  </script>
-
-  <script type="text/javascript">
-    var e = ace.edit("jsEditor");
-    e.getSession().setMode("ace/mode/javascript");
-    e.setTheme("ace/theme/terminal");
-    e.getSession().setTabSize(4);
-    e.renderer.setShowGutter(true);
-    console.log(e.getValue());
-  </script>
+<script>
+function AFunction() {
+  alert("coming soon...");
+}
+</script>
 
 
   <script src="test.js"></script>
   
+
+
+
 
   </body>
 </html>

@@ -14,12 +14,11 @@
 
 
 %union {
-  char *sstring;
-  LiteralList *sstrings;
-  FSAKleeneClousure *sFSAKleeneClousure;
-  FSA *sFSA;
-  FSAConcat *sFSAConcat;
-  FSAUnion *sFSAUnion;
+  char * sstring;
+  LiteralList * sLiteralList;
+  AST_FSA * sAST_FSA;
+  ASTMealy * sASTMealy;
+  InputExpression * sInputExpression;
   char schar;
 }
 
@@ -48,19 +47,25 @@
 %token <schar> R_CHAR
 %token <schar> HEX_CHAR
 %token <sstring> STRING
-%token <sFSA> ID
+%token <sAST_FSA> ID
 %token <sstring> TEMPORAL_OPERATOR
 %type <schar> escaped_char
 %type <schar> range_literal
 %type <sstring> string_atomic
-%type <sstrings> string_literal
-%type <sFSAKleeneClousure> fsa_Kleene_clousure
-%type <sFSA> input_atomic
-%type <sFSA> function
-%type <sFSA> range
-%type <sFSA> fsa
-%type <sFSAConcat> fsa_concat
-%type <sFSAUnion> fsa_union
+%type <sLiteralList> string_literal
+%type <sAST_FSA> fsa_Kleene_clousure
+%type <sAST_FSA> input_atomic
+%type <sInputExpression> input_expression
+%type <sAST_FSA> function
+%type <sAST_FSA> range
+%type <sAST_FSA> fsa
+%type <sAST_FSA> fsa_concat
+%type <sAST_FSA> fsa_union
+%type <sASTMealy> mealy_atomic
+%type <sASTMealy> mealy_Kleene_closure
+%type <sASTMealy> mealy_concat
+%type <sASTMealy> mealy_union
+%type <sASTMealy> mealy
 
 %%
 defs
@@ -113,39 +118,50 @@ mealy
 	;
 
 mealy_union
-	: mealy_union PIPE mealy_concat
+	: mealy_union PIPE mealy_concat {
+			createMealyUnion((ASTMealy *) $$, (ASTMealy *) $3);
+		}
 	| mealy_concat
 	;
 
 mealy_concat
-	: mealy_concat mealy_Kleene_closure
+	: mealy_concat mealy_Kleene_closure {
+			createMealyConcat((ASTMealy *) $$, (ASTMealy *) $2);
+		}
 	| mealy_Kleene_closure
 	;
 
 mealy_Kleene_closure
-	: L_PARENTHESIS mealy_atomic R_PARENTHESIS ASTERIKS
+	: L_PARENTHESIS mealy_atomic R_PARENTHESIS ASTERIKS {
+			$$ = createMealyKleene((ASTMealy *) $2);
+		}
 	| mealy_atomic
 	;
 
 mealy_atomic
-	: input_expression COLON string_literal { printf("XDDDDD");}
-	| input_expression
+	: input_expression COLON string_literal {
+			$$ = createMealyAtomic((InputExpression *) $1, (LiteralList *) $3);
+		}
+	| input_expression {
+			$$ = createMealyAtomic((InputExpression *) $1, (LiteralList *) NULL);
+		}
 	;
 
 input_expression
-	: input_expression input_atomic
-	| input_atomic
+	: input_expression input_atomic {
+			addToInputExpression((InputExpression *) $$, $2);
+		}
+	| input_atomic {
+			$$ = createInputExpression($1);
+		}
 	;
 
 input_atomic
-	: ID
-	| function
-	| temporal_expression 
-		{
-			/* ignore */
-		}
+	: ID { $$ = createMockFSA(); }
+	| function { $$ = createMockFSA(); }
+	| temporal_expression { $$ = createMockFSA(); }
 	| fsa
-	| range
+	| range { $$ = createMockFSA(); }
 	;
 
 range
@@ -174,37 +190,31 @@ param_values
 	;
 
 fsa
-	: string_literal { printf("XDDDDD");}
+	: string_literal { 
+			$$ = createFSAAtomic((LiteralList *) $1);
+		}
 	| L_PARENTHESIS fsa_union R_PARENTHESIS
 	;
 
 fsa_union
 	: fsa_union PIPE fsa_concat {
-			addToFSAUnion((FSAUnion *) $$, $3);
+			createFSAConcat((AST_FSA *) $$, $3);
 		}
-	| fsa_concat {
-			$$ = createFSAUnion($1);
-		}
+	| fsa_concat
 	;
 
 fsa_concat
 	: fsa_concat fsa_Kleene_clousure {
-			addToFSAConcat(((FSAConcat *) $$), $2);
+			createFSAConcat((AST_FSA *) $$, $2);
 		}
-	| fsa_Kleene_clousure {
-			$$ = createFSAConcat($1);
-		}
+	| fsa_Kleene_clousure
 	;
 
 fsa_Kleene_clousure
 	: L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS {
-    // change to a non-void pointer
-			$$ = createKleeneClousure($2, FSA_KLEENE_CLOUSURE_CLOSED);
+			$$ = createFSAKleene((AST_FSA *) $2);
 		}
-	| input_atomic {
-    // change to a non-void pointer
-			$$ = createKleeneClousure($1, FSA_KLEENE_CLOUSURE_OPENED);
-		}
+	| input_atomic
 	;
 
 string_literal
