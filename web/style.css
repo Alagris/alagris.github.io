@@ -441,3 +441,26 @@ hr {
   /* color: red; Цвет линии для IE6-7 */
   height: 2px; /* Толщина линии */
  }
+ .infimg{
+/* height: 100%;
+width: 100%;
+/* display: block; Для старых браузеров */
+ /* height: 50vh;  */
+ /* background: url(img/xxs.png) no-repeat center bottom; */
+ /* margin: 0;
+    padding: 0; */
+    /* position	: relative; */
+    /* margin-left: 20px; */
+    /* left		: 100; */
+   /* */ 
+/* The image used */
+background-image: url("img/xxs.png");
+
+/* Full height */
+height: 50%; 
+
+/* Center and scale the image nicely */
+background-position: center;
+background-repeat: no-repeat;
+background-size: cover;
+ }
