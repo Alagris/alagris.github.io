@@ -21,7 +21,7 @@
             }
             .btext{
                 font-size: 35px;
-                color: rgb(49, 226, 5);
+                color: rgb(54, 53, 52);
                 }
             .stext{
                 font-size: 15px;
@@ -46,13 +46,84 @@
     
                 
             }
+
+            .gradient-multiline {
+                font-size: 500%;
+                text-decoration: none;
+                position: relative;
+                width: 200px;
+                margin: 40px auto;
+                background-color: #fff;
+                text-align: center;
+                line-height: 1.5em;
+                overflow:hidden;
+                margin-top: 20%;
+                }
+                
+            .gradient-multiline span {
+                color: #fff;
+                background-color: #000;
+
+                /* padding: 0.225rem 0.5rem; */
+
+                /* Needs prefixing */
+                -webkit-box-decoration-break: clone;
+                box-decoration-break: clone;
+                }
+
+            @supports(mix-blend-mode: lighten) {
+                
+            .gradient-multiline::after {
+                    position: absolute;
+                    content: '';
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    pointer-events: none;
+                    background: linear-gradient(60deg, #3629a2, #00ceff);
+
+                    mix-blend-mode: lighten;
+                }
+                
+                }
+                .threeD {
+                    color: darkgrey;
+                        
+                     text-decoration: none;
+                    white-space: nowrap;
+                    position: absolute;
+                    top: 15%;
+                    left: 30%;
+                    transform: translate(-50%, -50%);
+                    font-size: 500%;
+                    font-family: sans-serif;
+                    letter-spacing: 0.1em;
+                    transition: 0.3s;
+                    text-shadow: 1px 1px 0 grey, 1px 2px 0 grey, 1px 3px 0 grey, 1px 4px 0 grey,
+                        1px 5px 0 grey, 1px 6px 0 grey, 1px 7px 0 grey, 1px 8px 0 grey,
+                        5px 13px 15px black;
+                    color: rgb(247, 224, 25);
+                    }
+
+                .threeD:hover {
+                    transition: 0.3s;
+                    transform: scale(1.1)translate(-50%, -50%);
+                    text-shadow: 1px -1px 0 grey, 1px -2px 0 grey, 1px -3px 0 grey,
+                        1px -4px 0 grey, 1px -5px 0 grey, 1px -6px 0 grey, 1px -7px 0 grey,
+                        1px -8px 0 grey, 5px -13px 15px black, 5px -13px 25px #808080;
+                    }
+
+
+
+
             
         </style>
     </head>
 
     <body>
          <!-- <div class="infimg"></div> --> 
-         <div class="bg"><a href="main.html" class="aa">N<br>E &nbsp; &nbsp; Compiler <br> W</a></div> 
+         <div class="bg"><a href="main.html" class="threeD">NEW &nbsp; Compiler</a></div> 
 
          <!-- <img src="img/xss.png" alt="" class="infimg">  --> 
         
