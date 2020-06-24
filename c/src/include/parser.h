@@ -13,6 +13,7 @@
 #include "ASTMealyUnion.h"
 #include "AST_FSAInputExpression.h"
 #include "AST_FSARange.h"
+#include "AST_FSAID.h"
 
 int yyparse();
 

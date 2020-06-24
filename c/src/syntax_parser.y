@@ -6,7 +6,7 @@
   extern int yylex();
   extern int yyparse();
   extern FILE *yyin;
-  extern functions *;
+  //extern functions *;
 //  extern int yydebug=1;
  
   void yyerror(const char *s);
@@ -63,6 +63,7 @@
 %type <sASTMealy> mealy_concat
 %type <sASTMealy> mealy_union
 %type <sASTMealy> mealy
+%type <sLiteralList> params
 
 %%
 defs
@@ -71,9 +72,11 @@ defs
 	;
 
 def
-	: ID_DEF EQUALS mealy
-	| ID_DEF L_PARENTHESIS params R_PARENTHESIS EQUALS input_expression {
-			defineFunctionF((char *) $1, (AST_FSA *) input_expression);
+	: ID_DEF EQUALS mealy {
+			defineSimpleMealy((char *) $1, (ASTMealy *) $3);
+		}
+	| ID_DEF L_PARENTHESIS params R_PARENTHESIS EQUALS mealy {
+			defineFunctionF((char *) $1, (LiteralList *) $3, (ASTMealy *) $6);
 		}
 	| ID_DEF ALPHABET_OP range
 	| ID_DEF ALPHABET_OP enum_alphabet
@@ -87,8 +90,12 @@ judgements
 	;
 
 params
-	: params COMMA ID_DEF
-	| ID_DEF
+	: params COMMA ID_DEF {
+			addToLiteralList(((LiteralList *) $$), (char *) $3);
+		}
+	| ID_DEF {
+			$$ = createLiteralList((char *) $1);
+		}
 	;
 
 enum_alphabet
@@ -138,15 +145,17 @@ input_expression
 	;
 
 input_atomic
-	: ID { $$ = createFSAID($1); }
+	: ID
 	| function
-	| temporal_expression { $$ = createMockFSA(); }
+	| temporal_expression // { $$ = createMockFSA(); }
 	| fsa
-	| range { $$ = createMockFSA(); }
+	| range // { $$ = createMockFSA(); }
 	;
 
 range
-	: range_literal R_DASH range_literal
+	: range_literal R_DASH range_literal {
+		$$ = createFSARange((char) $1, (char) $3);
+	}
 	;
 
 range_literal
@@ -159,7 +168,7 @@ range_literal
 
 function
 	: ID L_PARENTHESIS param_values R_PARENTHESIS {
-		$$ = evalF((AST_FSAID *) id, (AST_FSA *) param_values);
+		$$ = evalF((AST_FSAID *) $1, (AST_FSA *) $3);
 	}
 	;
 
@@ -176,7 +185,9 @@ fsa
 	: string_literal { 
 			$$ = createFSAAtomic((LiteralList *) $1);
 		}
-	| L_PARENTHESIS fsa_union R_PARENTHESIS
+	| L_PARENTHESIS fsa_union R_PARENTHESIS {
+		$$ = $2;
+	}
 	;
 
 fsa_union
@@ -202,10 +213,10 @@ fsa_Kleene_clousure
 
 string_literal
 	: string_literal string_atomic {
-			addToLiteralList(((LiteralList *) $$), $2);
+			addToLiteralList(((LiteralList *) $$),(char *) $2);
 		}
 	| string_atomic {
-			$$ = createLiteralList($1);
+			$$ = createLiteralList((char *) $1);
 		}
 	;
 

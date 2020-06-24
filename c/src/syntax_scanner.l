@@ -20,7 +20,7 @@
 <definition>\x5b					BEGIN(range);
 \<-									{ return ALPHABET_OP; }
 ->									{ return JUDGEMENTS_OP; }
-<definition>[A-Za-z0-9_]+			{ yylval.sstring strdup(yytext); return ID; }
+<definition>[A-Za-z0-9_]+			{ yylval.sAST_FSA = createFSAID(strdup(yytext)); return ID; }
 [A-Za-z0-9_]+						{ yylval.sstring = strdup(yytext); return ID_DEF; }
 <temporal>[A-Z]						{ yylval.sstring = strdup(yytext); return TEMPORAL_OPERATOR; }
 <temporal>\>						BEGIN(definition);

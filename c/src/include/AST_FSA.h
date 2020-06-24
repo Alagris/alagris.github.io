@@ -1,3 +1,6 @@
+#ifndef AST_FSA_H
+#define AST_FSA_H
+
 #define FSA_ATOMIC 0
 #define FSA_UNION 1
 #define FSA_CONCAT 2
@@ -6,13 +9,8 @@
 #define FSA_INPUT_EXPRESSION 5
 #define FSA_ID 6
 
-#ifndef AST_FSA_H
-#define AST_FSA_H
-
 #include "LiteralList.h"
 #include "stdint.h"
-
-typedef int16_t c;
 
 struct AST_FSA;
 
@@ -35,8 +33,8 @@ typedef struct AST_FSAUnion {
 } AST_FSAUnion;
 
 typedef struct AST_FSARange {
-	c l;
-	c r;
+	char beg;
+	char end;
 } AST_FSARange;
 
 typedef struct AST_FSAInputExpression {

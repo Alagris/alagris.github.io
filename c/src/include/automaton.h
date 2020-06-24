@@ -15,11 +15,6 @@
 
 #include <stdlib.h>
 
-State * calcStateOffset(r state);
-State * calcOffsetAndExtend(r state);
-int addState(Mealy * mealy);
-int addTransition(Mealy * mealy, r state, t Transition) {
-
 typedef struct State {
     Transition * transitions;
 } State;
@@ -38,5 +33,10 @@ typedef struct Mealy {
     r stateCount;
 	b * acceptingStates;
 } Mealy;
+
+State * calcStateOffset(r state);
+State * calcOffsetAndExtend(r state);
+int addState(Mealy * mealy);
+int addTransition(Mealy * mealy, r state, t Transition) {
 
 #endif

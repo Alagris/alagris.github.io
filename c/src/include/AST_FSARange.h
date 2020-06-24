@@ -4,6 +4,6 @@
 #include "AST_FSA.h"
 #include <stdlib.h>
 
-AST_FSA * createFSARange(c l, c r);
+AST_FSA * createFSARange(char beg, char end);
 
 #endif

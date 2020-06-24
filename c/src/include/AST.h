@@ -8,5 +8,4 @@
 #include "ASTMealyConcat.h"
 #include "ASTMealyKleene.h"
 #include "ASTMealyUnion.h"
-#include "InputExpression.h"
 #include "AST_FSARange.h"
