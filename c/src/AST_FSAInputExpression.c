@@ -5,3 +5,4 @@ AST_FSA * createFSAInputExpression(AST_FSA * lFSA, AST_FSA * rFSA) {
 	node->type = FSA_INPUT_EXPRESSION;
 	node->fsaInputExpression = (AST_FSAInputExpression) {lFSA, rFSA};
 	return node;
+}

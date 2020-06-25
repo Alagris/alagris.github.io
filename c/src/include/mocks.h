@@ -1,3 +1,4 @@
 #pragma once
+#include "AST_FSA.h"
 
-void * createMockFSA();
+AST_FSA * createMockFSA();

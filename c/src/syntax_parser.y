@@ -1,6 +1,4 @@
 %{
-	#include <stdio.h>
-	#include <stdlib.h>
 	#include "parser.h"
 
   extern int yylex();
@@ -13,7 +11,6 @@
 
 %}
 
-
 %union {
   char * sstring;
   LiteralList * sLiteralList;
@@ -23,14 +20,11 @@
 }
 
 %token COLON
+%token PERCENT
 %token L_PARENTHESIS
 %token R_PARENTHESIS
 %token PIPE
 %token EQUALS
-%token BACK_SLASH
-%token NEW_LINE
-%token S_QUOTE
-%token S_APOSTROPHE
 %token ASTERIKS
 %token COMMA
 %token R_R_BRACKET
@@ -41,14 +35,11 @@
 %token JUDGEMENTS_OP
 %token <schar> R_HEX_CHAR
 %token <schar> R_CHAR
-%token <schar> HEX_CHAR
 %token <sstring> STRING
 %token <sAST_FSA> ID
 %token <sstring> ID_DEF
 %token <sstring> TEMPORAL_OPERATOR
-%type <schar> escaped_char
 %type <schar> range_literal
-%type <sstring> string_atomic
 %type <sLiteralList> string_literal
 %type <sAST_FSA> fsa_Kleene_clousure
 %type <sAST_FSA> input_atomic
@@ -64,7 +55,8 @@
 %type <sASTMealy> mealy_union
 %type <sASTMealy> mealy
 %type <sLiteralList> params
-
+%type <sAST_FSA> param_values
+%type <sAST_FSA> temporal_expression 
 %%
 defs
 	: defs def
@@ -81,7 +73,6 @@ def
 	| ID_DEF ALPHABET_OP range
 	| ID_DEF ALPHABET_OP enum_alphabet
 	| ID_DEF COLON judgements
-	| /* empty */
 	;
 
 judgements
@@ -132,24 +123,24 @@ mealy_atomic
 	: input_expression COLON string_literal {
 			$$ = createMealyAtomic((AST_FSA *) $1, (LiteralList *) $3);
 		}
-	| input_expression {
+	| input_expression PERCENT {
 			$$ = createMealyAtomic((AST_FSA *) $1, (LiteralList *) NULL);
 		}
 	;
 
 input_expression
 	: input_expression input_atomic {
-			$$ = createFSAInputExpression((AST_FSA *) $$, $2);
+			$$ = createFSAInputExpression((AST_FSA *) $$, (AST_FSA *) $2);
 		}
 	| input_atomic
 	;
 
 input_atomic
-	: ID
-	| function
-	| temporal_expression // { $$ = createMockFSA(); }
+	: function
+//	| temporal_expression
+//	| ID
 	| fsa
-	| range // { $$ = createMockFSA(); }
+	| range
 	;
 
 range
@@ -173,7 +164,9 @@ function
 	;
 
 temporal_expression
-	: TEMPORAL_OPERATOR L_PARENTHESIS param_values R_PARENTHESIS
+	: TEMPORAL_OPERATOR L_PARENTHESIS param_values R_PARENTHESIS {
+		$$ = createMockFSA();
+		}
 	;
 
 param_values
@@ -192,14 +185,14 @@ fsa
 
 fsa_union
 	: fsa_union PIPE fsa_concat {
-			createFSAConcat((AST_FSA *) $$, $3);
+			createFSAUnion((AST_FSA *) $$, (AST_FSA *) $3);
 		}
 	| fsa_concat
 	;
 
 fsa_concat
 	: fsa_concat fsa_Kleene_clousure {
-			createFSAConcat((AST_FSA *) $$, $2);
+			createFSAConcat((AST_FSA *) $$, (AST_FSA *) $2);
 		}
 	| fsa_Kleene_clousure
 	;
@@ -212,29 +205,14 @@ fsa_Kleene_clousure
 	;
 
 string_literal
-	: string_literal string_atomic {
+	: string_literal STRING {
 			addToLiteralList(((LiteralList *) $$),(char *) $2);
 		}
-	| string_atomic {
+	| STRING {
 			$$ = createLiteralList((char *) $1);
 		}
 	;
 
-string_atomic
-	:	STRING
-	| escaped_char { 
-			$$ = (char *) malloc(sizeof(char));
-			*($$) = $1;
-		}
-	;
-
-escaped_char
-	: NEW_LINE { $$ = '\n'; }
-	| BACK_SLASH { $$ = '\\'; }
-	| S_QUOTE { $$ = '\"'; }
-	| S_APOSTROPHE { $$ = '\''; }
-	| HEX_CHAR
-	;
 %%
 
 void yyerror(const char *s) {

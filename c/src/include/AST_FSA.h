@@ -56,7 +56,7 @@ typedef struct AST_FSA{
 		struct AST_FSAAtomic fsaAtomic;
 		struct AST_FSARange fsaRange;
 		struct AST_FSAInputExpression fsaInputExpression;
-		struct AST_FSAID fsaID;
+		// struct AST_FSAID fsaID;
 	};
 } AST_FSA;
 
