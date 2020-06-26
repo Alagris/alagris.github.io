@@ -17,8 +17,10 @@
 #include "ASTMealyUnion.h"
 #include "AST_FSAInputExpression.h"
 #include "AST_FSARange.h"
-#include "AST_FSAID.h"
+#include "AST_FSAArg.h"
 #include "mocks.h"
+#include "mealy.h"
+#include "FSAFunction.h"
 
 int yyparse();
 

@@ -10,14 +10,10 @@
 #define r_epsilon r_max
 #define r_no_state r_max
 /*This is used for booleans*/
-#define b unsigned char
+// #define b unsigned char
 #define t unsigned char
 
 #include <stdlib.h>
-
-typedef struct State {
-    Transition * transitions;
-} State;
 
 typedef struct Transition {
 	r destinationState;
@@ -27,16 +23,22 @@ typedef struct Transition {
     char * output;
 } Transition;
 
+typedef struct State {
+    Transition * transitions;
+} State;
+
 typedef struct Mealy {
     State * states[NUMBER_OF_STATE_ARRAYS];
     r initialState;
     r stateCount;
-	b * acceptingStates;
+	t * acceptingStates;
 } Mealy;
 
 State * calcStateOffset(r state);
 State * calcOffsetAndExtend(r state);
 int addState(Mealy * mealy);
-int addTransition(Mealy * mealy, r state, t Transition) {
+int addTransition(Mealy * mealy, r state, t Transition,
+                  r destinationState, r inputLabelRangeBeginInclusive,
+                  r inputLabelRangeEndExclusive, t weight, char * output);
 
 #endif

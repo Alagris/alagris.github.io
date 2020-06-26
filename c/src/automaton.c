@@ -1,4 +1,5 @@
 #include "data.h"
+#include "automaton.h"
 
 Mealy * initializeMealy(r stateCount, r acceptingStateCount) {
     // r acceptingStateBufferSize = (acceptingStateCount + sizeof(b) - 1) / sizeof(b);
@@ -20,8 +21,8 @@ int addState(Mealy * mealy) {
 }
 
 int addTransition(Mealy * mealy, r state, t Transition,
-//                   r destinationState, r inputLabelRangeBeginInclusive,
-//                   r inputLabelRangeEndExclusive, t weight, char * output) {
+                  r destinationState, r inputLabelRangeBeginInclusive,
+                  r inputLabelRangeEndExclusive, t weight, char * output) {
 //    State * state = calcStateOffset(state);
 //    state[transition] = {destinationState, inputLabelRangeBeginInclusive,
 //                         inputLabelRangeEndExclusive, weight, output};

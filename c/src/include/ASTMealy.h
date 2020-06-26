@@ -7,13 +7,13 @@
 #define AST_MEALY_H
 
 #include "AST_FSA.h"
-#include "LiteralList.h"
+#include "StringList.h"
 
 struct ASTMealy;
 
 typedef struct ASTMealyAtomic {
     AST_FSA * input;
-    LiteralList * output;
+    StringList * output;
 } ASTMealyAtomic;
 
 typedef struct ASTMealyConcat {
@@ -32,12 +32,12 @@ typedef struct ASTMealyUnion {
 
 typedef struct ASTMealy{
 	char type;
-	union{
+	union U_AST_Mealy {
 		struct ASTMealyUnion mealyUnion;
 		struct ASTMealyConcat mealyConcat;
 		struct ASTMealyAtomic mealyAtomic;
 		struct ASTMealyKleene mealyKleene;
-	};
+	} mealy;
 } ASTMealy;
 
 #endif

@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include "data.h"
 #include "AST.h"
+#include "mealy.h"
 
-
+/*
 void parseATatT(char * source, struct Mealy * output){
 	
 }
@@ -16,6 +17,23 @@ void parseGlushkov(char * source, struct Mealy * output){
 
 void lossyDeterminization(struct Mealy * input, struct FunctionalMealy * output){
 	
+}
+*/
+
+void addToASTMealyList(ASTMealyList * list, ASTMealy * mealy, char * id, StringList * args) {
+    while(list->mealy) {
+        list = list->next;
+    }
+
+    list = createASTMealyList(mealy, id, args);
+}
+
+ASTMealyList * createASTMealyList(ASTMealy * mealy, char * id, StringList * args) {
+    ASTMealyList * list = malloc(sizeof(ASTMealyList));
+    list->mealy = mealy;
+    list->id = id;
+    list->args = args;
+    list->next = NULL;
 }
 
 size_t count(ASTMealy * mealy){
@@ -36,16 +54,6 @@ size_t count(ASTMealy * mealy){
     printf("XD\n");
 }
 
-Mealy * defineFunctionF(char * id, LiteralList * params, ASTMealy * astMealy) {
-    size_t sigmaSize = count(astMealy);
-    // char * stack = malloc(sizeof(char)* sigmaSize);
-    // localize($1,0,stack);
-    // struct T t = f($1,sigmaSize);
-    // bisonOutput = TtoM(&t,stack,sigmaSize);
-    // freeTContents(&t,sigmaSize);
-    // free(stack);
-}
-
-Mealy * defineSimpleMealy(char * id, ASTMealy * astMealy) {
-
+void defineFunctionF(ASTMealyList * mealyList, char * id, StringList * args, ASTMealy * astMealy) {
+    addToASTMealyList(mealyList, astMealy, id, args);
 }

@@ -7,9 +7,9 @@
 #define FSA_KLEENE 3
 #define FSA_RANGE 4
 #define FSA_INPUT_EXPRESSION 5
-#define FSA_ID 6
+#define FSA_ARG 6
 
-#include "LiteralList.h"
+#include "StringList.h"
 #include "stdint.h"
 
 struct AST_FSA;
@@ -20,7 +20,7 @@ typedef struct AST_FSAConcat {
 } AST_FSAConcat;
 
 typedef struct AST_FSAAtomic {
-    LiteralList * literalList;
+    char * string;
 } AST_FSAAtomic;
 
 typedef struct AST_FSAKleene {
@@ -42,22 +42,30 @@ typedef struct AST_FSAInputExpression {
     struct AST_FSA * rFSA;
 } AST_FSAInputExpression;
 
-typedef struct AST_FSAID {
-	char * id;
-} AST_FSAID;
+typedef struct AST_FSAArg {
+	char * arg;
+} AST_FSAArg;
 
 
-typedef struct AST_FSA{
+typedef struct AST_FSA {
 	char type;
-	union{
+	union U_AST_FSA {
 		struct AST_FSAUnion fsaUnion;
 		struct AST_FSAConcat fsaConcat;
 		struct AST_FSAKleene fsaKleene;
 		struct AST_FSAAtomic fsaAtomic;
 		struct AST_FSARange fsaRange;
 		struct AST_FSAInputExpression fsaInputExpression;
-		// struct AST_FSAID fsaID;
-	};
+		struct AST_FSAArg fsaArg;
+	} fsa;
 } AST_FSA;
+
+typedef struct AST_FSAList {
+    struct AST_FSA * fsa;
+    struct AST_FSAList *next;
+} AST_FSAList;
+
+AST_FSAList * createFSAList(AST_FSA * fsa);
+void addToFSAList(AST_FSAList * list, AST_FSA * fsa);
 
 #endif

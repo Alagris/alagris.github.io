@@ -4,18 +4,19 @@
   extern int yylex();
   extern int yyparse();
   extern FILE *yyin;
-  //extern functions *;
-//  extern int yydebug=1;
  
-  void yyerror(const char *s);
+  void yyerror(ASTMealyList * mealyList, const char *s);
 
 %}
 
+%parse-param { ASTMealyList * mealyList }
+
 %union {
   char * sstring;
-  LiteralList * sLiteralList;
+  StringList * sStringList;
   AST_FSA * sAST_FSA;
   ASTMealy * sASTMealy;
+  AST_FSAList * sAST_FSAList;
   char schar;
 }
 
@@ -33,14 +34,15 @@
 %token R_DASH_CHAR
 %token ALPHABET_OP
 %token JUDGEMENTS_OP
+%token <sstring> ARG
 %token <schar> R_HEX_CHAR
 %token <schar> R_CHAR
 %token <sstring> STRING
-%token <sAST_FSA> ID
+%token <sstring> FUN_ID
 %token <sstring> ID_DEF
-%token <sstring> TEMPORAL_OPERATOR
+/* %token <sstring> TEMPORAL_OPERATOR */
 %type <schar> range_literal
-%type <sLiteralList> string_literal
+/* %type <sStringList> string_literal */
 %type <sAST_FSA> fsa_Kleene_clousure
 %type <sAST_FSA> input_atomic
 %type <sAST_FSA> input_expression
@@ -54,9 +56,9 @@
 %type <sASTMealy> mealy_concat
 %type <sASTMealy> mealy_union
 %type <sASTMealy> mealy
-%type <sLiteralList> params
-%type <sAST_FSA> param_values
-%type <sAST_FSA> temporal_expression 
+%type <sStringList> args
+%type <sAST_FSAList> args_values
+/* %type <sAST_FSA> temporal_expression  */
 %%
 defs
 	: defs def
@@ -64,11 +66,8 @@ defs
 	;
 
 def
-	: ID_DEF EQUALS mealy {
-			defineSimpleMealy((char *) $1, (ASTMealy *) $3);
-		}
-	| ID_DEF L_PARENTHESIS params R_PARENTHESIS EQUALS mealy {
-			defineFunctionF((char *) $1, (LiteralList *) $3, (ASTMealy *) $6);
+	: ID_DEF L_PARENTHESIS args R_PARENTHESIS EQUALS mealy {
+			defineFunctionF(mealyList, (char *) $1, (StringList *) $3, (ASTMealy *) $6);
 		}
 	| ID_DEF ALPHABET_OP range
 	| ID_DEF ALPHABET_OP enum_alphabet
@@ -80,12 +79,15 @@ judgements
 	| ID_DEF
 	;
 
-params
-	: params COMMA ID_DEF {
-			addToLiteralList(((LiteralList *) $$), (char *) $3);
+args
+	: args COMMA ID_DEF {
+			addToStringList(((StringList *) $$), (char *) $3);
 		}
 	| ID_DEF {
-			$$ = createLiteralList((char *) $1);
+			$$ = createStringList((char *) $1);
+		}
+	| {
+			$$ = (void *) NULL;
 		}
 	;
 
@@ -120,11 +122,11 @@ mealy_Kleene_closure
 	;
 
 mealy_atomic
-	: input_expression COLON string_literal {
-			$$ = createMealyAtomic((AST_FSA *) $1, (LiteralList *) $3);
+	: input_expression COLON STRING {
+			$$ = createMealyAtomic((AST_FSA *) $1, (StringList *) $3);
 		}
 	| input_expression PERCENT {
-			$$ = createMealyAtomic((AST_FSA *) $1, (LiteralList *) NULL);
+			$$ = createMealyAtomic((AST_FSA *) $1, (StringList *) NULL);
 		}
 	;
 
@@ -138,7 +140,7 @@ input_expression
 input_atomic
 	: function
 //	| temporal_expression
-//	| ID
+	| ARG { $$ = createFSAArg((char *) $1); }
 	| fsa
 	| range
 	;
@@ -158,34 +160,37 @@ range_literal
 	;
 
 function
-	: ID L_PARENTHESIS param_values R_PARENTHESIS {
-		$$ = evalF((AST_FSAID *) $1, (AST_FSA *) $3);
+	: FUN_ID L_PARENTHESIS args_values R_PARENTHESIS {
+		$$ = evalF(mealyList, (char *) $1, (AST_FSAList *) $3);
 	}
 	;
 
-temporal_expression
+/* temporal_expression
 	: TEMPORAL_OPERATOR L_PARENTHESIS param_values R_PARENTHESIS {
 		$$ = createMockFSA();
 		}
-	;
+	; */
 
-param_values
-	: param_values COMMA input_atomic
-	| input_atomic
+args_values
+	: args_values COMMA input_atomic {
+			addToFSAList(((AST_FSAList *) $$), (AST_FSA *) $3);
+		}
+	| input_atomic {
+			$$ = createFSAList((AST_FSA *) $1);
+		}
+	| { $$ = NULL; }
 	;
 
 fsa
-	: string_literal { 
-			$$ = createFSAAtomic((LiteralList *) $1);
-		}
+	: fsa_union
 	| L_PARENTHESIS fsa_union R_PARENTHESIS {
 		$$ = $2;
 	}
 	;
 
 fsa_union
-	: fsa_union PIPE fsa_concat {
-			createFSAUnion((AST_FSA *) $$, (AST_FSA *) $3);
+	: L_PARENTHESIS	fsa_union PIPE fsa_concat R_PARENTHESIS {
+			createFSAUnion((AST_FSA *) $$, (AST_FSA *) $4);
 		}
 	| fsa_concat
 	;
@@ -201,21 +206,23 @@ fsa_Kleene_clousure
 	: L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS {
 			$$ = createFSAKleene((AST_FSA *) $2);
 		}
-	| input_atomic
+	| STRING { 
+			$$ = createFSAAtomic((char *) $1);
+		}
 	;
 
-string_literal
+/* string_literal
 	: string_literal STRING {
-			addToLiteralList(((LiteralList *) $$),(char *) $2);
+			addToStringList(((StringList *) $$),(char *) $2);
 		}
 	| STRING {
-			$$ = createLiteralList((char *) $1);
+			$$ = createStringList((char *) $1);
 		}
-	;
+	; */
 
 %%
 
-void yyerror(const char *s) {
+void yyerror(ASTMealyList * mealyList, const char *s) {
 	printf("Parse error!  Message: %s\n", s );
 	exit(-1);
 }

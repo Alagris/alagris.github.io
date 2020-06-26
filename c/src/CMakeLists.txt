@@ -20,12 +20,14 @@ add_executable(mealy
 	mealy.c
 	cli.c
 	data.c
-	LiteralList.c
+	StringList.c
 	mocks.c
 	mealy.c
 	stringBuffer.c
 	FSAFunction.c
+	AST_FSA.c
 	AST_FSAAtomic.c
+	AST_FSAArg.c
 	AST_FSAConcat.c
 	AST_FSAInputExpression.c
 	AST_FSAKleene.c

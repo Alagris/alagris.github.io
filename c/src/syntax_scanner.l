@@ -3,7 +3,7 @@
 		#include "syntax_parser.h"
 		static char * strbuf;
 %}
-%x	string temporal range definition
+%x	string range definition
 %%
 [	\t\v\f]							;
 #.*\n								;
@@ -16,7 +16,8 @@
 <definition>\(						{ return L_PARENTHESIS; }
 <definition>\)						{ return R_PARENTHESIS; }
 <definition>\|						{ return PIPE; }
-<definition>\<						BEGIN(temporal);
+<definition>\$[A-Za-z0-9]+			{ yylval.sstring = strdup(yytext); return ARG; }
+<definition>[A-Za-z][A-Za-z0-9_]*	{ yylval.sstring = strdup(yytext); return FUN_ID; }
 =									{ return EQUALS; }
 <definition>\*						{ return ASTERIKS; }
 <definition>,						{ return COMMA; }
@@ -24,8 +25,6 @@
 \<-									{ return ALPHABET_OP; }
 ->									{ return JUDGEMENTS_OP; }
 [A-Za-z0-9_]+						{ yylval.sstring = strdup(yytext); return ID_DEF; }
-<temporal>[A-Z]						{ yylval.sstring = strdup(yytext); return TEMPORAL_OPERATOR; }
-<temporal>\>						BEGIN(definition);
 <string>\\n							{ strbuf = addCharToBuffer(strbuf, '\n'); }
 <string>\\x[0-9A-Fa-f]{1,2}			{ strbuf = addCharToBuffer(strbuf, (char) strtoul(yytext + 2, NULL, 16)); }
 <string>\\\\						{ strbuf = addCharToBuffer(strbuf, '\\'); }
@@ -41,3 +40,8 @@
 <range>\\x[0-9A-Fa-f]{1,2}			{ yylval.schar = (char) strtoul(yytext + 2, NULL, 16); return R_HEX_CHAR; }
 <range>[^\\\-\]]					{ return R_CHAR; }
 %%
+/*
+<temporal>[A-Z]						{ yylval.sstring = strdup(yytext); return TEMPORAL_OPERATOR; }
+<definition>\<						BEGIN(temporal);
+<temporal>\>						BEGIN(definition);
+*/

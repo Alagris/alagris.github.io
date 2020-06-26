@@ -95,7 +95,9 @@ main (int argc, char **argv)
   yyin = input_file;
 
   // Parse through the input:
-  yyparse();
+  ASTMealyList mealyList = {(ASTMealy *) NULL, (char *) NULL,
+                             (StringList *) NULL, (ASTMealyList *) NULL};
+  yyparse((ASTMealyList *) &mealyList);
 
   return 0;
 }
