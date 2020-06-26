@@ -44,6 +44,9 @@
         #jsEditor{
             height:49vh
         }
+        .av{
+          background-color: #18222d;
+        }
     </style>
        
   </head>
@@ -60,10 +63,10 @@
                         <!-- <p id="output" /> -->
                     
                         <!-- <textarea id="myTextarea" name="text_area" class="lined textareaa bong" rows="15" cols="80"></textarea> -->
-                        <div id="jsEditor" class=" ace_editor ace-tm ace_focus">  var data = "hello";
+                        <div id="jsEditor" class=" ace_editor ace-tm ace_focus" style="color: red; background-color: #18222d;"> "f":"bar" "o":"baz" "o":"boo"<!-- var data = "hello";
   function say(){
   console.log(data);
-  }
+  } -->
 </div>
                         </div>
                 </div>
@@ -71,17 +74,17 @@
                   
                   <!-- <button class='butto play' type="button" onclick="AFunction()"></button> -->
                  <div class="">
-                  <button class="btn" type="button" onclick="AFunction() "><i class="fa fa-play-circle"></i></button>
-                  <button class="btn" type="button" id="save" onclick=""><i class="fa fa-folder"></i></button>
+                  <button class="btn" title="Run" type="button" onclick="AFunction() "><i class="fa fa-play-circle"></i></button>
+                  <button class="btn" title="Save to file" type="button" id="save" onclick=""><i class="fa fa-folder"></i></button>
 
-                  <button class="btn" type="button"  onclick="myFunction()"><i class="fa fa-flag-checkered"></i></button>
-                  <button class="btn bii" type="button"  onclick="window.location.href='infpage.html'"><i class="fa fa-info-circle"></i></button>
+                  <button class="btn" title="Check" type="button"  onclick="myFunction()"><i class="fa fa-flag-checkered"></i></button>
+                  <button class="btn bii" title="Info" type="button"  onclick="window.location.href='infpage.html'"><i class="fa fa-info-circle"></i></button>
                   </div>
                   <hr>
                   <p><br></p>
                   <p id="demo"></p>
                 </div>
-                <div class="block"> <p id="console">Run saccessful! <br> 0 warnings <br> 0 errors</p></div>
+                <div class="block"> <p id="output" /></div>
                 <div class="block "> 
                     <!-- <div class="bor">
                     <button class="button cbut"type="button"  onclick="myFunction()">check</button>
@@ -92,6 +95,27 @@
                 </div>
             </div>
         </div>
+        <script>
+          var Module = {
+            print: (function() {
+              var element = document.getElementById('output');
+              return function(text) {
+                element.innerHTML += text + "<br>";
+              };
+            })(),
+            printErr: function(text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                if (0) {
+                  dump(text + '\n');
+                }
+            },				
+            canvas: (function() {
+              var canvas = document.getElementById('canvas');
+              return canvas;
+            })()
+          };
+        </script>
+        <script src="web_mealy_compiler.js"></script>
         <script>
             $(function() {
               $(".lined").linedtextarea(
@@ -152,7 +176,7 @@
   </script>
 
 
-  <script src="test.js"></script>
+  <!-- <script src="test.js"></script> -->
   
 
   </body>
