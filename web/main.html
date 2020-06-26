@@ -48,19 +48,27 @@
           background-color: #18222d;
         }
     </style>
+
+
+<!-- <script>
+  function mFunction() {
+    var number = "123";
+    document.getElementById("demo").innerHTML = number;
+  }
+</script> -->
        
   </head>
 
     <script type="text/javascript"
     src="https://pagead2.googlesyndication.com/pagead/show_ads.js">
     </script>
-  <body>
+  <body > 
         <div class="wrapper">
             <div class="blocks">
                 <div class="block"> 
                     <div class="container">
 
-                        <!-- <p id="output" /> -->
+                        <!-- <p id="output1"></p> -->
                     
                         <!-- <textarea id="myTextarea" name="text_area" class="lined textareaa bong" rows="15" cols="80"></textarea> -->
                         <div id="jsEditor" class=" ace_editor ace-tm ace_focus" style="color: red; background-color: #18222d;"> "f":"bar" "o":"baz" "o":"boo"<!-- var data = "hello";
@@ -74,17 +82,17 @@
                   
                   <!-- <button class='butto play' type="button" onclick="AFunction()"></button> -->
                  <div class="">
-                  <button class="btn" title="Run" type="button" onclick="AFunction() "><i class="fa fa-play-circle"></i></button>
+                  <button class="btn" title="Run" type="button" onclick="runMealy() "><i class="fa fa-play-circle"></i></button>
                   <button class="btn" title="Save to file" type="button" id="save" onclick=""><i class="fa fa-folder"></i></button>
 
-                  <button class="btn" title="Check" type="button"  onclick="myFunction()"><i class="fa fa-flag-checkered"></i></button>
+                  <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>
                   <button class="btn bii" title="Info" type="button"  onclick="window.location.href='infpage.html'"><i class="fa fa-info-circle"></i></button>
                   </div>
                   <hr>
                   <p><br></p>
-                  <p id="demo"></p>
+                  <p id="output1"></p>
                 </div>
-                <div class="block"> <p id="output" /></div>
+                <div class="block"> <textarea id="output" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>
                 <div class="block "> 
                     <!-- <div class="bor">
                     <button class="button cbut"type="button"  onclick="myFunction()">check</button>
@@ -95,7 +103,7 @@
                 </div>
             </div>
         </div>
-        <script>
+        <!-- <script>
           var Module = {
             print: (function() {
               var element = document.getElementById('output');
@@ -114,8 +122,8 @@
               return canvas;
             })()
           };
-        </script>
-        <script src="web_mealy_compiler.js"></script>
+        </script> -->
+        <!-- <script src="web_mealy_compiler.js"></script> -->
         <script>
             $(function() {
               $(".lined").linedtextarea(
@@ -150,12 +158,19 @@
       </script>
 
   <!-- <a href="#" class="emptyLink" id="mapPrintLink" onclick="mapPrintExec();"></a> -->
-  <p id="demo"></p>
+  <!-- <p id="demo">1</p> -->
 
   <script>
   function myFunction() {
-    var x = document.getElementById("jsEditor").value;    //myTextarea
+    // var x = document.getElementById("jsEditor").value;    
+    // document.getElementById("demo").innerHTML = x;
+
+    var x =  jsEditor.getSession().getValue();   
     document.getElementById("demo").innerHTML = x;
+
+    // var x =  "123";   az" "o"
+    // document.getElementById("demo").innerHTML = x;
+
   }
   </script>
   <!-- <button type="button" onclick="location.src="test.js"">Test</button> -->
@@ -165,6 +180,52 @@
     alert("coming soon...");
   }
   </script>
+  <script type='text/javascript'>
+    
+    var output = document.getElementById('output');
+    // var output1 = document.getElementById('output1');
+    var Module = {};
+    
+    function compile(){
+      console.log(e.getSession().getValue())
+      Module.ccall('compile',
+      'void',
+      ['string'], 
+      [e.getSession().getValue()])
+    }
+    function runMealy(){
+      var input = e.getSession().getValue()
+      console.log(output.value + "12345")
+      var c = Module.ccall('run_global',
+      'string',
+      ['string'], 
+      [output.value])
+      console.log(c);
+      output.value = c;
+
+  
+    }
+  </script>
+  <script async type="text/javascript" src="web_mealy_compiler.js"></script>
+
+  <script type="text/javascript">
+   
+    Module['onRuntimeInitialized'] = function() {
+   
+     console.log("wasm loaded ");
+      // call the square function by
+
+      console.log( Module.ccall);
+    console.log(Module._testInt);
+    console.log(Module._testInt());
+    console.log( Module.ccall('testInt', // name of C function
+'number', // return type
+[], // argument types
+[]));
+  }
+  </script>
+
+
 
   <script type="text/javascript">
     var e = ace.edit("jsEditor");
@@ -175,8 +236,16 @@
     console.log(e.getValue());
   </script>
 
+<script>
+  window.onload = function(){
+      
+      var lengthOfName = e.getSession().getValue()
 
-  <!-- <script src="test.js"></script> -->
+  
+      document.getElementById('demo').innerHTML = lengthOfName;
+  };
+
+  // <script src="test.js"></script> 
   
 
   </body>
