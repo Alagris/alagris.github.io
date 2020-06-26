@@ -3,6 +3,7 @@
 ASTMealy * createMealyKleene(ASTMealy * mealy) {
 	ASTMealy * node = (ASTMealy *) malloc(sizeof(ASTMealy));
 	node->type = MEALY_KLEENE;
-	node->mealyUnion = (ASTMealyUnion) {mealy};
+	node->mealy.mealyKleene.mealy = mealy;
+	// node->mealyKleene = (ASTMealyKleene) {mealy};
 	return node;
 }

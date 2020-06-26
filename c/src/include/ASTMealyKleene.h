@@ -4,10 +4,6 @@
 #include "ASTMealy.h"
 #include <stdlib.h>
 
-// typedef struct ASTMealyKleene {
-//     ASTMealy * mealy;
-// } ASTMealyKleene;
-
 ASTMealy * createMealyKleene(ASTMealy * mealy);
 
 #endif

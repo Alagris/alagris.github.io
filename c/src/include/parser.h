@@ -1,6 +1,10 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "AST_FSA.h"
 #include "AST_FSAAtomic.h"
 #include "AST_FSAConcat.h"
@@ -13,7 +17,15 @@
 #include "ASTMealyUnion.h"
 #include "AST_FSAInputExpression.h"
 #include "AST_FSARange.h"
+#include "AST_FSAArg.h"
+#include "mocks.h"
+#include "mealy.h"
+#include "FSAFunction.h"
 
 int yyparse();
+
+void initStringBuffer(char * buffer);
+char * addStringToBuffer(char * buffer, char * string);
+char * addCharToBuffer(char * buffer, char character);
 
 #endif

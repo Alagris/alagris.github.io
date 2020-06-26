@@ -4,11 +4,6 @@
 #include "ASTMealy.h"
 #include <stdlib.h>
 
-// typedef struct ASTMealyUnion {
-//     ASTMealy * lmealy;
-//     ASTMealy * rmealy;
-// } ASTMealyUnion;
-
 ASTMealy * createMealyUnion(ASTMealy * lMealy, ASTMealy * rMealy);
 
 #endif

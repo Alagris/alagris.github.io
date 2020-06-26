@@ -1,8 +1,10 @@
 #include "AST_FSARange.h"
 
-AST_FSA * createFSAConcat(c * l, c * r) {
+AST_FSA * createFSARange(char beg, char end) {
 	AST_FSA * node = (AST_FSA *) malloc(sizeof(AST_FSA));
 	node->type = FSA_RANGE;
-	node->fsaRange = (AST_FSARange) {l, r};
+	node->fsa.fsaRange.beg = beg;
+	node->fsa.fsaRange.end = end;
+	// node->fsaRange = (AST_FSARange) {beg, end};
 	return node;
 }

@@ -9,7 +9,8 @@ find_package(FLEX)
 
 
 
-BISON_TARGET(SyntaxParser syntax_parser.y ${CMAKE_CURRENT_BINARY_DIR}/syntax_parser.c)
+BISON_TARGET(SyntaxParser syntax_parser.y ${CMAKE_CURRENT_BINARY_DIR}/syntax_parser.c
+			VERBOSE bison.output)
 FLEX_TARGET(SyntaxScanner syntax_scanner.l  ${CMAKE_CURRENT_BINARY_DIR}/syntax_scanner.c)
 ADD_FLEX_BISON_DEPENDENCY(SyntaxScanner SyntaxParser)
 
@@ -19,15 +20,23 @@ add_executable(mealy
 	mealy.c
 	cli.c
 	data.c
-	LiteralList.c
-	AST_FSAConcat.c
-	AST_FSAUnion.c
-	AST_FSAKleene.c
+	StringList.c
 	mocks.c
+	mealy.c
+	stringBuffer.c
+	FSAFunction.c
+	AST_FSA.c
+	AST_FSAAtomic.c
+	AST_FSAArg.c
+	AST_FSAConcat.c
+	AST_FSAInputExpression.c
+	AST_FSAKleene.c
+	AST_FSARange.c
+	AST_FSAUnion.c
 	ASTMealyAtomic.c
 	ASTMealyConcat.c
-	ASTMealyUnion.c
 	ASTMealyKleene.c
+	ASTMealyUnion.c
 	include/data.h
 	include/mealy.h
 	${BISON_SyntaxParser_OUTPUTS}

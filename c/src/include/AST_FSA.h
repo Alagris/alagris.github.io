@@ -1,18 +1,18 @@
+#ifndef AST_FSA_H
+#define AST_FSA_H
+
 #define FSA_ATOMIC 0
 #define FSA_UNION 1
 #define FSA_CONCAT 2
 #define FSA_KLEENE 3
 #define FSA_RANGE 4
 #define FSA_INPUT_EXPRESSION 5
-#define FSA_ID 6
+#define FSA_ARG 6
+#define FSA_EPS 7
+#define MEALY_PHANTOM 9
 
-#ifndef AST_FSA_H
-#define AST_FSA_H
-
-#include "LiteralList.h"
+#include "StringList.h"
 #include "stdint.h"
-
-typedef int16_t c;
 
 struct AST_FSA;
 
@@ -22,7 +22,7 @@ typedef struct AST_FSAConcat {
 } AST_FSAConcat;
 
 typedef struct AST_FSAAtomic {
-    LiteralList * literalList;
+    char letter;
 } AST_FSAAtomic;
 
 typedef struct AST_FSAKleene {
@@ -35,8 +35,8 @@ typedef struct AST_FSAUnion {
 } AST_FSAUnion;
 
 typedef struct AST_FSARange {
-	c l;
-	c r;
+	char beg;
+	char end;
 } AST_FSARange;
 
 typedef struct AST_FSAInputExpression {
@@ -44,22 +44,37 @@ typedef struct AST_FSAInputExpression {
     struct AST_FSA * rFSA;
 } AST_FSAInputExpression;
 
-typedef struct AST_FSAID {
-	char * id;
-} AST_FSAID;
+typedef struct AST_FSAArg {
+	char * arg;
+} AST_FSAArg;
+
+typedef struct MealyPhantom {
+    struct AST_FSA * in;
+    char * out;
+} MealyPhantom;
 
 
-typedef struct AST_FSA{
+typedef struct AST_FSA {
 	char type;
-	union{
+	union U_AST_FSA {
 		struct AST_FSAUnion fsaUnion;
 		struct AST_FSAConcat fsaConcat;
 		struct AST_FSAKleene fsaKleene;
 		struct AST_FSAAtomic fsaAtomic;
 		struct AST_FSARange fsaRange;
 		struct AST_FSAInputExpression fsaInputExpression;
-		struct AST_FSAID fsaID;
-	};
+		struct AST_FSAArg fsaArg;
+		struct MealyPhantom mealyPhantom;
+	} fsa;
 } AST_FSA;
+
+typedef struct AST_FSAList {
+    struct AST_FSA * fsa;
+    struct AST_FSAList *next;
+} AST_FSAList;
+
+AST_FSAList * createFSAList(AST_FSA * fsa);
+void addToFSAList(AST_FSAList * list, AST_FSA * fsa);
+AST_FSA * createFSAEpsilon();
 
 #endif

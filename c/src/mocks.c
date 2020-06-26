@@ -1,5 +1,5 @@
 #include "mocks.h"
 
-void * createMockFSA() {
-    return (void *) 0;
+AST_FSA * createMockFSA() {
+    return (AST_FSA *) NULL;
 }
