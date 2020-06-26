@@ -101,40 +101,42 @@ mealy
 	;
 
 mealy_union
-	: mealy_union PIPE mealy_concat {
-			createMealyUnion((ASTMealy *) $$, (ASTMealy *) $3);
-		}
-	| mealy_concat
+	: mealy_concat
+	/* : mealy_union PIPE mealy_concat {
+			$$ = createMealyUnion((ASTMealy *) $$, (ASTMealy *) $3);
+		} */
 	;
 
 mealy_concat
-	: mealy_concat mealy_Kleene_closure {
-			createMealyConcat((ASTMealy *) $$, (ASTMealy *) $2);
-		}
-	| mealy_Kleene_closure
+	: mealy_Kleene_closure
+	/* : mealy_concat mealy_Kleene_closure {
+			$$ = createMealyConcat((ASTMealy *) $$, (ASTMealy *) $2);
+		} */
 	;
 
 mealy_Kleene_closure
-	: L_PARENTHESIS mealy_atomic R_PARENTHESIS ASTERIKS {
+	: mealy_atomic
+	/* : L_PARENTHESIS mealy_atomic R_PARENTHESIS ASTERIKS {
 			$$ = createMealyKleene((ASTMealy *) $2);
-		}
-	| mealy_atomic
+		} */
 	;
 
 mealy_atomic
 	: input_expression COLON STRING {
-			$$ = createMealyAtomic((AST_FSA *) $1, (StringList *) $3);
+			AST_FSA * ph = createMealyAtomicPhantom((AST_FSA *) $1, (char *) $3);
+			$$ = createMealyAtomic(ph, (StringList *) NULL);
 		}
 	| input_expression PERCENT {
-			$$ = createMealyAtomic((AST_FSA *) $1, (StringList *) NULL);
+			AST_FSA * ph = createMealyAtomicPhantom((AST_FSA *) $1, (char *) NULL);
+			$$ = createMealyAtomic(ph, (StringList *) NULL);
 		}
 	;
 
 input_expression
-	: input_expression input_atomic {
+	: input_atomic
+	/* : input_expression input_atomic {
 			$$ = createFSAInputExpression((AST_FSA *) $$, (AST_FSA *) $2);
-		}
-	| input_atomic
+		} */
 	;
 
 input_atomic
@@ -147,7 +149,8 @@ input_atomic
 
 range
 	: range_literal R_DASH range_literal {
-		$$ = createFSARange((char) $1, (char) $3);
+		 $$ = createFSAAtomic($1);
+		// $$ = createFSARange((char) $1, (char) $3);
 	}
 	;
 
@@ -183,21 +186,21 @@ args_values
 
 fsa
 	: fsa_union
-	| L_PARENTHESIS fsa_union R_PARENTHESIS {
+	/* | L_PARENTHESIS fsa_union R_PARENTHESIS {
 		$$ = $2;
-	}
+	} */
 	;
 
 fsa_union
 	: L_PARENTHESIS	fsa_union PIPE fsa_concat R_PARENTHESIS {
-			createFSAUnion((AST_FSA *) $$, (AST_FSA *) $4);
+			$$ = createFSAUnion((AST_FSA *) $$, (AST_FSA *) $4);
 		}
 	| fsa_concat
 	;
 
 fsa_concat
 	: fsa_concat fsa_Kleene_clousure {
-			createFSAConcat((AST_FSA *) $$, (AST_FSA *) $2);
+			$$ = createFSAConcat((AST_FSA *) $$, (AST_FSA *) $2);
 		}
 	| fsa_Kleene_clousure
 	;
@@ -207,18 +210,13 @@ fsa_Kleene_clousure
 			$$ = createFSAKleene((AST_FSA *) $2);
 		}
 	| STRING { 
-			$$ = createFSAAtomic((char *) $1);
+			$$ = createFSAEpsilon();
+			char * ptr = $1;
+			while(ptr) {
+				$$ = createFSAConcat((AST_FSA *) $$, createFSAAtomic(*ptr));
+			}
 		}
 	;
-
-/* string_literal
-	: string_literal STRING {
-			addToStringList(((StringList *) $$),(char *) $2);
-		}
-	| STRING {
-			$$ = createStringList((char *) $1);
-		}
-	; */
 
 %%
 

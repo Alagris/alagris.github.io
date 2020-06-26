@@ -19,7 +19,7 @@ AST_FSA * evalF(struct ASTMealyList * mealyList, char * funId, AST_FSAList * arg
 AST_FSA * _evalF(AST_FSA * root, AST_FSAList * argsValues, StringList * argsNames, char eval) {
     switch(root->type) {
         case FSA_ATOMIC:
-            return createFSAAtomic(root->fsa.fsaAtomic.string);
+            return createFSAAtomic(root->fsa.fsaAtomic.letter);
         case FSA_UNION:
             return createFSAUnion((AST_FSA *) _evalF(root->fsa.fsaUnion.lFSA, argsValues, argsNames, eval),
                                     (AST_FSA *) _evalF(root->fsa.fsaUnion.rFSA, argsValues, argsNames, eval));
@@ -28,9 +28,9 @@ AST_FSA * _evalF(AST_FSA * root, AST_FSAList * argsValues, StringList * argsName
                                     (AST_FSA *) _evalF(root->fsa.fsaConcat.rFSA, argsValues, argsNames, eval));
         case FSA_KLEENE:
             return createFSAKleene((AST_FSA *) _evalF(root->fsa.fsaKleene.fsa, argsValues, argsNames, eval));
-        case FSA_RANGE:
-            return createFSARange((AST_FSA *) _evalF(root->fsa.fsaRange.beg, argsValues, argsNames, eval),
-                                    (AST_FSA *) _evalF(root->fsa.fsaRange.end, argsValues, argsNames, eval));
+        // case FSA_RANGE:
+        //     return createFSARange((AST_FSA *) _evalF(root->fsa.fsaRange.beg, argsValues, argsNames, eval),
+        //                             (AST_FSA *) _evalF(root->fsa.fsaRange.end, argsValues, argsNames, eval));
         case FSA_INPUT_EXPRESSION:
             return createFSAInputExpression((AST_FSA *) _evalF(root->fsa.fsaInputExpression.lFSA, argsValues, argsNames, eval),
                                     (AST_FSA *) _evalF(root->fsa.fsaInputExpression.rFSA, argsValues, argsNames, eval));
@@ -48,5 +48,7 @@ AST_FSA * _evalF(AST_FSA * root, AST_FSAList * argsValues, StringList * argsName
             } else {
                 return root;
             }
+        case FSA_EPS:
+            return createFSAEpsilon();
     } 
 }

@@ -8,3 +8,11 @@ ASTMealy * createMealyAtomic (AST_FSA * input, StringList * output) {
     // node->mealyAtomic = (ASTMealyAtomic) {input, output};
     return node;
 }
+
+AST_FSA * createMealyAtomicPhantom (AST_FSA * input, char * output) {
+    AST_FSA * node = (AST_FSA *) malloc(sizeof(AST_FSA));
+    node->type = MEALY_PHANTOM;
+    node->fsa.mealyPhantom.in = input;
+    node->fsa.mealyPhantom.out = output;
+    return node;
+}

@@ -8,6 +8,8 @@
 #define FSA_RANGE 4
 #define FSA_INPUT_EXPRESSION 5
 #define FSA_ARG 6
+#define FSA_EPS 7
+#define MEALY_PHANTOM 9
 
 #include "StringList.h"
 #include "stdint.h"
@@ -20,7 +22,7 @@ typedef struct AST_FSAConcat {
 } AST_FSAConcat;
 
 typedef struct AST_FSAAtomic {
-    char * string;
+    char letter;
 } AST_FSAAtomic;
 
 typedef struct AST_FSAKleene {
@@ -46,6 +48,11 @@ typedef struct AST_FSAArg {
 	char * arg;
 } AST_FSAArg;
 
+typedef struct MealyPhantom {
+    struct AST_FSA * in;
+    char * out;
+} MealyPhantom;
+
 
 typedef struct AST_FSA {
 	char type;
@@ -57,6 +64,7 @@ typedef struct AST_FSA {
 		struct AST_FSARange fsaRange;
 		struct AST_FSAInputExpression fsaInputExpression;
 		struct AST_FSAArg fsaArg;
+		struct MealyPhantom mealyPhantom;
 	} fsa;
 } AST_FSA;
 
@@ -67,5 +75,6 @@ typedef struct AST_FSAList {
 
 AST_FSAList * createFSAList(AST_FSA * fsa);
 void addToFSAList(AST_FSAList * list, AST_FSA * fsa);
+AST_FSA * createFSAEpsilon();
 
 #endif

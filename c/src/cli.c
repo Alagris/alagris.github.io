@@ -71,7 +71,7 @@ main (int argc, char **argv)
   /* Default values. */
   arguments.verbose = 0;
   arguments.output_file = "stdout";
-  arguments.args[0] = "/dev/stdin";
+  arguments.args[0] = "input";
 
   /* Parse our arguments; every option seen by parse_opt will
      be reflected in arguments. */
@@ -98,6 +98,10 @@ main (int argc, char **argv)
   ASTMealyList mealyList = {(ASTMealy *) NULL, (char *) NULL,
                              (StringList *) NULL, (ASTMealyList *) NULL};
   yyparse((ASTMealyList *) &mealyList);
+  MealyList * compiledList = complieMealy(&mealyList);
+  char text[4096];
+  fgets(text, sizeof(text), stdin);
+  run(compiledList->mealy, text);
 
   return 0;
 }

@@ -13,3 +13,9 @@ void addToFSAList(AST_FSAList * list, AST_FSA * fsa) {
 	}
 	list->next = createFSAList(fsa);
 }
+
+AST_FSA * createFSAEpsilon() {
+	AST_FSA * node = (AST_FSA *) malloc(sizeof(AST_FSA));
+    node->type = FSA_EPS;
+    return node;
+}

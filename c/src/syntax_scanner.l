@@ -43,5 +43,4 @@
 /*
 <temporal>[A-Z]						{ yylval.sstring = strdup(yytext); return TEMPORAL_OPERATOR; }
 <definition>\<						BEGIN(temporal);
-<temporal>\>						BEGIN(definition);
 */

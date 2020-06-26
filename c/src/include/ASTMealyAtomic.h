@@ -7,5 +7,6 @@
 #include <stdlib.h>
 
 ASTMealy * createMealyAtomic (AST_FSA * input, StringList * output);
+AST_FSA * createMealyAtomicPhantom (AST_FSA * input, char * output);
 
 #endif

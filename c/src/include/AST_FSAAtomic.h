@@ -5,6 +5,6 @@
 #include "StringList.h"
 #include <stdlib.h>
 
-AST_FSA * createFSAAtomic(char * string);
+AST_FSA * createFSAAtomic(char letter);
 
 #endif
