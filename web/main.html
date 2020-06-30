@@ -199,7 +199,7 @@ b : B
   <script type='text/javascript'>
     
     var output = document.getElementById('output');
-    // var output1 = document.getElementById('output1');
+   // var output1 = document.getElementById('output1');
     var Module = {};
     
     function compile(){
@@ -216,8 +216,11 @@ b : B
       'string',
       ['string'], 
       [output.value])
-      console.log(c);
-      output.value = c;
+      console.log(c + "88888");
+      //output.value = c;
+
+     // output1.value = c;
+      document.getElementById("output1").innerHTML = c;
 
   
     }
