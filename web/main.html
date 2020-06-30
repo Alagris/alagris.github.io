@@ -48,6 +48,16 @@
           background-color: #18222d;
         }
     </style>
+    <script>
+      window.onload = function(){
+          document.getElementById('save').onclick = function(){
+            var a = document.createElement("a")
+            a.setAttribute("href", "data:text/plain," + document.getElementById('output1').innerHTML.replace(/<br>/g, encodeURIComponent("\r\n"))); //myTextarea
+            a.setAttribute("download", "filename.txt");
+            a.click();
+          };
+      };
+      </script>
 
 
 <!-- <script>
@@ -99,7 +109,7 @@ b : B
                   <!-- <button class='butto play' type="button" onclick="AFunction()"></button> -->
                  <div class="">
                   <button class="btn" title="Run" type="button" onclick="runMealy() "><i class="fa fa-play-circle"></i></button>
-                  <button class="btn" title="Save to file" type="button" id="save" onclick=""><i class="fa fa-folder"></i></button>
+                  <button class="btn" title="Save to file" type="button" id="save" onclick="othername()"><i class="fa fa-folder"></i></button>
 
                   <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>
                   <button class="btn bii" title="Info" type="button"  onclick="window.location.href='infpage.html'"><i class="fa fa-info-circle"></i></button>
@@ -162,16 +172,7 @@ b : B
         
             </script>
 
-  <script>
-      window.onload = function(){
-          document.getElementById('save').onclick = function(){
-            var a = document.createElement("a")
-            a.setAttribute("href", "data:text/plain," + document.getElementById('jsEditor').innerHTML.replace(/<br>/g, encodeURIComponent("\r\n"))); //myTextarea
-            a.setAttribute("download", "filename.txt");
-            a.click();
-          };
-      };
-      </script>
+  
 
   <!-- <a href="#" class="emptyLink" id="mapPrintLink" onclick="mapPrintExec();"></a> -->
   <!-- <p id="demo">1</p> -->
@@ -188,6 +189,10 @@ b : B
     // document.getElementById("demo").innerHTML = x;
 
   }
+
+
+  
+
   </script>
   <!-- <button type="button" onclick="location.src="test.js"">Test</button> -->
 
@@ -200,6 +205,7 @@ b : B
     
     var output = document.getElementById('output');
    // var output1 = document.getElementById('output1');
+   var cub;
     var Module = {};
     
     function compile(){
@@ -218,12 +224,18 @@ b : B
       [output.value])
       console.log(c + "88888");
       //output.value = c;
-
+      cub = c;
      // output1.value = c;
       document.getElementById("output1").innerHTML = c;
 
-  
     }
+    function othername() {
+    var input = cub + "23456";
+    console.log(input);
+    alert(input);
+} 
+
+
   </script>
   <script async type="text/javascript" src="web_mealy_compiler.js"></script>
 
@@ -258,16 +270,16 @@ b : B
     console.log(e.getValue());
   </script>
 
-<script>
+<!-- <script>
   window.onload = function(){
       
       var lengthOfName = e.getSession().getValue()
 
   
       document.getElementById('demo').innerHTML = lengthOfName;
-  };
+  }; -->
 
-  // <script src="test.js"></script> 
+   <!-- <script src="test.js"></script>  -->
   
 
   </body>
