@@ -95,13 +95,20 @@ main (int argc, char **argv)
   yyin = input_file;
 
   // Parse through the input:
-  ASTMealyList mealyList = {(ASTMealy *) NULL, (char *) NULL,
-                             (StringList *) NULL, (ASTMealyList *) NULL};
-  yyparse((ASTMealyList *) &mealyList);
-  MealyList * compiledList = complieMealy(&mealyList);
+  ASTMealyList * mealyList = NULL;
+  yyparse(&mealyList);
+  MealyList * compiledList = complieMealy(mealyList);
+  char name[256];
   char text[4096];
+  fgets(name, sizeof(name), stdin);
   fgets(text, sizeof(text), stdin);
-  run(compiledList->mealy, text);
+                int index = -1;
+  while(compiledList) { 
+    if(!strcmp(compiledList->id, name)) {
+      run(compiledList->mealy, text);
+    }
+    compiledList = compiledList->next;
+  }
 
   return 0;
 }

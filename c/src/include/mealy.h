@@ -40,13 +40,13 @@ typedef struct MealyList {
     struct MealyList *next;
 } MealyList;
 
-void addToASTMealyList(ASTMealyList * list, ASTMealy * mealy, char * id, StringList * args);
+void addToASTMealyList(ASTMealyList ** list, ASTMealy * mealy, char * id, StringList * args);
 ASTMealyList * createASTMealyList(ASTMealy * mealy, char * id, StringList * args);
 
-void addToMealyList(MealyList * list, M * mealy, char * id);
+void addToMealyList(MealyList ** list, M * mealy, char * id);
 MealyList * createMealyList(M * mealy, char * id);
 
-void defineFunctionF(ASTMealyList * mealyList, char * id, StringList * args, ASTMealy * astMealy);
+void defineFunctionF(ASTMealyList ** mealyList, char * id, StringList * args, ASTMealy * astMealy);
 
 char *** empty2D(int size);
 char ** singleton(char inputSymbol, char * outputString, int sigmaSize);
