@@ -7,7 +7,11 @@ void initStringBuffer(char * buffer) {
 }
 
 char * addStringToBuffer(char * buffer, char * string) {
-    buffer = (char *) realloc(buffer, strlen(buffer) + strlen(string) + 1);
+    size_t buf_len = 0;
+    if(buffer) {
+        size_t buf_len = strlen(buffer);
+    }
+    buffer = (char *) realloc(buffer, buf_len + strlen(string) + 1);
     if(!buffer) {
         exit(1);
     }
@@ -16,12 +20,15 @@ char * addStringToBuffer(char * buffer, char * string) {
 }
 
 char * addCharToBuffer(char * buffer, char character) {
-    size_t len = strlen(buffer);
-    buffer = (char *) realloc(buffer, len + sizeof(char) + 1);
+    size_t buf_len = 0;
+    if(buffer) {
+        size_t buf_len = strlen(buffer);
+    }
+    buffer = (char *) realloc(buffer, buf_len + sizeof(char) + 1);
     if(!buffer) {
         exit(1);
     }
-    buffer[len] = character;
-    buffer[len + 1] = '\0';
+    buffer[buf_len] = character;
+    buffer[buf_len + 1] = '\0';
     return buffer;
 }

@@ -7,7 +7,8 @@ if [ ! -e bin ];then
 fi 
 
 cd bin
-#cmake -DCMAKE_BUILD_TYPE=Debug --build .
-cmake --build .
+cmake -DCMAKE_BUILD_TYPE=Debug --build .
+#cmake --build .
+make
 
 

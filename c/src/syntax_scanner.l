@@ -18,7 +18,9 @@
 <definition>\|						{ return PIPE; }
 <definition>\$[A-Za-z0-9]+			{ yylval.sstring = strdup(yytext); return ARG; }
 <definition>[A-Za-z][A-Za-z0-9_]*	{ yylval.sstring = strdup(yytext); return FUN_ID; }
-=									{ return EQUALS; }
+\(									{ return L_ARG_PARENTHESIS; }
+\)									{ return R_ARG_PARENTHESIS; }
+=									{ BEGIN(definition); return EQUALS; }
 <definition>\*						{ return ASTERIKS; }
 <definition>,						{ return COMMA; }
 <definition>\x5b					BEGIN(range);

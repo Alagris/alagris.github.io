@@ -10,7 +10,7 @@ find_package(FLEX)
 
 
 BISON_TARGET(SyntaxParser syntax_parser.y ${CMAKE_CURRENT_BINARY_DIR}/syntax_parser.c
-			VERBOSE bison.output)
+			VERBOSE bison.output COMPILE_FLAGS -t)
 FLEX_TARGET(SyntaxScanner syntax_scanner.l  ${CMAKE_CURRENT_BINARY_DIR}/syntax_scanner.c)
 ADD_FLEX_BISON_DEPENDENCY(SyntaxScanner SyntaxParser)
 
