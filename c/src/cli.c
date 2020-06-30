@@ -98,14 +98,15 @@ main (int argc, char **argv)
   ASTMealyList * mealyList = NULL;
   yyparse(&mealyList);
   MealyList * compiledList = complieMealy(mealyList);
-  char name[256];
-  char text[4096];
-  fgets(name, sizeof(name), stdin);
-  fgets(text, sizeof(text), stdin);
-                int index = -1;
+  // char name[256];
+  // char text[4096];
+  // fgets(name, sizeof(name), stdin);
+  // fgets(text, sizeof(text), stdin);
+  char * name = "f";
+  char * text = "aa";
   while(compiledList) { 
     if(!strcmp(compiledList->id, name)) {
-      run(compiledList->mealy, text);
+      printf("%s\n", run(compiledList->mealy, text));
     }
     compiledList = compiledList->next;
   }

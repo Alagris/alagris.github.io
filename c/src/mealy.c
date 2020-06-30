@@ -370,9 +370,9 @@ char * run(struct M * m, char * input){
     }
     //now we need to check if any of the accepting states is reached
     int acceptedState = -1;
-    for(int state=0; state < m->stateCount; ++state) {
+    for(int state = 0; state < m->stateCount; ++state) {
         if(backtrack[len][state] > -1) {
-            if(acceptedState==-1) {
+            if(acceptedState == -1) {
                 acceptedState = state;
             }else{
                 printf("Nondeterminism at final step in states %d and %d",acceptedState,state);
@@ -380,7 +380,7 @@ char * run(struct M * m, char * input){
             }
         }
     }
-    if(acceptedState==-1){
+    if(acceptedState == -1){
         //no state accepted, so we return NULL (empty set) as output
         return NULL;
     }
