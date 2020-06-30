@@ -83,7 +83,7 @@ judgements
 
 args
 	: args COMMA ID_DEF {
-			addToStringList(((StringList *) $$), (char *) $3);
+			addToStringList(((StringList *) $1), (char *) $3);
 		}
 	| ID_DEF {
 			$$ = createStringList((char *) $1);
@@ -105,14 +105,14 @@ mealy
 mealy_union
 	: mealy_concat
 	/* : mealy_union PIPE mealy_concat {
-			$$ = createMealyUnion((ASTMealy *) $$, (ASTMealy *) $3);
+			$$ = createMealyUnion((ASTMealy *) $1, (ASTMealy *) $3);
 		} */
 	;
 
 mealy_concat
 	: mealy_Kleene_closure
 	/* : mealy_concat mealy_Kleene_closure {
-			$$ = createMealyConcat((ASTMealy *) $$, (ASTMealy *) $2);
+			$$ = createMealyConcat((ASTMealy *) $1, (ASTMealy *) $2);
 		} */
 	;
 
@@ -137,7 +137,7 @@ mealy_atomic
 input_expression
 	: input_atomic
 	/* : input_expression input_atomic {
-			$$ = createFSAInputExpression((AST_FSA *) $$, (AST_FSA *) $2);
+			$$ = createFSAInputExpression((AST_FSA *) $1, (AST_FSA *) $2);
 		} */
 	;
 
@@ -180,7 +180,7 @@ function
 
 args_values
 	: args_values COMMA input_atomic {
-			addToFSAList(((AST_FSAList *) $$), (AST_FSA *) $3);
+			addToFSAList(((AST_FSAList *) $1), (AST_FSA *) $3);
 		}
 	| input_atomic {
 			$$ = createFSAList((AST_FSA *) $1);
@@ -197,21 +197,22 @@ fsa
 
 fsa_union
 	: L_PARENTHESIS	fsa_union PIPE fsa_concat R_PARENTHESIS {
-			$$ = createFSAUnion((AST_FSA *) $$, (AST_FSA *) $4);
+			$$ = createFSAUnion((AST_FSA *) $2, (AST_FSA *) $4);
 		}
 	| fsa_concat
 	;
 
 fsa_concat
 	: fsa_concat fsa_Kleene_clousure {
-			$$ = createFSAConcat((AST_FSA *) $$, (AST_FSA *) $2);
+			$$ = createFSAConcat((AST_FSA *) $1, (AST_FSA *) $2);
 		}
 	| fsa_Kleene_clousure
 	;
 
 fsa_Kleene_clousure
-	: L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS {
-			$$ = createFSAKleene((AST_FSA *) $2);
+	: input_atomic ASTERIKS {
+	// : L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS {
+			$$ = createFSAKleene((AST_FSA *) $1);
 		}
 	| STRING { 
 			$$ = createFSAEpsilon();

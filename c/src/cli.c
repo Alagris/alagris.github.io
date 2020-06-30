@@ -109,6 +109,8 @@ main (int argc, char **argv)
   // char * text = "a"
   while(compiledList) { 
     if(!strcmp(compiledList->id, name)) {
+      // char * text2 = "aacc";
+      // char * output = run(compiledList->mealy, text2);
       char * output = run(compiledList->mealy, text);
       if(output) {
         printf("%s\n", output);
