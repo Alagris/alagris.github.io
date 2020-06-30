@@ -99,14 +99,24 @@ main (int argc, char **argv)
   yyparse(&mealyList);
   MealyList * compiledList = complieMealy(mealyList);
   // char name[256];
-  // char text[4096];
+  char text[4096];
   // fgets(name, sizeof(name), stdin);
-  // fgets(text, sizeof(text), stdin);
+  fgets(text, sizeof(text), stdin);
+  if (1 != sscanf(text, "%s", &text)) {
+    fprintf(stderr, "Invalid input\n");
+  }
   char * name = "f";
-  char * text = "a";
+  // char * text = "a"
   while(compiledList) { 
     if(!strcmp(compiledList->id, name)) {
-      printf("%s\n", run(compiledList->mealy, text));
+      char * output = run(compiledList->mealy, text);
+      if(output) {
+        printf("%s\n", output);
+      } else
+      {
+        fprintf(stderr, "Invalid input\n");
+      }
+      
     }
     compiledList = compiledList->next;
   }

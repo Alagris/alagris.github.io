@@ -337,7 +337,6 @@ void printT(struct T * t, int size){
 }
 
 char * run(struct M * m, char * input){
-    printf("run\n");
     int len = strlen(input);
     //we will use backtracking mechanism for
     //evaluation of all nondeterministic
@@ -358,7 +357,7 @@ char * run(struct M * m, char * input){
                     if(m->delta[state].ts[tran].input == inputSymbol) {
                         int targetState = m->delta[state].ts[tran].targetState;
                         if(backtrack[step][targetState] > -1) {
-                            printf("Nondeterminism at step %d in state %d",step,targetState);
+                            fprintf(stderr, "Nondeterminism at step %d in state %d",step,targetState);
                             exit(1);
                         }
                         backtrack[step][targetState] = state; // this will allow us to
@@ -375,7 +374,7 @@ char * run(struct M * m, char * input){
             if(acceptedState == -1) {
                 acceptedState = state;
             }else{
-                printf("Nondeterminism at final step in states %d and %d",acceptedState,state);
+                fprintf(stderr, "Nondeterminism at final step in states %d and %d",acceptedState,state);
                 exit(1);
             }
         }
@@ -468,5 +467,4 @@ struct M TtoM(struct T * t,char * stack, int sigmaSize){
 
 void defineFunctionF(ASTMealyList ** mealyList, char * id, StringList * args, ASTMealy * astMealy) {
     addToASTMealyList(mealyList, astMealy, id, args);
-    printf("");
 }
