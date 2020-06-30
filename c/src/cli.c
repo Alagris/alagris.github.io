@@ -103,7 +103,7 @@ main (int argc, char **argv)
   // fgets(name, sizeof(name), stdin);
   // fgets(text, sizeof(text), stdin);
   char * name = "f";
-  char * text = "aa";
+  char * text = "a";
   while(compiledList) { 
     if(!strcmp(compiledList->id, name)) {
       printf("%s\n", run(compiledList->mealy, text));

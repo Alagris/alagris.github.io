@@ -176,7 +176,7 @@ range_literal
 function
 	: FUN_ID L_PARENTHESIS args_values R_PARENTHESIS {
 			printf("function\n");
-		$$ = evalF(mealyList, (char *) $1, (AST_FSAList *) $3);
+		$$ = evalF(*mealyList, (char *) $1, (AST_FSAList *) $3);
 	}
 	;
 

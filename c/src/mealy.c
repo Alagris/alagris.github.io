@@ -58,24 +58,23 @@ size_t count(AST_FSA * root) {
 
 int localize(AST_FSA * root, int offset, char * stack) {
     switch(root->type) {
-    case 0:
+    case FSA_ATOMIC:
         stack[offset] = root->fsa.fsaAtomic.letter;
         root->fsa.fsaAtomic.letter = (char) offset;
         return offset + 1;
-    case 1:
+    case FSA_UNION:
         return localize(root->fsa.fsaUnion.lFSA,
             localize(root->fsa.fsaUnion.rFSA, offset, stack), stack);
-    case 2:
+    case FSA_CONCAT:
         return localize(root->fsa.fsaConcat.lFSA,
             localize(root->fsa.fsaConcat.rFSA, offset, stack), stack);
-    case 3:
+    case FSA_KLEENE:
         return localize(root->fsa.fsaKleene.fsa, offset, stack);
-    case 4:
+    case FSA_RANGE:
         return 0; // Ranges to-do
-    case 5:
-        return localize(root->fsa.fsaInputExpression.lFSA,
-            localize(root->fsa.fsaInputExpression.rFSA, offset, stack), stack);
-    case 7:
+    case MEALY_PHANTOM:
+        return localize(root->fsa.mealyPhantom.in, offset, stack);
+    case FSA_EPS:
         return offset;
     }
 }
@@ -228,7 +227,7 @@ T f(AST_FSA * root, int sSize) {
         }
         case MEALY_PHANTOM: {
             //T x = f(root->fsa.fsaInputExpression.lFSA, sSize);
-            T x = f(root->fsa.mealyPhantom.in->fsa.fsaInputExpression.lFSA, sSize);
+            T x = f(root->fsa.mealyPhantom.in, sSize);
             char ** oldxe = x.e;
             x.e = setConcatStr(x.e,sSize, root->fsa.mealyPhantom.out);
             free1D(oldxe, sSize);
@@ -256,6 +255,7 @@ MealyList * complieMealy(ASTMealyList * mealyList) {
         char * stack = malloc(sSize);
         localize(fsa, 0, stack);
         T t = f(fsa, sSize);
+        //printT(&t, sSize);
         M * tmpM = malloc(sizeof(M));
         *tmpM = TtoM(&t, stack, sSize);
         addToMealyList(&mealyMList, tmpM, mealyList->id);
