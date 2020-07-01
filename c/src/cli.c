@@ -85,7 +85,8 @@ main (int argc, char **argv)
 	*/
 
   // open a file handle to a particular file:
-  FILE *input_file = fopen(arguments.args[0], "r");
+  FILE *input_file                                
+= fopen(arguments.args[0], "r");
   // make sure it's valid:
   if (!input_file) {
     printf("Cannot open %s\n", arguments.args[0]);
@@ -97,17 +98,20 @@ main (int argc, char **argv)
   // Parse through the input:
   ASTMealyList * mealyList = NULL;
   yyparse(&mealyList);
-  MealyList * compiledList = complieMealy(mealyList);
+  MealyList * compiledList = compileMealy(mealyList);
   
   char text[4096];
   fgets(text, sizeof(text), stdin);
-  // if (1 != sscanf(text, "%s", &text)) {
+  char * name = text;
+  char * user_input;
+  // if (1 != sscanf(text, "%s: %s\n", name, user_input)) {
   //   fprintf(stderr, "Invalid input\n");
   //   return(-7);
   // }
-   
-  char * name = text;
-  char * user_input;
+
+  if(*text == '#' || *text == '\n') {
+    return 0;
+  }
 
   char * ptr = text;
   while(*ptr) {
@@ -124,6 +128,7 @@ main (int argc, char **argv)
   while(compiledList) { 
     if(!strcmp(compiledList->id, name)) {
       char * output = run(compiledList->mealy, user_input);
+      printf("%s: ", name);
       if(output) {
         printf("%s\n", output);
         return(0);

@@ -31,7 +31,7 @@ typedef struct M{
     int i;
     int stateCount;
     struct Transitions * delta;
-    char** F;
+    char ** F;
 } M;
 
 typedef struct MealyList {
@@ -62,7 +62,7 @@ char *** union2DInPlaceLhs(char *** lhs, char *** rhs,int size);
 T f(AST_FSA * root, int sSize);
 size_t count(AST_FSA * root);
 int localize(AST_FSA * root, int offset, char * stack);
-MealyList * complieMealy(ASTMealyList * mealyList);
+MealyList * compileMealy(ASTMealyList * mealyList);
 void free1D(char ** mat,int size);
 void free2D(char *** mat,int size);
 void free2DShallow(char *** mat,int size);

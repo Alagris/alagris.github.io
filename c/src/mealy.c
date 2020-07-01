@@ -39,19 +39,19 @@ ASTMealyList * createASTMealyList(ASTMealy * mealy, char * id, StringList * args
 size_t count(AST_FSA * root) {
     // AST_FSA * root = mealy->mealy.mealyAtomic.input;
     switch(root->type) {
-    case 0:
+    case FSA_ATOMIC:
         return 1;
-    case 1:
+    case FSA_UNION:
         return count(root->fsa.fsaUnion.lFSA) + count(root->fsa.fsaUnion.rFSA);
-    case 2:
+    case FSA_CONCAT:
         return count(root->fsa.fsaConcat.lFSA) + count(root->fsa.fsaConcat.rFSA);
-    case 3:
+    case FSA_KLEENE:
         return count(root->fsa.fsaKleene.fsa);
-    case 4:
-        return 1; // ranges to-do
-    case 5:
-        return count(root->fsa.fsaInputExpression.lFSA) + count(root->fsa.fsaInputExpression.rFSA);
-    case 7:
+    // case FSA_RANGE:
+    //     return 1; // ranges to-do
+    case MEALY_PHANTOM:
+        return count(root->fsa.mealyPhantom.in);
+    case FSA_EPS:
         return 0;
     }
 }
@@ -140,10 +140,7 @@ char * epsilon() {
 } 
 
 char ** empty(int sigmaSize) {
-    char ** n = malloc(sizeof(char * ) * sigmaSize);
-    for(int i=0; i < sigmaSize; ++i) {
-        n[i] = NULL;
-    }
+    char ** n = calloc(sigmaSize, sizeof(char *));
     return n;
 }
 
@@ -174,63 +171,63 @@ char *** union2DInPlaceLhs(char *** lhs, char *** rhs,int size) {
     return lhs;
 }
 
-T f(AST_FSA * root, int sSize) {
+T f(AST_FSA * root, int sigmaSize) {
     switch(root->type) {
         case FSA_ATOMIC: {
             T x;
-            x.l = empty2D(sSize);
-            x.b = singleton(root->fsa.fsaAtomic.letter, epsilon(), sSize);
-            x.e = singleton(root->fsa.fsaAtomic.letter, epsilon(), sSize);
+            x.l = empty2D(sigmaSize);
+            x.b = singleton(root->fsa.fsaAtomic.letter, epsilon(), sigmaSize);
+            x.e = singleton(root->fsa.fsaAtomic.letter, epsilon(), sigmaSize);
             x.a = NULL;
             return x;
         }
         case FSA_UNION: {
-            T x = f(root->fsa.fsaUnion.lFSA, sSize);
-            T y = f(root->fsa.fsaUnion.rFSA, sSize);
-            x.l = union2DInPlaceLhs(x.l, y.l, sSize);
-            x.e = unionInPlaceLhs(x.e, y.e, sSize);
-            x.b = unionInPlaceLhs(x.b, y.b, sSize);
+            T x = f(root->fsa.fsaUnion.lFSA, sigmaSize);
+            T y = f(root->fsa.fsaUnion.rFSA, sigmaSize);
+            x.l = union2DInPlaceLhs(x.l, y.l, sigmaSize);
+            x.e = unionInPlaceLhs(x.e, y.e, sigmaSize);
+            x.b = unionInPlaceLhs(x.b, y.b, sigmaSize);
             x.a = unionSingleton(x.a,y.a);
-            free2DShallow(y.l,sSize);
+            free2DShallow(y.l,sigmaSize);
             free(y.e);
             free(y.b);
             return x;
         }
         case FSA_CONCAT: {
-            T x = f(root->fsa.fsaConcat.lFSA, sSize);
-            T y = f(root->fsa.fsaConcat.rFSA, sSize);
+            T x = f(root->fsa.fsaConcat.lFSA, sigmaSize);
+            T y = f(root->fsa.fsaConcat.rFSA, sigmaSize);
             char *** oldxl = x.l;
-            x.l = union2DInPlaceLhs(concatProd(x.e, y.b, sSize), union2DInPlaceLhs(x.l, y.l, sSize), sSize);
+            x.l = union2DInPlaceLhs(concatProd(x.e, y.b, sigmaSize), union2DInPlaceLhs(x.l, y.l, sigmaSize), sigmaSize);
             char ** oldxb = x.b;
-            x.b = unionInPlaceLhs(strConcatSet(x.a, sSize, y.b), x.b, sSize);
+            x.b = unionInPlaceLhs(strConcatSet(x.a, sigmaSize, y.b), x.b, sigmaSize);
             char ** oldxe = x.e;
-            x.e = unionInPlaceLhs(setConcatStr(x.e, sSize, y.a), y.e, sSize);
+            x.e = unionInPlaceLhs(setConcatStr(x.e, sigmaSize, y.a), y.e, sigmaSize);
             x.a = concat(x.a,y.a);
-            free2DShallow(oldxl, sSize);
-            free2DShallow(y.l, sSize);
+            free2DShallow(oldxl, sigmaSize);
+            free2DShallow(y.l, sigmaSize);
             free(y.e);
-            free1D(y.b, sSize);
-            free1D(oldxe, sSize);
+            free1D(y.b, sigmaSize);
+            free1D(oldxe, sigmaSize);
             free(oldxb);
             return x;
         }
         case FSA_KLEENE: {
-            T x = f(root->fsa.fsaKleene.fsa, sSize);
+            T x = f(root->fsa.fsaKleene.fsa, sigmaSize);
             if(x.a && x.a[0]!='\0'){
                 fprintf(stderr, "Nondeterminism!\n");
                 exit(-6);
             }
             char *** oldxl = x.l;
-            x.l = union2DInPlaceLhs(concatProd(x.e, x.b, sSize), x.l, sSize);
-            free2DShallow(oldxl,sSize);
+            x.l = union2DInPlaceLhs(concatProd(x.e, x.b, sigmaSize), x.l, sigmaSize);
+            free2DShallow(oldxl,sigmaSize);
             return x;
         }
         case MEALY_PHANTOM: {
-            //T x = f(root->fsa.fsaInputExpression.lFSA, sSize);
-            T x = f(root->fsa.mealyPhantom.in, sSize);
+            //T x = f(root->fsa.fsaInputExpression.lFSA, sigmaSize);
+            T x = f(root->fsa.mealyPhantom.in, sigmaSize);
             char ** oldxe = x.e;
-            x.e = setConcatStr(x.e,sSize, root->fsa.mealyPhantom.out);
-            free1D(oldxe, sSize);
+            x.e = setConcatStr(x.e,sigmaSize, root->fsa.mealyPhantom.out);
+            free1D(oldxe, sigmaSize);
             char * oldxa = x.a;
             x.a = concat(x.a, root->fsa.mealyPhantom.out);
             free(oldxa);
@@ -238,29 +235,29 @@ T f(AST_FSA * root, int sSize) {
         }
         case FSA_EPS: {
             T x;
-            x.l = empty2D(sSize);
-            x.b = empty(sSize);
-            x.e = empty(sSize);
+            x.l = empty2D(sigmaSize);
+            x.b = empty(sigmaSize);
+            x.e = empty(sigmaSize);
             x.a = epsilon();
             return x;
         }
     }
 }
 
-MealyList * complieMealy(ASTMealyList * mealyList) {
+MealyList * compileMealy(ASTMealyList * mealyList) {
     MealyList * mealyMList = NULL;
     while(mealyList) {
         if(!mealyList->args) {
             AST_FSA * fsa = mealyList->mealy->mealy.mealyAtomic.input;
-            size_t sSize = count(fsa);
-            char * stack = malloc(sSize);
+            size_t sigmaSize = count(fsa);
+            char * stack = malloc(sigmaSize);
             localize(fsa, 0, stack);
-            T t = f(fsa, sSize);
-            //printT(&t, sSize);
+            T t = f(fsa, sigmaSize);
+            //printT(&t, sigmaSize);
             M * tmpM = malloc(sizeof(M));
-            *tmpM = TtoM(&t, stack, sSize);
+            *tmpM = TtoM(&t, stack, sigmaSize);
             addToMealyList(&mealyMList, tmpM, mealyList->id);
-            freeTContents(&t, sSize);
+            freeTContents(&t, sigmaSize);
         }
         mealyList = mealyList->next;
     }
@@ -309,10 +306,11 @@ char* outputFor(struct M * m, int sourceState, int targetState, int inputSymbol)
     return NULL;
 }
 
-void freeTContents(struct T * t,int size){
+void freeTContents(struct T * t, int size){
     free(t->a);
     free1D(t->b, size);
-    free1D(t->e, size);
+    // free1D(t->e, size);
+    free1D(t->e, 1);
     free2D(t->l, size);
 }
 
@@ -332,7 +330,8 @@ void printT(struct T * t, int size){
     printf("\n");
     printf("e:");
     for(int i=0;i<size;i++){
-        printf("'%s'(%p) ", t->e[i], t->e[i]);
+        printf("'%s'(%p) ", t->e[0], t->e[0]);
+        // printf("'%s'(%p) ", t->e[i], t->e[i]);
     }
     printf("\n");
     printf("a:'%s'\n",t->a);
@@ -343,10 +342,10 @@ char * run(struct M * m, char * input){
     //we will use backtracking mechanism for
     //evaluation of all nondeterministic
     //superpositions of automaton
-    int backtrack[len+1][m->stateCount];
+    int backtrack[len + 1][m->stateCount];
     for(int state=0; state < m->stateCount; ++state)
         for(int step=0; step < len + 1; ++step)
-            backtrack[step][state] =- 1;
+            backtrack[step][state] = -1;
     backtrack[0][m->i] =  m->i;
     //first we need to propagate input forwards for each symbol 
     for(int step=1;step<=len;step++){
@@ -407,53 +406,66 @@ char * run(struct M * m, char * input){
     }
     return output;
 }
-char * copyStr(char * str){
-    if(str==NULL)return NULL;
-    char * n = malloc(sizeof(char)*(strlen(str)+1));
-    strcat(n,str);
+
+char * copyStr(char * str) {
+    if(str == NULL) {
+        return NULL;
+    }
+    char * n = malloc(sizeof(char) * (strlen(str) + 1));
+    *n = '\0';
+    strcat(n, str);
     return n;
 }
-struct M TtoM(struct T * t,char * stack, int sigmaSize){
+
+struct M TtoM(struct T * t, char * stack, int sigmaSize){
     struct M m;
-    m.stateCount = sigmaSize+1;//there is one state for every symbols in 
+    m.stateCount = sigmaSize + 1;//there is one state for every symbols in 
     //Sigma plus one extra initial state 
     m.i = sigmaSize;
-    m.F = malloc(sizeof(char*)*m.stateCount);
-    for(int i=0;i<sigmaSize;i++){
-        m.F[i] = copyStr(t->e[i]);
+    m.F = malloc(sizeof(char*) * m.stateCount);
+    for(int i=0; i < sigmaSize; ++i){
+        // m.F[i] = copyStr(t->e[i]);
+        m.F[i] = copyStr(t->e[0]);
     }
     m.F[sigmaSize] = copyStr(t->a);
     m.delta = malloc(sizeof(struct Transitions)*m.stateCount);
     // delta stores an array of transitions for each state
-    for(int i=0;i<sigmaSize;i++){
+    for(int i=0; i < sigmaSize; ++i){
         int transitionCount = 0;//first find out how many outgoing
         //transitions originate in state i
-        for(int j=0;j<sigmaSize;j++)if(t->l[i][j])transitionCount++;
+        for(int j=0; j < sigmaSize; ++j) {
+            if(t->l[i][j]) {
+                ++transitionCount;
+            }
+        }
         //then allocate array of transitions
         m.delta[i].len = transitionCount;
-        struct Transition * tr = m.delta[i].ts = malloc(sizeof(struct Transition)*transitionCount);
+        struct Transition * tr = m.delta[i].ts = malloc(sizeof(struct Transition) * transitionCount);
         //then collect all the transitions 
-        for(int j=0,k=0;j<sigmaSize;j++){
-            char* output = copyStr(t->l[i][j]);
+        for(int j=0, k=0; j < sigmaSize; ++j){
+            char * output = copyStr(t->l[i][j]);
             if(output){
                 tr[k].targetState = j; //j is the target state of transition
                 tr[k].input = stack[j]; // stack[j] tells us the input label of transition
                 tr[k].output = output;
-                k++;
+                ++k;
             }
         }
     }
-    //now it's time to connect initial state with the rest of states
     int initialTransitionCount = 0;
 
-    for(int j=0;j<sigmaSize;j++)if(t->b[j])initialTransitionCount++;
+    for(int j=0; j < sigmaSize; ++j) {
+        if(t->b[j]) {
+            ++initialTransitionCount;
+        }
+    }
     
     m.delta[sigmaSize].len = initialTransitionCount;
     struct Transition * initialTr = m.delta[sigmaSize].ts = 
         malloc(sizeof(struct Transition)*initialTransitionCount);
 
-    for(int j=0,k=0;j<sigmaSize;j++){
-        char* output = copyStr(t->b[j]);
+    for(int j=0, k=0; j < sigmaSize; ++j){
+        char * output = copyStr(t->b[j]);
         if(output){
             initialTr[k].targetState = j; 
             initialTr[k].input = stack[j];
@@ -461,9 +473,6 @@ struct M TtoM(struct T * t,char * stack, int sigmaSize){
             k++;
         }
     }
-    //lastly you could sort all transitions by input in increasing order,
-    //which would later allow you to implement binary search. I want to
-    //keep things simple so I won't do it here.
     return m;
 }
 
