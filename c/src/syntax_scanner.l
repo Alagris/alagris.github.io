@@ -21,6 +21,7 @@
 \(									{ return L_ARG_PARENTHESIS; }
 \)									{ return R_ARG_PARENTHESIS; }
 =									{ BEGIN(definition); return EQUALS; }
+,									{ return ARG_COMMA; }
 <definition>\*						{ return ASTERIKS; }
 <definition>,						{ return COMMA; }
 <definition>\x5b					BEGIN(range);

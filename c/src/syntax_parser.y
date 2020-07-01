@@ -4,7 +4,6 @@
   extern int yylex();
   extern int yyparse();
   extern FILE *yyin;
-		// yydebug = 1;
   void yyerror(ASTMealyList ** mealyList, const char *s);
 
 %}
@@ -30,6 +29,7 @@
 %token EQUALS
 %token ASTERIKS
 %token COMMA
+%token ARG_COMMA
 %token R_R_BRACKET
 %token R_BACK_SLASH
 %token R_DASH
@@ -83,7 +83,7 @@ judgements
 	;
 
 args
-	: args COMMA ID_DEF {
+	: args ARG_COMMA ID_DEF {
 			addToStringList(((StringList *) $1), (char *) $3);
 		}
 	| ID_DEF {
