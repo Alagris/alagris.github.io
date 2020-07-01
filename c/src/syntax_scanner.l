@@ -16,7 +16,7 @@
 <definition>\(						{ return L_PARENTHESIS; }
 <definition>\)						{ return R_PARENTHESIS; }
 <definition>\|						{ return PIPE; }
-<definition>\$[A-Za-z0-9]+			{ yylval.sstring = strdup(yytext); return ARG; }
+<definition>\$[A-Za-z0-9]+			{ yylval.sstring = strdup(yytext + 1); return ARG; }
 <definition>[A-Za-z][A-Za-z0-9_]*	{ yylval.sstring = strdup(yytext); return FUN_ID; }
 \(									{ return L_ARG_PARENTHESIS; }
 \)									{ return R_ARG_PARENTHESIS; }

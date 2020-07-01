@@ -160,14 +160,14 @@ char* unionSingleton(char * lhs, char * rhs) {
     }
 }
 char ** unionInPlaceLhs(char ** lhs, char ** rhs,int size) {
-    for(int i=0;i<size;i++) {
-        lhs[i]=unionSingleton(lhs[i],rhs[i]);
+    for(int i=0; i < size; ++i) {
+        lhs[i]=unionSingleton(lhs[i], rhs[i]);
     }
     return lhs;
 }
 char *** union2DInPlaceLhs(char *** lhs, char *** rhs,int size) {
-    for(int i=0;i<size;i++) {
-        for(int j=0;j<size;j++) {
+    for(int i=0; i< size; ++i) {
+        for(int j=0; j<size; ++j) {
             lhs[i][j]=unionSingleton(lhs[i][j],rhs[i][j]);
         }
     }
@@ -250,16 +250,18 @@ T f(AST_FSA * root, int sSize) {
 MealyList * complieMealy(ASTMealyList * mealyList) {
     MealyList * mealyMList = NULL;
     while(mealyList) {
-        AST_FSA * fsa = mealyList->mealy->mealy.mealyAtomic.input;
-        size_t sSize = count(fsa);
-        char * stack = malloc(sSize);
-        localize(fsa, 0, stack);
-        T t = f(fsa, sSize);
-        //printT(&t, sSize);
-        M * tmpM = malloc(sizeof(M));
-        *tmpM = TtoM(&t, stack, sSize);
-        addToMealyList(&mealyMList, tmpM, mealyList->id);
-        freeTContents(&t, sSize);
+        if(!mealyList->args) {
+            AST_FSA * fsa = mealyList->mealy->mealy.mealyAtomic.input;
+            size_t sSize = count(fsa);
+            char * stack = malloc(sSize);
+            localize(fsa, 0, stack);
+            T t = f(fsa, sSize);
+            //printT(&t, sSize);
+            M * tmpM = malloc(sizeof(M));
+            *tmpM = TtoM(&t, stack, sSize);
+            addToMealyList(&mealyMList, tmpM, mealyList->id);
+            freeTContents(&t, sSize);
+        }
         mealyList = mealyList->next;
     }
     return mealyMList;

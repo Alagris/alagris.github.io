@@ -75,6 +75,6 @@ char * copyStr(char * str);
 struct M TtoM(struct T * t,char * stack, int sigmaSize);
 
 AST_FSA * evalF(ASTMealyList * mealyList, char * funId, AST_FSAList * args);
-AST_FSA * _evalF(AST_FSA * root, AST_FSAList * argsValues, StringList * argsNames, char eval);
+AST_FSA * _evalF(AST_FSA * root, AST_FSAList * argsValues, StringList * argsNames);
 
 #endif /* MEALY_H */

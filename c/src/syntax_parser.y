@@ -45,6 +45,7 @@
 /* %token <sstring> TEMPORAL_OPERATOR */
 %type <schar> range_literal
 /* %type <sStringList> string_literal */
+%type <sAST_FSA> mealy_phantom
 %type <sAST_FSA> fsa_Kleene_clousure
 %type <sAST_FSA> input_atomic
 %type <sAST_FSA> input_expression
@@ -123,6 +124,10 @@ mealy_Kleene_closure
 		} */
 	;
 
+/* mealy_atomic
+	: mealy_phantom {
+			$$ = createMealyAtomic($1, (StringList *) NULL);
+		} */
 mealy_atomic
 	: input_expression COLON STRING {
 			AST_FSA * ph = createMealyAtomicPhantom((AST_FSA *) $1, (char *) $3);
@@ -133,6 +138,15 @@ mealy_atomic
 			$$ = createMealyAtomic(ph, (StringList *) NULL);
 		}
 	;
+
+/* mealy_phantom
+	: input_expression COLON STRING {
+			$$ = createMealyAtomicPhantom((AST_FSA *) $1, (char *) $3);
+		}
+	| input_expression PERCENT {
+			$$ = createMealyAtomicPhantom((AST_FSA *) $1, (char *) NULL);
+		}
+	; */
 
 input_expression
 	: input_atomic
@@ -210,10 +224,12 @@ fsa_concat
 	;
 
 fsa_Kleene_clousure
-	: input_atomic ASTERIKS {
-	// : L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS {
-			$$ = createFSAKleene((AST_FSA *) $1);
+	: L_PARENTHESIS input_atomic R_PARENTHESIS ASTERIKS {
+	/* : input_atomic ASTERIKS { */
+			$$ = createFSAKleene((AST_FSA *) $2);
 		}
+	/* | mealy_phantom */
+	| input_atomic
 	| STRING { 
 			$$ = createFSAEpsilon();
 			char * ptr = $1;
