@@ -98,30 +98,44 @@ main (int argc, char **argv)
   ASTMealyList * mealyList = NULL;
   yyparse(&mealyList);
   MealyList * compiledList = complieMealy(mealyList);
-  // char name[256];
+  
   char text[4096];
-  // fgets(name, sizeof(name), stdin);
   fgets(text, sizeof(text), stdin);
-  if (1 != sscanf(text, "%s", &text)) {
-    fprintf(stderr, "Invalid input\n");
+  // if (1 != sscanf(text, "%s", &text)) {
+  //   fprintf(stderr, "Invalid input\n");
+  //   return(-7);
+  // }
+   
+  char * name = text;
+  char * user_input;
+
+  char * ptr = text;
+  while(*ptr) {
+        if(*ptr == ':') {
+          *ptr = '\0';
+          user_input = ptr + 2;
+        } else if(*ptr == '\n') {
+          *ptr = '\0';
+          break;
+        }
+        ++ptr;
   }
-  char * name = "f";
-  // char * text = "a"
+
   while(compiledList) { 
     if(!strcmp(compiledList->id, name)) {
-      // char * text2 = "aacc";
-      // char * output = run(compiledList->mealy, text2);
-      char * output = run(compiledList->mealy, text);
+      char * output = run(compiledList->mealy, user_input);
       if(output) {
         printf("%s\n", output);
-      } else
-      {
+        return(0);
+      } else {
         fprintf(stderr, "Invalid input\n");
+        return(-9);
       }
       
     }
     compiledList = compiledList->next;
   }
 
-  return 0;
+  fprintf(stderr, "Invalid input\n");
+  return -8;
 }

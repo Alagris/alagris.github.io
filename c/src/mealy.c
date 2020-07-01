@@ -150,7 +150,7 @@ char ** empty(int sigmaSize) {
 char* unionSingleton(char * lhs, char * rhs) {
     if(lhs) {
         if(rhs) {
-            printf("Nondeterminism!");
+            fprintf(stderr, "Nondeterminism!\n");
             exit(1);
         } else {
             return lhs;
@@ -217,7 +217,7 @@ T f(AST_FSA * root, int sSize) {
         case FSA_KLEENE: {
             T x = f(root->fsa.fsaKleene.fsa, sSize);
             if(x.a && x.a[0]!='\0'){
-                printf("Nondeterminism!");
+                fprintf(stderr, "Nondeterminism!\n");
                 exit(-6);
             }
             char *** oldxl = x.l;

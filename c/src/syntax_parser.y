@@ -45,7 +45,7 @@
 /* %token <sstring> TEMPORAL_OPERATOR */
 %type <schar> range_literal
 /* %type <sStringList> string_literal */
-%type <sAST_FSA> mealy_phantom
+/* %type <sAST_FSA> mealy_phantom */
 %type <sAST_FSA> fsa_Kleene_clousure
 %type <sAST_FSA> input_atomic
 %type <sAST_FSA> input_expression
