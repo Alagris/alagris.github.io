@@ -11,6 +11,14 @@ public class MainController {
     public String home(Model model) {
         model.addAttribute("title", "NEW Compiler");
         return "home";
+
     }
+
+    @GetMapping("/infpage")
+    public String infpage(Model model) {
+        model.addAttribute("title", "NEW Compiler - InfoPage");
+        return "infpage";
+    }
+
 
 }
