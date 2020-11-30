@@ -3,16 +3,21 @@ package net.alagris;
 import net.alagris.GrammarParser.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DirectedAcyclicGraph;
 
 import java.util.HashSet;
 import java.util.Optional;
 
 public class ParserListener implements GrammarListener {
 
-    final private HashSet<FunctionDef> functions;
-    
-    public ParserListener(HashSet functions) {
-        this.functions = functions;
+    final private HashSet<FunctionDef> functions = new HashSet<FunctionDef>();
+    final private DirectedAcyclicGraph<FunctionDef, DefaultEdge> dac;
+    private Boolean exponential;
+    private String name;
+
+    public ParserListener(DirectedAcyclicGraph dac) {
+        this.dac = dac;
     }
     
     @Override
@@ -43,7 +48,12 @@ public class ParserListener implements GrammarListener {
     public void exitFuncDef(FuncDefContext ctx) {
         final Boolean exponential = (ctx.exponential != null) ? true : false;
         final String name = ctx.ID().getText();
-        functions.add(new FunctionDef(exponential, name));
+        final FunctionDef functionDef = new FunctionDef(exponential, name);
+        functions.add(functionDef);
+        dac.addVertex(functionDef);
+        dac.addEdge(functionDef, functions.stream().filter(x -> {
+            x.getName().equals(((FuncDefContext) ctx.parent).ID().getText());
+        }).findFirst());
     }
 
     @Override

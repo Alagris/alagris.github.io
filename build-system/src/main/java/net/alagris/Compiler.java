@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.stream.Stream;
+
+import org.jgrapht.graph.*;
+
+import net.alagris.FunctionDef;
 
 public class Compiler {
 
@@ -29,8 +32,9 @@ public class Compiler {
         String source = contentBuilder.toString();
         final GrammarLexer lexer = new GrammarLexer(CharStreams.fromString(source));
         final GrammarParser parser = new GrammarParser(new CommonTokenStream(lexer));
-        HashSet functionDefs = new HashSet<FunctionDef>();
-        ParserListener listener = new ParserListener(functionDefs);
+//        HashSet functionDefs = new HashSet<FunctionDef>();
+        DirectedAcyclicGraph<FunctionDef, DefaultEdge> dac = new DirectedAcyclicGraph<>(DefaultEdge.class);
+        ParserListener listener = new ParserListener(dac);
 //        listener.statements.push(new ArrayList<Statement>());
 //        System.out.println("Push initial blank statements "+listener.statements);
         ParseTreeWalker.DEFAULT.walk(listener, parser.start());
