@@ -10,7 +10,7 @@ public class MainController {
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("title", "NEW Compiler");
-        return "studentform";
+        return "home";
 
     }
 
