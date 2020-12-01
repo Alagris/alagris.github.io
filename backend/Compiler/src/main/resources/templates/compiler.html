@@ -65,6 +65,33 @@
       };
       </script>
 
+    <script type="text/javascript" src="js/ace/build/src/ace.js"></script>
+
+
+    <script>
+
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            if (xhr.status == 200) {
+                document.body.innerText = 'Response: ' + xhr.responseText;
+            } else {
+                document.body.innerText = 'Error: ' + xhr.status;
+            }
+        }
+    };
+
+
+function submite() {
+    var val = e.getSession().getValue();
+
+    xhr.open('POST', '/examples/echo', true);
+    xhr.send(val);
+};
+    </script>
+
+
 </head>
 
 </head>
@@ -112,6 +139,7 @@ b : B
 
                 <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>
                 <button class="btn bii" title="Info" type="button"  onclick="window.location.href='/infpage'"><i class="fa fa-info-circle"></i></button>
+                <button  type="button"  onclick="submite()">Submit</button>
             </div>
             <hr>
             <p><br></p>
@@ -258,16 +286,22 @@ b : B
 
 
 <!-- <script type="text/javascript"> -->
-<script type="text/javascript" src="js/ace/build/src/ace.js"></script>
 <script>
     var e = ace.edit("jsEditor");
     e.getSession().setMode("ace/mode/mealy");
     e.setTheme("ace/theme/monokai");
     // e.session.setMode("ace/mode/mealy");
     e.getSession().setTabSize(1);
-    e.renderer.setShowGutter(true);
+    e.renderer.setShowGutter(true)
+   // e.setValue("Hello");;
     console.log(e.getValue());
+   // var val = e.getSession().getValue();
+  //  window.val = val;
+    //print(val);
+
   </script>
+
+<!--tyt-->
 
 <!-- <script>
   window.onload = function(){
