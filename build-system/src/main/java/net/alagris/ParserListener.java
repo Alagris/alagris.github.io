@@ -8,6 +8,7 @@ import org.jgrapht.graph.DirectedAcyclicGraph;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Stack;
 
 public class ParserListener implements GrammarListener {
 
@@ -15,6 +16,7 @@ public class ParserListener implements GrammarListener {
     final private DirectedAcyclicGraph<FunctionDef, DefaultEdge> dac;
     private Boolean exponential;
     private String name;
+    private Stack<FunctionDef> functionDefStack;
 
     public ParserListener(DirectedAcyclicGraph dac) {
         this.dac = dac;
@@ -42,18 +44,24 @@ public class ParserListener implements GrammarListener {
 
     @Override
     public void enterFuncDef(FuncDefContext ctx) {
+        final FunctionDef currentFunction = new FunctionDef();
+        functionDefStack.push(currentFunction);
     }
 
     @Override
     public void exitFuncDef(FuncDefContext ctx) {
         final Boolean exponential = (ctx.exponential != null) ? true : false;
         final String name = ctx.ID().getText();
-        final FunctionDef functionDef = new FunctionDef(exponential, name);
-        functions.add(functionDef);
-        dac.addVertex(functionDef);
-        dac.addEdge(functionDef, functions.stream().filter(x -> {
-            x.getName().equals(((FuncDefContext) ctx.parent).ID().getText());
-        }).findFirst());
+        // Pop itself
+        FunctionDef currentDef = functionDefStack.pop();
+        // Test if root
+        if (functionDefStack.empty()) {
+            final FunctionDef root = new FunctionDef("__NIL__");
+        }
+        FunctionDef parentDef = functionDefStack.peek();
+        functions.add(currentDef);
+        dac.addVertex(currentDef);
+        dac.addEdge(currentDef, parentDef);
     }
 
     @Override
