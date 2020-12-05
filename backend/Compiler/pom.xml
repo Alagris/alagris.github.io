@@ -14,11 +14,28 @@
 	<name>Compiler</name>
 	<description>Compiler</description>
 
+	<repositories>
+		<repository>
+			<id>solomonoff</id>
+			<url>https://raw.github.com/aleksander-mendoza/SolomonoffLib/repository/</url>
+		</repository>
+	</repositories>
+
 	<properties>
 		<java.version>11</java.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+			<version>4.7.1</version>
+		</dependency>
+		<dependency>
+			<groupId>solomonoff</groupId>
+			<artifactId>solomonoff</artifactId>
+			<version>1.5</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
