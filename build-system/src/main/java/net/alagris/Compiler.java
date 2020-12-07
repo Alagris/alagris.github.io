@@ -40,6 +40,9 @@ public class Compiler {
 //        System.out.println("Push initial blank statements "+listener.statements);
         ParseTreeWalker.DEFAULT.walk(listener, parser.start());
 //        ArrayList<Statement> output = listener.statements.pop();
-        System.out.println("");
+        dag.iterator().forEachRemaining(x -> {
+            // Compile here
+            System.out.println("");
+        });
     }
 }
