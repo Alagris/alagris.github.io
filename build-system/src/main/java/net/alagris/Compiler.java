@@ -33,9 +33,9 @@ public class Compiler {
         final GrammarLexer lexer = new GrammarLexer(CharStreams.fromString(source));
         final GrammarParser parser = new GrammarParser(new CommonTokenStream(lexer));
 //        HashSet functionDefs = new HashSet<FunctionDef>();
-        DirectedAcyclicGraph<Token, DefaultEdge> dac = new DirectedAcyclicGraph<>(DefaultEdge.class);
+        DirectedAcyclicGraph<Token, DefaultEdge> dag = new DirectedAcyclicGraph<>(DefaultEdge.class);
         final LinkedList<CompilationError> errors = new LinkedList<>();
-        ParserListener listener = new ParserListener(dac, errors);
+        ParserListener listener = new ParserListener(dag, errors);
 //        listener.statements.push(new ArrayList<Statement>());
 //        System.out.println("Push initial blank statements "+listener.statements);
         ParseTreeWalker.DEFAULT.walk(listener, parser.start());

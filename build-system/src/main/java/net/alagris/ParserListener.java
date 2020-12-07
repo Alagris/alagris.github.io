@@ -11,14 +11,14 @@ import java.util.*;
 public class ParserListener implements GrammarListener {
 
     final private HashMap<String, FunctionDef> functions = new HashMap<>();
-    final private DirectedAcyclicGraph<Token, DefaultEdge> dac;
+    final private DirectedAcyclicGraph<Token, DefaultEdge> dag;
     final private LinkedList<CompilationError> errors;
     private Boolean vertexAddedBefore = false;
 //    private String name;
     private LinkedList<Token> currentLineIDs = new LinkedList<>();
 
-    public ParserListener(DirectedAcyclicGraph dac, LinkedList<CompilationError> errors) {
-        this.dac = dac;
+    public ParserListener(DirectedAcyclicGraph dag, LinkedList<CompilationError> errors) {
+        this.dag = dag;
         this.errors = errors;
 //        functionDefStack.push(new FunctionDef("__NIL__"));
     }
@@ -56,9 +56,9 @@ public class ParserListener implements GrammarListener {
         final Token currentSymbol = ctx.ID().getSymbol();
         final Boolean exponential = (ctx.exponential != null) ? true : false;
         functions.put(currentSymbol.getText(), new FunctionDef(exponential, currentSymbol));
-        dac.addVertex(currentSymbol);
+        dag.addVertex(currentSymbol);
         for(Token symbol : currentLineIDs) {
-            dac.addEdge(currentSymbol, symbol);
+            dag.addEdge(currentSymbol, symbol);
         }
     }
 
