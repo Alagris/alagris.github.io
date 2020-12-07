@@ -2,18 +2,18 @@ package net.alagris;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.jgrapht.graph.*;
-
-import net.alagris.FunctionDef;
 
 public class Compiler {
 
@@ -33,8 +33,9 @@ public class Compiler {
         final GrammarLexer lexer = new GrammarLexer(CharStreams.fromString(source));
         final GrammarParser parser = new GrammarParser(new CommonTokenStream(lexer));
 //        HashSet functionDefs = new HashSet<FunctionDef>();
-        DirectedAcyclicGraph<FunctionDef, DefaultEdge> dac = new DirectedAcyclicGraph<>(DefaultEdge.class);
-        ParserListener listener = new ParserListener(dac);
+        DirectedAcyclicGraph<Token, DefaultEdge> dac = new DirectedAcyclicGraph<>(DefaultEdge.class);
+        final LinkedList<CompilationError> errors = new LinkedList<>();
+        ParserListener listener = new ParserListener(dac, errors);
 //        listener.statements.push(new ArrayList<Statement>());
 //        System.out.println("Push initial blank statements "+listener.statements);
         ParseTreeWalker.DEFAULT.walk(listener, parser.start());

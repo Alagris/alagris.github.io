@@ -1,27 +1,21 @@
 package net.alagris;
 
+import org.antlr.v4.runtime.Token;
+
 public class FunctionDef {
-    final private Boolean exponential;
-    final private String name;
-
-    public FunctionDef() {
-        exponential = null;
+    private Boolean exponential;
+    private Token symbol;
+    
+    public FunctionDef(Boolean exponential, Token symbol) {
+        this.exponential = exponential;
+        this.symbol = symbol;
     }
-
-//    public FunctionDef(Boolean exponential, String name) {
-//        this.exponential = exponential;
-//        this.name = name;
-//    }
 
     public Boolean isExponential() {
-        return getExponential();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Boolean getExponential() {
         return exponential;
+    }
+
+    public Token getSymbol() {
+        return symbol;
     }
 }

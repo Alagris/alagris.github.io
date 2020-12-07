@@ -6,20 +6,21 @@ import org.antlr.v4.runtime.tree.*;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 public class ParserListener implements GrammarListener {
 
-    final private HashSet<FunctionDef> functions = new HashSet<FunctionDef>();
-    final private DirectedAcyclicGraph<FunctionDef, DefaultEdge> dac;
-    private Boolean exponential;
-    private String name;
-    private Stack<FunctionDef> functionDefStack;
+    final private HashMap<String, FunctionDef> functions = new HashMap<>();
+    final private DirectedAcyclicGraph<Token, DefaultEdge> dac;
+    final private LinkedList<CompilationError> errors;
+    private Boolean vertexAddedBefore = false;
+//    private String name;
+    private LinkedList<Token> currentLineIDs = new LinkedList<>();
 
-    public ParserListener(DirectedAcyclicGraph dac) {
+    public ParserListener(DirectedAcyclicGraph dac, LinkedList<CompilationError> errors) {
         this.dac = dac;
+        this.errors = errors;
+//        functionDefStack.push(new FunctionDef("__NIL__"));
     }
     
     @Override
@@ -39,29 +40,26 @@ public class ParserListener implements GrammarListener {
 
     @Override
     public void exitEndFuncs(EndFuncsContext ctx) {
-
     }
 
     @Override
     public void enterFuncDef(FuncDefContext ctx) {
-        final FunctionDef currentFunction = new FunctionDef();
-        functionDefStack.push(currentFunction);
     }
 
     @Override
     public void exitFuncDef(FuncDefContext ctx) {
+//        final String name = ctx.ID().getText();
+//        FunctionDef currentDef = functionDefStack.pop();
+//        FunctionDef parentDef = functionDefStack.peek();
+//        functions.add(currentDef);
+//        dac.addEdge(currentDef, parentDef);
+        final Token currentSymbol = ctx.ID().getSymbol();
         final Boolean exponential = (ctx.exponential != null) ? true : false;
-        final String name = ctx.ID().getText();
-        // Pop itself
-        FunctionDef currentDef = functionDefStack.pop();
-        // Test if root
-        if (functionDefStack.empty()) {
-            final FunctionDef root = new FunctionDef("__NIL__");
+        functions.put(currentSymbol.getText(), new FunctionDef(exponential, currentSymbol));
+        dac.addVertex(currentSymbol);
+        for(Token symbol : currentLineIDs) {
+            dac.addEdge(currentSymbol, symbol);
         }
-        FunctionDef parentDef = functionDefStack.peek();
-        functions.add(currentDef);
-        dac.addVertex(currentDef);
-        dac.addEdge(currentDef, parentDef);
     }
 
     @Override
@@ -241,16 +239,36 @@ public class ParserListener implements GrammarListener {
 
     @Override
     public void exitMealyAtomicVarID(MealyAtomicVarIDContext ctx) {
-        String test = ctx.getText();
-        final Optional<FunctionDef> functionDef =
-                functions.stream().filter(x -> x.getName().equals(ctx.ID().getText())).findFirst();
-        functionDef.ifPresent(x -> {
-            if(!x.isExponential()) {
-                functions.remove(x);
-            }
-        });
+//        String test = ctx.getText();
+//        final Optional<FunctionDef> functionDef =
+//                functions.stream().filter(x -> x.getName().equals(ctx.ID().getText())).findFirst();
+//        functionDef.ifPresent(x -> {
+//            if(!x.isExponential()) {
+//                functions.remove(x);
+//            }
+//        });
 
 //        functionDef.orElseThrow()
+        final String symbolName = ctx.ID().getText();
+        Token symbol;
+        final FunctionDef funcDef = functions.get(symbolName);
+        if (funcDef != null) {
+            symbol = funcDef.getSymbol();
+            if(!funcDef.isExponential()) {
+                functions.remove(symbolName).getSymbol();
+            }
+        } else {
+            final int line = ctx.ID().getSymbol().getLine();
+            final int pos = ctx.ID().getSymbol().getCharPositionInLine();
+            errors.add(new CompilationError(
+                    new String().format("filename_here:%d,%d Unknown ID", line, pos)));
+            return;
+        }
+        
+//        dac.addVertex(currentSymbol);
+//        vertexAddedBefore = true;
+//        dac.addEdge(symbol, currentSymbol);
+        currentLineIDs.add(symbol);
     }
 
     @Override
