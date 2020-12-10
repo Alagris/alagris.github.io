@@ -9,16 +9,24 @@ public class MainController {
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("title", "NEW Compiler");
+        model.addAttribute("title", "Solomonoff");
         return "start";
 
     }
 
     @GetMapping("/infpage")
     public String infpage(Model model) {
-        model.addAttribute("title", "NEW Compiler - InfoPage");
+        model.addAttribute("title", "Solomonoff - InfoPage");
         return "infpage";
+    }
+
+    @GetMapping("/DocPage")
+    public String DocPage(Model model) {
+        model.addAttribute("title", "Solomonoff - Documentation");
+        return "DocPage";
     }
 
 
 }
+
+
