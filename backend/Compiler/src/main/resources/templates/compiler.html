@@ -68,6 +68,7 @@
 
     <script type="text/javascript" src="js/ace/build/src/ace.js"></script>
     <script src="js/FileSaver.js"></script>
+    <script src="https://kit.fontawesome.com/a1ef51e063.js" crossorigin="anonymous"></script>
     <script>
 
         function saveStaticDataToFile() {
@@ -145,15 +146,33 @@ b : B
         <div class="block">
 
             <!-- <button class='butto play' type="button" onclick="AFunction()"></button> -->
-            <div class="">
-                <button class="btn" title="Run" type="button" onclick="runMealy() "><i class="fa fa-play-circle"></i></button>
-                <button class="btn" title="Save to file" type="button" onclick="saveStaticDataToFile();"><i class="fa fa-folder"></i></button>
+<!--            <div class="">-->
+<!--                <button class="btn" title="Run" type="button" onclick="runMealy() "><i class="fa fa-play-circle"></i></button>-->
+<!--                <button class="btn" title="Save to file" type="button" onclick="saveStaticDataToFile();"><i class="fa fa-folder"></i></button>-->
 
+<!--                <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>-->
+<!--                <button class="btn bii" title="Info" type="button"  onclick="window.location.href='/infpage'"><i class="fa fa-info-circle"></i></button>-->
+<!--                <button  type="button"  onclick="submite()">Submit</button>-->
+<!--&lt;!&ndash;                <button type="button" onclick="saveStaticDataToFile();">Click to Save</button>&ndash;&gt;-->
+<!--            </div>-->
+            <style>
+                .ri{
+
+                //margin-left: 20vw;
+                float: right;
+                }
+
+            </style>
+            <div class="">
+                <button class="btn" title="Run" type="button" onclick="submite() "><i class="fa fa-play-circle"></i></button>
                 <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>
-                <button class="btn bii" title="Info" type="button"  onclick="window.location.href='/infpage'"><i class="fa fa-info-circle"></i></button>
-                <button  type="button"  onclick="submite()">Submit</button>
-<!--                <button type="button" onclick="saveStaticDataToFile();">Click to Save</button>-->
+                <button class="btn" title="Save to file" type="button" onclick="saveStaticDataToFile();"><i class="fas fa-download"></i></button>
+                <button class="btn bii" title="Documentation" type="button"  onclick="window.location.href='/DocPage'"><i class="fas fa-book"></i></button>
+                <button class="btn ri" title="Return to Start page" type="button"  onclick="window.location.href='/'"><i class="fas fa-long-arrow-alt-left"></i></button>
+<!--                <button  type="button"  onclick="submite()">Submit</button>-->
+                <!--                <button type="button" onclick="saveStaticDataToFile();">Click to Save</button>-->
             </div>
+
             <hr>
             <p><br></p>
             <p id="output1"></p>
@@ -191,11 +210,11 @@ b : B
 </script> -->
 <!-- <script src="web_mealy_compiler.js"></script> -->
 <script>
-            $(function() {
-              $(".lined").linedtextarea(
-                {selectedLine: 2}
-              );
-            });
+         //   $(function() {
+            //  $(".lined").linedtextarea(
+            //    {selectedLine: 2}
+            //  );
+           // });
             </script>
 <script type="text/javascript">
 
