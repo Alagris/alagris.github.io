@@ -35,7 +35,7 @@ public class HttpSessionController {
     @RequestParam(value = "storeName", required = false) String storeName) {
 
         String code = storeName;
-        
+
     //}
    // @GetMapping(path = "/parse")
    // public String parseCode(String code) {

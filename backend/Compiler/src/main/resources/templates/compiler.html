@@ -58,7 +58,8 @@
       window.onload = function(){
           document.getElementById('save').onclick = function(){
             var a = document.createElement("a")
-            a.setAttribute("href", "data:text/plain," + document.getElementById('output1').innerHTML.replace(/<br>/g, encodeURIComponent("\r\n"))); //myTextarea
+            var val1 = e.getSession().getValue();
+            a.setAttribute("href", "data:text/plain," + val1, encodeURIComponent("\r\n"))); //myTextarea
             a.setAttribute("download", "filename.txt");
             a.click();
           };
@@ -66,7 +67,17 @@
       </script>
 
     <script type="text/javascript" src="js/ace/build/src/ace.js"></script>
+    <script src="js/FileSaver.js"></script>
+    <script>
 
+        function saveStaticDataToFile() {
+            var val1 = e.getSession().getValue();
+            var blob = new Blob([val1],
+                { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "static.txt");
+        }
+
+    </script>
 
     <script>
 
@@ -141,6 +152,7 @@ b : B
                 <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>
                 <button class="btn bii" title="Info" type="button"  onclick="window.location.href='/infpage'"><i class="fa fa-info-circle"></i></button>
                 <button  type="button"  onclick="submite()">Submit</button>
+                <button type="button" onclick="saveStaticDataToFile();">Click to Save</button>
             </div>
             <hr>
             <p><br></p>
