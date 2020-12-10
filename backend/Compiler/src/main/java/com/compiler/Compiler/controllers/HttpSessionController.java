@@ -5,9 +5,11 @@ import net.alagris.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class HttpSessionController {
@@ -28,8 +30,15 @@ public class HttpSessionController {
     // "http://localhost:8080/parse?code=" + encodeURIComponent("f='re':'tr'")
     // It encode the following regex:
     // f='re':'tr'
-    @GetMapping(path = "/parse")
-    public String parseCode(String code) {
+    @RequestMapping(value="/parse", method = RequestMethod.POST)
+    public String parseCode(ModelMap model, HttpServletRequest request,
+    @RequestParam(value = "storeName", required = false) String storeName) {
+
+        String code = storeName;
+        
+    //}
+   // @GetMapping(path = "/parse")
+   // public String parseCode(String code) {
         //take a look at https://stackoverflow.com/questions/46766075/how-to-pass-ajax-into-a-spring-controller/46783132
         try {
             //This creates new compiler instance.

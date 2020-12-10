@@ -86,7 +86,8 @@
 function submite() {
     var val = e.getSession().getValue();
 
-    xhr.open('POST', '/examples/echo', true);
+    xhr.open('POST', '"parse?code=" + val,', true);
+    //xhr.open('POST', '/examples/echo', true);
     xhr.send(val);
 };
     </script>
