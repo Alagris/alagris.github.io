@@ -52,22 +52,22 @@ public class HttpSessionController {
         // in case of success
         return "Success!";
     }
-    @GetMapping(path = "/list")
-    public String listDefinedTransducers() {
-        final CLI.OptimisedHashLexTransducer compiler = httpSessionBean.getCompiler();
-        return compiler.specs.variableAssignments.keySet().toString();
-    }
-    // Test me with:
-    // http://localhost:8080/run?transducerName=f&transducerInput=yy
-    // http://localhost:8080/run?transducerName=f&transducerInput=re
-    @GetMapping(path = "/run")
-    public String runTransducer(String transducerName,String transducerInput) {
-        if(transducerInput==null)return "TRANSDUCER INPUT IS MISSING";
-        final CLI.OptimisedHashLexTransducer compiler = httpSessionBean.getCompiler();
-        //run the transducer
-        final String output = compiler.run(transducerName,transducerInput);
-        return output==null?"INPUT REJECTED":"OUTPUT RETURNED:"+output;
-    }
+//    @GetMapping(path = "/list")
+//    public String listDefinedTransducers() {
+//        final CLI.OptimisedHashLexTransducer compiler = httpSessionBean.getCompiler();
+//        return compiler.specs.variableAssignments.keySet().toString();
+//    }
+//    // Test me with:
+//    // http://localhost:8080/run?transducerName=f&transducerInput=yy
+//    // http://localhost:8080/run?transducerName=f&transducerInput=re
+//    @GetMapping(path = "/run")
+//    public String runTransducer(String transducerName,String transducerInput) {
+//        if(transducerInput==null)return "TRANSDUCER INPUT IS MISSING";
+//        final CLI.OptimisedHashLexTransducer compiler = httpSessionBean.getCompiler();
+//        //run the transducer
+//        final String output = compiler.run(transducerName,transducerInput);
+//        return output==null?"INPUT REJECTED":"OUTPUT RETURNED:"+output;
+//    }
     @GetMapping(path = "/controller")
     public String example(String name) {
         if(!StringUtils.isEmpty(name)){

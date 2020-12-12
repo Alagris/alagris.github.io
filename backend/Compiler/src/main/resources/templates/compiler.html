@@ -15,6 +15,11 @@
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></script> -->
 
     <style>
+   html { overflow:  hidden; }
+  /* div { height:  2000px; }*/
+  </style>
+
+    <style>
         body {
             background: #213040; /*url(images/bg.jpg); Цвет фона и путь к файлу */
             color: white;
@@ -66,14 +71,40 @@
       };
       </script>
 
+    <script>
+        async function runREST(){
+            const response = await fetch('reverse', {method:'POST',body:e.getSession().getValue()})
+            const reversedText = await response.text()
+            outputField.value = reversedText
+       }
+    </script>
+
+    <script>
+    var val9;
+        async function runC(){
+            const response1 = await fetch('run', {method:'POST',body:inputFieldF.value})
+            const reversedText1 = await response1.text()
+            outputField2.value = reversedText1
+            var9 = outputField2.GetValue();
+       }
+    </script>
+
     <script type="text/javascript" src="js/ace/build/src/ace.js"></script>
     <script src="js/FileSaver.js"></script>
     <script src="https://kit.fontawesome.com/a1ef51e063.js" crossorigin="anonymous"></script>
     <script>
 
+
         function saveStaticDataToFile() {
+            var val2 = inputFieldF.value;
             var val1 = e.getSession().getValue();
-            var blob = new Blob([val1],
+            var val4 = "Input 1: \n\n";
+            var val5 = "\n\n-----------------------------------------------------------------------------\n\nInput 2:  \n\n";
+            var val7 = "\n\n-----------------------------------------------------------------------------\n\nOutput: \n\n";
+            var val10 = document.getElementById("outputField2").value;
+            var val3 = val4 + val1 +val5 + val2 + val7 + val10;
+
+            var blob = new Blob([val3],
                 { type: "text/plain;charset=utf-8" });
             saveAs(blob, "SavedGrammar.txt");
         }
@@ -139,6 +170,8 @@ struct X{
 a : A*,
 b : B
 
+f='re':'tr'
+
 
 "f":"bar" "o":"baz" "o":"boo"</div>
             </div>
@@ -164,20 +197,25 @@ b : B
 
             </style>
             <div class="">
-                <button class="btn" title="Run" type="button" onclick="submite() "><i class="fa fa-play-circle"></i></button>
-                <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>
+                <button class="btn" title="Compile" type="button"  onclick="runREST()"><i class="fa fa-flag-checkered"></i></button>
+                <button class="btn" title="Run" type="button" onclick="runC()"><i class="fa fa-play-circle"></i></button>
                 <button class="btn" title="Save to file" type="button" onclick="saveStaticDataToFile();"><i class="fas fa-download"></i></button>
                 <button class="btn bii" title="Documentation" type="button"  onclick="window.location.href='/DocPage'"><i class="fas fa-book"></i></button>
                 <button class="btn ri" title="Return to Start page" type="button"  onclick="window.location.href='/'"><i class="fas fa-long-arrow-alt-left"></i></button>
+<!--                <button onclick="runREST()">run rest</button>-->
+<!--                <button onclick="runC()">run Compiler</button>-->
 <!--                <button  type="button"  onclick="submite()">Submit</button>-->
                 <!--                <button type="button" onclick="saveStaticDataToFile();">Click to Save</button>-->
             </div>
 
             <hr>
-            <p><br></p>
-            <p id="output1"></p>
+<!--            <p id="outputField"><br></p>-->
+<!--            <p id="output1"></p>-->
+<!--            <div class="block"> <textarea id="outputField2" placeholder="Enter text here" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>-->
+            <output id = "outputField"></output>
         </div>
-        <div class="block"> <textarea id="output" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>
+
+        <div class="block"> <textarea id="inputFieldF" placeholder="Enter text here" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>
         <div class="block ">
             <!-- <div class="bor">
             <button class="button cbut"type="button"  onclick="myFunction()">check</button>
@@ -185,8 +223,12 @@ b : B
             <button class="button sbut"type="button" id="save" onclick="">save</button>
             <button class="button ibut"type="button" id="save" onclick="">info</button>
             </div> -->
+<!--           <p>Output: </p>-->
+            <output id = "outputField2"></output>
         </div>
+
     </div>
+
 </div>
 <!-- <script>
   var Module = {
