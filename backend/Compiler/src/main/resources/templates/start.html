@@ -39,6 +39,9 @@
           font-size: 3.5rem;
         }
       }
+      .j{
+       float: right;
+      }
     </style>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -88,7 +91,7 @@
     <div class="jumbotron">
         <div class="container">
             <h1 class="display-3">Solomonoff Compiler</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur..</p>
+            <p><b>This project focuses on research in the field of automata theory and inductive inference.</b> While many existing libraries already provide support for general purpose automata and implement various related algorithms, this project takes a slightly different approach. The primary tool for working with the library, is through doman specific language of regular expressions. Most of the things can be done without writing even a single line of Java code.</p>
             <p><a class="btn btn-primary btn-lg" href="/compiler" role="button">Get Started </a></p>
         </div>
     </div>
@@ -98,21 +101,23 @@
         <div class="row">
             <div class="col-md-4">
                 <h2>Perfomance</h2>
-                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                <p><a class="btn btn-secondary" href="/" role="button">View details »</a></p>
+                <p> Evaluation is very efficient thanks to guarantees of lexicographic weights. In pessimistic case evaluation is quadratic, but after performing pseudo-minimisation, it is in practice often close to being linear (optimistic case being deterministic automata, whose evaluation has linear time complexity).</p>
+<!--                <p><a class="btn btn-secondary" href="/" role="button">View details »</a></p>-->
             </div>
             <div class="col-md-4">
                 <h2>Reliability</h2>
-                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-                <p><a class="btn btn-secondary" href="/" role="button">View details »</a></p>
+                <p>The primary philosophy used in implementing this library is the top-down approach and features are added conservatively in a well thought-through manner. No features will be added ad-hoc. Everything is meant to fit well together and follow some greater design strategy. </p>
+<!--                <p><a class="btn btn-secondary" href="/" role="button">View details »</a></p>-->
             </div>
             <div class="col-md-4">
                 <h2>Productivity</h2>
-                <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-                <p><a class="btn btn-secondary" href="/" role="button">View details »</a></p>
+                <p>Compilation of regular expressions is very efficient thanks to Glshkov's construction. Hence all operations of concatenation, union, Kleene closure (including *, +, ?) are constant-time operations. Moreover, the automata will have only as many states as there are symbols in regular expression.</p>
+<!--                <p><a class="btn btn-secondary" href="/" role="button">View details »</a></p>-->
             </div>
-        </div>
 
+        </div>
+        <p><a class="btn btn-secondary j" href="/DocPage" role="button">View details »</a></p>
+        <br>
         <hr>
 
     </div> <!-- /container -->
