@@ -58,6 +58,7 @@ public class ParserListener implements GrammarListener {
         functions.put(currentSymbol.getText(), new FunctionDef(exponential, currentSymbol));
         dag.addVertex(currentSymbol);
         for(Token symbol : currentLineIDs) {
+//            dag.addEdge(symbol, currentSymbol);
             dag.addEdge(currentSymbol, symbol);
         }
     }
