@@ -9,10 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -40,34 +37,27 @@ public class Compiler {
         final LinkedList<CompilationError> errors = new LinkedList<>();
         ParserListener listener = new ParserListener(dag, errors);
         ParseTreeWalker.DEFAULT.walk(listener, parser.start());
+        
+        Stack<LinkedList<Token>> stages = new Stack<>();
 
-        final LinkedList<HashSet<Token>> stages = new LinkedList<>();
-        TopologicalOrderIterator<Token, DefaultEdge> dagIter = new TopologicalOrderIterator<>(dag);
-        HashSet<Token> currentStage = new HashSet<>();
-        while (dagIter.hasNext()) {
-            final Token token = dagIter.next();
-            for (Token tokensInCurrentStage : currentStage) {
-                Set<Token> ancestors = dag.getAncestors(tokensInCurrentStage);
-                if (ancestors.contains(token)) {
-                    stages.add(currentStage);
-                    currentStage = new HashSet<>();
-                    break;
+        while (true) {
+            final Iterator<Token> topoIter = dag.iterator();
+            if (!topoIter.hasNext()) {
+                break;
+            }
+            final LinkedList<Token> stage = new LinkedList<>();
+            for ( ; topoIter.hasNext(); ) {
+                Token token = topoIter.next();
+                if (dag.getDescendants(token).isEmpty()) {
+                    stage.add(token);
                 }
             }
-            currentStage.add(token);
-        }
-        for (HashSet<Token> a : stages) {
-            System.out.println(a);
+            for (Token token : stage) {
+                dag.removeVertex(token);
+            }
+
+            stages.push(stage);
         }
     }
 
-    public static String call(Spliterator<Token> spliterator) {
-        AtomicInteger current = new AtomicInteger();
-        String a_name;
-        while (spliterator.tryAdvance(a -> {
-            System.out.println(a.getText());
-            current.getAndIncrement();
-        }));
-        return Thread.currentThread().getName() + ":" + current;
-    }
 }
