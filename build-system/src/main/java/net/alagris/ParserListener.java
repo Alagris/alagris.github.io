@@ -20,7 +20,6 @@ public class ParserListener implements GrammarListener {
     public ParserListener(DirectedAcyclicGraph dag, LinkedList<CompilationError> errors) {
         this.dag = dag;
         this.errors = errors;
-//        functionDefStack.push(new FunctionDef("__NIL__"));
     }
     
     @Override
@@ -48,18 +47,12 @@ public class ParserListener implements GrammarListener {
 
     @Override
     public void exitFuncDef(FuncDefContext ctx) {
-//        final String name = ctx.ID().getText();
-//        FunctionDef currentDef = functionDefStack.pop();
-//        FunctionDef parentDef = functionDefStack.peek();
-//        functions.add(currentDef);
-//        dac.addEdge(currentDef, parentDef);
         final Token currentSymbol = ctx.ID().getSymbol();
         final Boolean exponential = (ctx.exponential != null) ? true : false;
         functions.put(currentSymbol.getText(), new FunctionDef(exponential, currentSymbol));
         dag.addVertex(currentSymbol);
         for(Token symbol : currentLineIDs) {
             dag.addEdge(symbol, currentSymbol);
-//            dag.addEdge(currentSymbol, symbol);
         }
     }
 
@@ -240,16 +233,6 @@ public class ParserListener implements GrammarListener {
 
     @Override
     public void exitMealyAtomicVarID(MealyAtomicVarIDContext ctx) {
-//        String test = ctx.getText();
-//        final Optional<FunctionDef> functionDef =
-//                functions.stream().filter(x -> x.getName().equals(ctx.ID().getText())).findFirst();
-//        functionDef.ifPresent(x -> {
-//            if(!x.isExponential()) {
-//                functions.remove(x);
-//            }
-//        });
-
-//        functionDef.orElseThrow()
         final String symbolName = ctx.ID().getText();
         Token symbol;
         final FunctionDef funcDef = functions.get(symbolName);
@@ -266,9 +249,6 @@ public class ParserListener implements GrammarListener {
             return;
         }
         
-//        dac.addVertex(currentSymbol);
-//        vertexAddedBefore = true;
-//        dac.addEdge(symbol, currentSymbol);
         currentLineIDs.add(symbol);
     }
 
