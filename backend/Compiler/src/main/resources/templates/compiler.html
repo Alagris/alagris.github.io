@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></script> -->
-
+    <script type='text/javascript' src='js/jquery.js'></script>
     <style>
    html { overflow:  hidden; }
   /* div { height:  2000px; }*/
@@ -59,17 +59,17 @@
         }
     </style>
 
-    <script>
-      window.onload = function(){
-          document.getElementById('save').onclick = function(){
-            var a = document.createElement("a")
-            var val1 = e.getSession().getValue();
-            a.setAttribute("href", "data:text/plain," + val1, encodeURIComponent("\r\n"))); //myTextarea
-            a.setAttribute("download", "filename.txt");
-            a.click();
-          };
-      };
-      </script>
+<!--    <script>-->
+<!--      window.onload = function(){-->
+<!--          document.getElementById('save').onclick = function(){-->
+<!--            var a = document.createElement("a")-->
+<!--            var val1 = e.getSession().getValue();-->
+<!--            a.setAttribute("href", "data:text/plain," + val1, encodeURIComponent("\r\n")); //myTextarea-->
+<!--            a.setAttribute("download", "filename.txt");-->
+<!--            a.click();-->
+<!--          };-->
+<!--      };-->
+<!--      </script>-->
 
     <script>
         async function runREST(){
@@ -79,6 +79,8 @@
        }
     </script>
 
+
+
     <script>
     var val9;
         async function runC(){
@@ -87,6 +89,7 @@
             outputField2.value = reversedText1
             var9 = outputField2.GetValue();
        }
+
     </script>
 
     <script type="text/javascript" src="js/ace/build/src/ace.js"></script>
@@ -215,7 +218,7 @@ f='re':'tr'
             <output id = "outputField"></output>
         </div>
 
-        <div class="block"> <textarea id="inputFieldF" placeholder="Enter text here" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>
+        <div class="block"> <textarea id="inputFieldF" class="ntSaveForms" placeholder="Enter text here" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>
         <div class="block ">
             <!-- <div class="bor">
             <button class="button cbut"type="button"  onclick="myFunction()">check</button>
@@ -224,12 +227,14 @@ f='re':'tr'
             <button class="button ibut"type="button" id="save" onclick="">info</button>
             </div> -->
 <!--           <p>Output: </p>-->
-            <output id = "outputField2"></output>
+            <output id = "outputField2">></output>
         </div>
 
     </div>
 
 </div>
+
+<script type='text/javascript' src='js/ntsaveforms.js'></script>
 <!-- <script>
   var Module = {
     print: (function() {
@@ -338,7 +343,7 @@ f='re':'tr'
 
 
   </script>
-<script async type="text/javascript" src="js/web_mealy_compiler.js"></script>
+<!--<script async type="text/javascript" src="js/web_mealy_compiler.js"></script>-->
 
 <script type="text/javascript">
 

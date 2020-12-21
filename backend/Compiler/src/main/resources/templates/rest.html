@@ -2,9 +2,16 @@
 <html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>Title</title>
+<!--    <script>-->
+<!--        async function runREST(){-->
+<!--            const response = await fetch('reverse', {method:'POST',body:inputField.value})-->
+<!--            const reversedText = await response.text()-->
+<!--            outputField.value = reversedText-->
+<!--       }-->
+<!--    </script>-->
     <script>
         async function runREST(){
-            const response = await fetch('reverse', {method:'POST',body:inputField.value})
+            const response = await fetch('reverse', {method:'POST',body:e.getSession().getValue()})
             const reversedText = await response.text()
             outputField.value = reversedText
        }

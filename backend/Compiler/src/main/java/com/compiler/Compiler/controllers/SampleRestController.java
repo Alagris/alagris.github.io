@@ -21,7 +21,7 @@ public class SampleRestController {
     public String reverse(HttpSession httpSession, @RequestBody String text) {
         System.out.println(text);
         httpSession.setAttribute("storedInSession", text);
-//        return new StringBuilder(text).reverse().toString();
+        //return new StringBuilder(text).reverse().toString();
         try {
             //This creates new compiler instance.
             CLI.OptimisedHashLexTransducer compiler = new CLI.OptimisedHashLexTransducer(text, 0, Integer.MAX_VALUE, true);
