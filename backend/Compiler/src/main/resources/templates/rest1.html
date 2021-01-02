@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sample</title>
+    <style type="text/css" media="screen">
+    #editor {
+       height: 200px;
+       width: 80%;
+    }
+    #outputField {
+       height: 350px;
+       width: 80%;
+    }
+    #inputField{
+       width: 80%;
+    }
+    </style>
+    <script>
+    replHistory = []
+    replHistoryIndex = 0
+    replCurrent = ""
+    async function repl(){
+        const response = await fetch('repl',{method:'POST',body:inputField.value})
+        const replResult = await response.text()
+        const trimmedInput = inputField.value.trim().replaceAll('\n','')
+        replHistory.push(trimmedInput)
+        replHistoryIndex = replHistory.length
+        outputField.value += '> '+trimmedInput+'\n'+replResult+'\n'
+        outputField.scrollTop = outputField.scrollHeight
+        replCurrent = inputField.value = ""
+
+    }
+    async function compile(){
+
+        const code = editor.getValue()
+        console.log(code);
+        const response = await fetch('compile',{method:'POST',body:code})
+        const errorMessage = await response.text()
+        outputField.value += "===REPL RELOADED!===\n"
+        console.log("Compiler says: "+errorMessage)
+        if(errorMessage!=""){
+          alert(errorMessage)
+        }
+    }
+
+    </script>
+</head>
+<body>
+Code:
+<button onclick="compile()">
+    Compile
+</button>
+<br/>
+
+<div id="editor" th:text="${code}">A = [da];</div>
+<script type="text/javascript" src="js/ace/build/src/ace.js"></script>
+<script>
+        var editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+
+        editor.session.setMode("ace/mode/mealy");
+
+</script>
+
+<br/>
+Console:
+<br/>
+<textarea readonly id="outputField">
+</textarea>
+<br/>
+Console input (Hit enter to submit, use up and down arrow keys to traverse history):
+<br/>
+<textarea id="inputField">
+</textarea>
+
+<script>
+function submitOnEnter(event){
+    if(event.which === 13){
+        repl()
+    }else if(event.which === 38){
+       if(replHistoryIndex>0){
+           if(replHistoryIndex===replHistory.length){
+               replCurrent = inputField.value
+           }
+           replHistoryIndex--
+           inputField.value = replHistory[replHistoryIndex]
+           inputField.selectionEnd = inputField.selectionStart = 0
+       }
+    }else if(event.which === 40){
+       if(replHistoryIndex+1<replHistory.length){
+           replHistoryIndex++
+           inputField.value = replHistory[replHistoryIndex]
+           inputField.selectionEnd = inputField.selectionStart = 0
+       }else if(replHistoryIndex + 1 === replHistory.length){
+           replHistoryIndex++
+           inputField.value = replCurrent
+           inputField.selectionEnd = inputField.selectionStart = 0
+       }
+    }
+}
+
+document.getElementById("inputField").addEventListener("keydown", submitOnEnter);
+
+</script>
+
+</body>
+</html>
