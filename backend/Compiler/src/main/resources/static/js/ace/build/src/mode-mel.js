@@ -253,8 +253,7 @@ oop.inherits(Mode, TextMode);
 
 exports.Mode = Mode;
 
-});
-                (function() {
+});                (function() {
                     window.require(["ace/mode/mel"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;

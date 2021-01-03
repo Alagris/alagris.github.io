@@ -1159,8 +1159,7 @@ exports.killRing = {
     }
 };
 
-});
-                (function() {
+});                (function() {
                     window.require(["ace/keyboard/emacs"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;

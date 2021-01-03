@@ -390,8 +390,7 @@ oop.inherits(Mode, TextMode);
 
 exports.Mode = Mode;
 
-});
-                (function() {
+});                (function() {
                     window.require(["ace/mode/coffee"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;

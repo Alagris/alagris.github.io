@@ -885,8 +885,7 @@ snippet wbr\n\
 ";
 exports.scope = "liquid";
 
-});
-                (function() {
+});                (function() {
                     window.require(["ace/snippets/liquid"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;

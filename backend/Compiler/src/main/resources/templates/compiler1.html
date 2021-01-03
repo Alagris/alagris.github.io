@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>NEW Compiler</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--<link rel="stylesheet" th:src="${style.css}"> -->
+    <!--    <link rel="stylesheet"  type="text/css" href="https://alagris.github.io/web/style.css">-->
+    <link rel="stylesheet"  type="text/css" href="css/style.css">
+    <link rel="shortcut icon" type="image/ico" href="images/logo_s.ico"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></script> -->
+    <script type='text/javascript' src='js/jquery.js'></script>
+    <style>
+   html { overflow:  hidden; }
+  /* div { height:  2000px; }*/
+  </style>
+
+    <style>
+        body {
+            background: #213040; /*url(images/bg.jpg); Цвет фона и путь к файлу */
+            color: white;
+        }
+        .button {
+        /* background-color: rgb(16, 172, 76);  */
+        /* border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px; */
+        cursor: pointer;
+      }
+      .fbut{
+        background-color: rgb(16, 172, 76);
+      }
+      .cbut{
+        background-color: rgb(228, 231, 24);
+      }
+      .sbut{
+        background-color: rgb(24, 15, 161);
+      }
+      .ibut{
+        background-color: rgb(21, 180, 201);
+      }
+      .bong{background-color: #18222d;}
+      </style>
+    <style type="text/css">
+        #jsEditor{
+            height:49vh
+        }
+        .av{
+          background-color: #18222d;
+        }
+    </style>
+
+
+
+<!--    <script>-->
+<!--        async function runREST(){-->
+<!--            const response = await fetch('reverse', {method:'POST',body:e.getSession().getValue()})-->
+<!--            const reversedText = await response.text()-->
+<!--            outputField.value = reversedText-->
+<!--       }-->
+<!--    </script>-->
+
+
+
+<!--    <script>-->
+<!--    var val9;-->
+<!--        async function runC(){-->
+<!--            const response1 = await fetch('run', {method:'POST',body:inputFieldF.value})-->
+<!--            const reversedText1 = await response1.text()-->
+<!--            outputField2.value = reversedText1-->
+<!--            var9 = outputField2.GetValue();-->
+<!--       }-->
+
+    </script>
+
+<!--    <script type="text/javascript" src="js/ace/build/src/ace.js"></script>-->
+    <script src="js/FileSaver.js"></script>
+    <script src="https://kit.fontawesome.com/a1ef51e063.js" crossorigin="anonymous"></script>
+    <script>
+
+
+        function saveStaticDataToFile() {
+            var val2 = inputFieldF.value;
+            var val1 = e.getSession().getValue();
+            var val4 = "Input 1: \n\n";
+            var val5 = "\n\n-----------------------------------------------------------------------------\n\nInput 2:  \n\n";
+            var val7 = "\n\n-----------------------------------------------------------------------------\n\nOutput: \n\n";
+            var val10 = document.getElementById("outputField2").value;
+            var val3 = val4 + val1 +val5 + val2 + val7 + val10;
+
+            var blob = new Blob([val3],
+                { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "SavedGrammar.txt");
+        }
+
+    </script>
+
+    <script>
+
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            if (xhr.status == 200) {
+                document.body.innerText = 'Response: ' + xhr.responseText;
+            } else {
+                document.body.innerText = 'Error: ' + xhr.status;
+            }
+        }
+    };
+
+
+function submite() {
+    var val = e.getSession().getValue();
+
+    xhr.open('POST', '"parse?code=" + val,', true);
+    //xhr.open('POST', '/examples/echo', true);
+    xhr.send(val);
+};
+    </script>
+
+
+</head>
+
+</head>
+
+<script type="text/javascript"
+        src="https://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<body >
+<div class="wrapper">
+    <div class="blocks">
+        <div class="block">
+            <div class="container">
+
+                <!-- <p id="output1"></p> -->
+
+                <!-- <textarea id="myTextarea" name="text_area" class="lined textareaa bong" rows="15" cols="80"></textarea> -->
+<!--                <div  id="jsEditor" class=" ace_editor ace-tm ace_focus" style=" background-color: #18222d;"></div>-->
+                <div id="editor" th:text="${code}">A = [da];</div>
+                <script type="text/javascript" src="js/ace/build/src/ace.js"></script>
+                <script>
+                    var editor = ace.edit("editor");
+                    editor.setTheme("ace/theme/monokai");
+
+                    editor.session.setMode("ace/mode/mealy");
+
+                 </script>
+            </div>
+        </div>
+        <div class="block">
+
+            <!-- <button class='butto play' type="button" onclick="AFunction()"></button> -->
+            <!--            <div class="">-->
+            <!--                <button class="btn" title="Run" type="button" onclick="runMealy() "><i class="fa fa-play-circle"></i></button>-->
+            <!--                <button class="btn" title="Save to file" type="button" onclick="saveStaticDataToFile();"><i class="fa fa-folder"></i></button>-->
+
+            <!--                <button class="btn" title="Compile" type="button"  onclick="compile()"><i class="fa fa-flag-checkered"></i></button>-->
+            <!--                <button class="btn bii" title="Info" type="button"  onclick="window.location.href='/infpage'"><i class="fa fa-info-circle"></i></button>-->
+            <!--                <button  type="button"  onclick="submite()">Submit</button>-->
+            <!--&lt;!&ndash;                <button type="button" onclick="saveStaticDataToFile();">Click to Save</button>&ndash;&gt;-->
+            <!--            </div>-->
+            <style>
+                .ri{
+
+                //margin-left: 20vw;
+                float: right;
+                }
+
+            </style>
+            <div class="">
+                <button class="btn" title="Compile" type="button"  onclick="runREST()"><i class="fa fa-flag-checkered"></i></button>
+                <button class="btn" title="Run" type="button" onclick="runC()"><i class="fa fa-play-circle"></i></button>
+                <button class="btn" title="Save to file" type="button" onclick="saveStaticDataToFile();"><i class="fas fa-download"></i></button>
+                <button class="btn bii" title="Documentation" type="button"  onclick="window.location.href='/DocPage'"><i class="fas fa-book"></i></button>
+                <button class="btn ri" title="Return to Start page" type="button"  onclick="window.location.href='/'"><i class="fas fa-long-arrow-alt-left"></i></button>
+                <!--                <button onclick="runREST()">run rest</button>-->
+                <!--                <button onclick="runC()">run Compiler</button>-->
+                <!--                <button  type="button"  onclick="submite()">Submit</button>-->
+                <!--                <button type="button" onclick="saveStaticDataToFile();">Click to Save</button>-->
+            </div>
+
+            <hr>
+            <!--            <p id="outputField"><br></p>-->
+            <!--            <p id="output1"></p>-->
+            <!--            <div class="block"> <textarea id="outputField2" placeholder="Enter text here" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>-->
+            <output id = "outputField"></output>
+        </div>
+
+        <div class="block"> <textarea id="inputFieldF" class="ntSaveForms" placeholder="Enter text here" style="width: 100%; color: aliceblue; height: 100%; background-color: #324559;"></textarea> </div>
+        <div class="block ">
+            <!-- <div class="bor">
+            <button class="button cbut"type="button"  onclick="myFunction()">check</button>
+            <button class="button fbut" type="button" onclick="AFunction() ">run</button>
+            <button class="button sbut"type="button" id="save" onclick="">save</button>
+            <button class="button ibut"type="button" id="save" onclick="">info</button>
+            </div> -->
+            <!--           <p>Output: </p>-->
+            <output id = "outputField2">></output>
+        </div>
+
+    </div>
+
+</div>
+
+<script type='text/javascript' src='js/ntsaveforms.js'></script>
+
+
+<script type="text/javascript">
+
+              var _gaq = _gaq || [];
+              _gaq.push(['_setAccount', 'UA-36251023-1']);
+              _gaq.push(['_setDomainName', 'jqueryscript.net']);
+              _gaq.push(['_trackPageview']);
+
+              (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+              })();
+
+            </script>
+
+
+
+<!-- <a href="#" class="emptyLink" id="mapPrintLink" onclick="mapPrintExec();"></a> -->
+<!-- <p id="demo">1</p> -->
+
+<script>
+  function myFunction() {
+    // var x = document.getElementById("jsEditor").value;
+    // document.getElementById("demo").innerHTML = x;
+
+    var x =  jsEditor.getSession().getValue();
+    document.getElementById("demo").innerHTML = x;
+
+    // var x =  "123";   az" "o"
+    // document.getElementById("demo").innerHTML = x;
+
+  }
+
+
+
+
+  </script>
+<!-- <button type="button" onclick="location.src="test.js"">Test</button> -->
+
+<script>
+  function AFunction() {
+    alert("coming soon...");
+  }
+  </script>
+<script type='text/javascript'>
+
+    var output = document.getElementById('output');
+   // var output1 = document.getElementById('output1');
+   var cub;
+    var Module = {};
+
+    function compile(){
+      console.log(e.getSession().getValue())
+      Module.ccall('compile',
+      'void',
+      ['string'],
+      [e.getSession().getValue()])
+    }
+    function runMealy(){
+      var input = e.getSession().getValue()
+      console.log(output.value + "12345")
+      var c = Module.ccall('run_global',
+      'string',
+      ['string'],
+      [output.value])
+      console.log(c + "88888");
+      //output.value = c;
+      cub = c;
+     // output1.value = c;
+      document.getElementById("output1").innerHTML = c;
+
+    }
+    function othername() {
+    var input = cub + "23456";
+    console.log(input);
+    alert(input);
+}
+
+
+  </script>
+<!--<script async type="text/javascript" src="js/web_mealy_compiler.js"></script>-->
+
+<script type="text/javascript">
+
+    Module['onRuntimeInitialized'] = function() {
+
+     console.log("wasm loaded ");
+      // call the square function by
+
+      console.log( Module.ccall);
+    console.log(Module._testInt);
+    console.log(Module._testInt());
+    console.log( Module.ccall('testInt', // name of C function
+'number', // return type
+[], // argument types
+[]));
+  }
+  </script>
+
+
+
+<!-- <script type="text/javascript"> -->
+<!--<script>-->
+<!--    var e = ace.edit("jsEditor");-->
+<!--    e.getSession().setMode("ace/mode/mealy");-->
+<!--    e.setTheme("ace/theme/monokai");-->
+<!--    // e.session.setMode("ace/mode/mealy");-->
+<!--    e.getSession().setTabSize(1);-->
+<!--    e.renderer.setShowGutter(true)-->
+<!--   // e.setValue("Hello");;-->
+<!--    console.log(e.getValue());-->
+<!--   // var val = e.getSession().getValue();-->
+<!--  //  window.val = val;-->
+<!--    //print(val);-->
+
+<!--  </script>-->
+
+<!--tyt-->
+
+<!-- <script>
+  window.onload = function(){
+
+      var lengthOfName = e.getSession().getValue()
+
+
+      document.getElementById('demo').innerHTML = lengthOfName;
+  }; -->
+
+<!-- <script src="test.js"></script>  -->
+
+
+</body>
+
+</html>

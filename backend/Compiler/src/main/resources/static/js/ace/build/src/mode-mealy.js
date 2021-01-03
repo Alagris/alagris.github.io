@@ -6,154 +6,104 @@ var MealyHighlightRules = function() {
 this.$rules = {
 "start" : [
    {
-      "token" : ["entity.name.type", "none", "meta.separator", "none", "punctuation"],
-      "regex" : "([a-zA-Z0-9_]+)(\\s*)(=)(\\s*)(\\[)",
-      "push" : "alphabet"
+      "token" : ["variable.other", "variable.parameter"],
+      "regex" : "(^:eval\\s+)(.*$)"
    },
    {
-      "token" : "comment",
-      "regex" : "(//[^\\n]*)"
+      "token" : "variable.other",
+      "regex" : "([#.\u2205\u03a3])"
    },
    {
-      "token" : "meta.separator",
-      "regex" : "(;)"
+      "token" : ["keyword.operator", "variable"],
+      "regex" : "(!!\\s*)?([#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_][#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_0-9]*)"
    },
    {
-      "token" : ["variable", "none", "punctuation", "none", "punctuation", "none", "meta.separator"],
-      "regex" : "([a-zA-Z0-9_]+)(\\s*)(\\()(\\s*)(\\))(\\s*)(=)",
-      "push" : "function"
+      "token" : ["punctuation.definition", "variable"],
+      "regex" : "(@\\s*)([#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_][#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_0-9]*)"
    },
    {
-      "token" : ["entity.name.type", "none", "meta.separator"],
-      "regex" : "([a-zA-Z0-9_]+)(\\s*)(:)",
-      "push" : "type"
+      "token" : "constant.character",
+      "regex" : "(<[0-9]+-[0-9]+>|\\[\\\\?.-\\\\?.\\])"
    },
    {
-      "token" : ["keyword", "none", "entity.name.type", "none", "punctuation"],
-      "regex" : "(struct)(\\s+)([a-zA-Z0-9_]+)(\\s*)(\\{)",
-      "push" : "struct"
-   },
-   {
-      defaultToken : "text",
-   }
-], 
-"alphabet" : [
-   {
-      "token" : ["punctuation", "none", "punctuation"],
-      "regex" : "(\\])(\\s*)(;)",
-      "next" : "pop"
-   },
-   {
-      "token" : "keyword",
-      "regex" : "(#)"
-   },
-   {
-      "token" : "constant.character.escape",
-      "regex" : "(\\\\.)"
-   },
-   {
-      "token" : "text",
-      "regex" : "(.)"
-   },
-   {
-      defaultToken : "text",
-   }
-], 
-"function" : [
-   {
-      "token" : "meta.separator",
-      "regex" : "(;)",
-      "next" : "pop"
-   },
-   {
-      "token" : "constant.numeric",
-      "regex" : "(\\b[0-9]+\\b)"
-   },
-   {
-      "token" : "keyword",
-      "regex" : "(->|\\*)"
-   },
-   {
-      "token" : "keyword",
-      "regex" : "(:|\\*|\\+|\\|)"
-   },
-   {
-      "token" : "punctuation",
-      "regex" : "(\\(|\\))"
-   },
-   {
-      "token" : "string.regexp",
-      "regex" : "(\\[([^\\\\\\[\\]\\-]|\\\\.)\\-([^\\\\\\[\\]\\-]|\\\\.)\\])"
-   },
-   {
-      "token" : "variable",
-      "regex" : "([a-zA-Z0-9_]+)"
-   },
-   {
-      "token" : "punctuation",
-      "regex" : "(\")",
-      "push" : "string"
-   },
-   {
-      defaultToken : "text",
-   }
-], 
-"string" : [
-   {
-      "token" : "punctuation",
-      "regex" : "(\")",
-      "next" : "pop"
-   },
-   {
-      "token" : "keyword",
-      "regex" : "(#)"
-   },
-   {
-      "token" : "constant.character.escape",
-      "regex" : "(\\\\.)"
-   },
-   {
-      "token" : "string",
-      "regex" : "(.)"
-   },
-   {
-      defaultToken : "text",
-   }
-], 
-"struct" : [
-   {
-      "token" : "punctuation",
-      "regex" : "(})",
-      "next" : "pop"
-   },
-   {
-      "token" : ["variable", "none", "meta.separator", "none", "entity.name.type", "none", "keyword"],
-      "regex" : "([a-zA-Z0-9_]+)(\\s*)(:)(\\s*)([a-zA-Z0-9_]+)(\\s*)(\\*?)"
-   },
-   {
-      "token" : "meta.separator",
-      "regex" : "(,)"
-   },
-   {
-      defaultToken : "text",
-   }
-], 
-"type" : [
-   {
-      "token" : "meta.separator",
-      "regex" : "(;)",
-      "next" : "pop"
+      "token" : "punctuation.definition",
+      "regex" : "(=)"
    },
    {
       "token" : "entity.name.type",
-      "regex" : "([a-zA-Z0-9_]+)"
+      "regex" : "(&&|->|<:|[;{}])"
    },
    {
-      "token" : "keyword",
-      "regex" : "(->|\\*)"
+      "token" : "keyword.operator",
+      "regex" : "([|?*+:()])"
+   },
+   {
+      "token" : "string punctuation",
+      "regex" : "(')",
+      "push" : "main__1"
+   },
+   {
+      "token" : "constant.numeric",
+      "regex" : "(-?\\d+)"
+   },
+   {
+      "token" : "string",
+      "regex" : "(<)",
+      "push" : "main__2"
+   },
+   {
+      "token" : "comment",
+      "regex" : "(/\\*)",
+      "push" : "main__3"
+   },
+   {
+      "token" : "comment",
+      "regex" : "(//.*)"
+   },
+   {
+      "token" : "invalid",
+      "regex" : "([^\\s])"
    },
    {
       defaultToken : "text",
+   }
+], 
+"main__1" : [
+   {
+      "token" : "string punctuation",
+      "regex" : "(')",
+      "next" : "pop"
+   },
+   {
+      "token" : "text",
+      "regex" : "(\\\\.)"
+   },
+   {
+      "token" : "string punctuation",
+      "regex" : "([^\\\\']+)"
+   },
+   {
+      defaultToken : "text",
+   }
+], 
+"main__2" : [
+   {
+      "token" : "string",
+      "regex" : "(>)",
+      "next" : "pop"
+   },
+   {
+      defaultToken : "string",
+   }
+], 
+"main__3" : [
+   {
+      "token" : "comment",
+      "regex" : "(\\*/)",
+      "next" : "pop"
+   },
+   {
+      defaultToken : "comment",
    }
 ]
 };
@@ -308,7 +258,7 @@ define("ace/mode/mealy",["require","exports","module","ace/lib/oop","ace/mode/te
 
 var oop = require("../lib/oop");
 var TextMode = require("./text").Mode;
-var MealyHighlightRules = require("./mealy_highlight_rules").MealyHighlightRules;
+var MealyHighlightRules = require("./mealy_highlight_rules").MealyHighlightRules; // use your $NAME_highlight_rules.js instead of "mealy_highlight_rules"
 var FoldMode = require("./folding/cstyle").FoldMode;
 
 var Mode = function() {
@@ -320,13 +270,12 @@ oop.inherits(Mode, TextMode);
 
 (function() {
     this.lineCommentStart = "//";
-    this.$id = "ace/mode/mealy";
-    this.snippetFileId = "ace/snippets/mealy";
+    this.$id = "ace/mode/mealy"; //rename this to match your language
+    this.snippetFileId = "ace/snippets/mealy"; //rename this to match your language
 }).call(Mode.prototype);
 
 exports.Mode = Mode;
-});
-                (function() {
+});                (function() {
                     window.require(["ace/mode/mealy"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;

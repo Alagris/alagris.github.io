@@ -237,9 +237,7 @@ snippet button:s\n\
 snippet button:r\n\
 	<button type=\"reset\">${1}</button>\n\
 snippet canvas\n\
-	<canvas>\n\
-		${1}\n\
-	</canvas>\n\
+	<canvas id=\"${1:canvas}\"></canvas>\n\
 snippet caption\n\
 	<caption>${1}</caption>\n\
 snippet cite\n\
@@ -859,8 +857,7 @@ snippet wbr\n\
 ";
 exports.scope = "html";
 
-});
-                (function() {
+});                (function() {
                     window.require(["ace/snippets/html"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;

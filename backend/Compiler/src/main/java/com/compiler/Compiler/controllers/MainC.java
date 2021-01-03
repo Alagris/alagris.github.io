@@ -26,11 +26,28 @@ public class MainC {
     }
 
 
-    @RequestMapping("/rest")
+    @RequestMapping("/compiler1")
     public String read(Map<String, Object> model, HttpSession httpSession) {
         final String text = (String)httpSession.getAttribute("code");
         model.put("code",text);
-        return "rest1";
+        return "compiler2";
+    }
+
+//    @GetMapping("/compiler1")
+//    public String compiler1(Model model) {
+//        model.addAttribute("title", "Solomonoff - InfoPage");
+//        return "compiler2";
+   //}
+    @GetMapping("/infpage")
+    public String infpage(Model model) {
+        model.addAttribute("title", "Solomonoff - InfoPage");
+        return "ttt";
+    }
+
+    @GetMapping("/DocPage")
+    public String DocPage(Model model) {
+        model.addAttribute("title", "Solomonoff - Documentation");
+        return "DocPage";
     }
 
 }

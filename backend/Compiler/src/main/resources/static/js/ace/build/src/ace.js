@@ -461,6 +461,8 @@ exports.HI_DPI = useragent.isWin
     ? typeof window !== "undefined" && window.devicePixelRatio >= 1.5
     : true;
 
+if (useragent.isChromeOS) exports.HI_DPI = false;
+
 if (typeof document !== "undefined") {
     var div = document.createElement("div");
     if (exports.HI_DPI && div.style.transform  !== undefined)
@@ -696,18 +698,19 @@ exports.getButton = function(e) {
 };
 
 exports.capture = function(el, eventHandler, releaseCaptureHandler) {
+    var ownerDocument = el && el.ownerDocument || document;
     function onMouseUp(e) {
         eventHandler && eventHandler(e);
         releaseCaptureHandler && releaseCaptureHandler(e);
 
-        removeListener(document, "mousemove", eventHandler);
-        removeListener(document, "mouseup", onMouseUp);
-        removeListener(document, "dragstart", onMouseUp);
+        removeListener(ownerDocument, "mousemove", eventHandler);
+        removeListener(ownerDocument, "mouseup", onMouseUp);
+        removeListener(ownerDocument, "dragstart", onMouseUp);
     }
 
-    addListener(document, "mousemove", eventHandler);
-    addListener(document, "mouseup", onMouseUp);
-    addListener(document, "dragstart", onMouseUp);
+    addListener(ownerDocument, "mousemove", eventHandler);
+    addListener(ownerDocument, "mouseup", onMouseUp);
+    addListener(ownerDocument, "dragstart", onMouseUp);
     
     return onMouseUp;
 };
@@ -2687,18 +2690,16 @@ function DragdropHandler(mouseHandler) {
 
     var editor = mouseHandler.editor;
 
-    var blankImage = dom.createElement("img");
-    blankImage.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-    if (useragent.isOpera)
-        blankImage.style.cssText = "width:1px;height:1px;position:fixed;top:0;left:0;z-index:2147483647;opacity:0;";
+    var dragImage = dom.createElement("div");
+    dragImage.style.cssText = "top:-100px;position:absolute;z-index:2147483647;opacity:0.5";
+    dragImage.textContent = "\xa0";
 
     var exports = ["dragWait", "dragWaitEnd", "startDrag", "dragReadyEnd", "onMouseDrag"];
 
-     exports.forEach(function(x) {
-         mouseHandler[x] = this[x];
+    exports.forEach(function(x) {
+        mouseHandler[x] = this[x];
     }, this);
     editor.on("mousedown", this.onMouseDown.bind(mouseHandler));
-
 
     var mouseTarget = editor.container;
     var dragSelectionMarker, x, y;
@@ -2723,14 +2724,12 @@ function DragdropHandler(mouseHandler) {
 
         var dataTransfer = e.dataTransfer;
         dataTransfer.effectAllowed = editor.getReadOnly() ? "copy" : "copyMove";
-        if (useragent.isOpera) {
-            editor.container.appendChild(blankImage);
-            blankImage.scrollTop = 0;
-        }
-        dataTransfer.setDragImage && dataTransfer.setDragImage(blankImage, 0, 0);
-        if (useragent.isOpera) {
-            editor.container.removeChild(blankImage);
-        }
+        editor.container.appendChild(dragImage);
+
+        dataTransfer.setDragImage && dataTransfer.setDragImage(dragImage, 0, 0);
+        setTimeout(function() {
+            editor.container.removeChild(dragImage);
+        });
         dataTransfer.clearData();
         dataTransfer.setData("Text", editor.session.getTextRange());
 
@@ -3146,12 +3145,12 @@ exports.addTouchListeners = function(el, editor) {
         var scrollLeft = editor.renderer.scrollLeft;
         var rect = editor.container.getBoundingClientRect();
         contextMenu.style.top = pagePos.pageY - rect.top - 3 + "px";
-        if(pagePos.pageX - rect.left < rect.width - 70) {
-          contextMenu.style.removeProperty('left');
-          contextMenu.style.right = "10px";
+        if (pagePos.pageX - rect.left < rect.width - 70) {
+            contextMenu.style.left = "";
+            contextMenu.style.right = "10px";
         } else {
-          contextMenu.style.removeProperty('right');
-          contextMenu.style.left = leftOffset + scrollLeft - rect.left + "px";
+            contextMenu.style.right = "";
+            contextMenu.style.left = leftOffset + scrollLeft - rect.left + "px";
         }
         contextMenu.style.display = "";
         contextMenu.firstChild.style.display = "none";
@@ -3853,7 +3852,7 @@ function deHyphenate(str) {
     return str.replace(/-(.)/g, function(m, m1) { return m1.toUpperCase(); });
 }
 
-exports.version = "1.4.10";
+exports.version = "1.4.12";
 
 });
 
@@ -4024,6 +4023,9 @@ var MouseHandler = function(editor) {
         }.bind(this);
         setTimeout(stop, 10);
         this.editor.on("nativecontextmenu", stop);
+    };
+    this.destroy = function() {
+        if (this.releaseMouse) this.releaseMouse();
     };
 }).call(MouseHandler.prototype);
 
@@ -5611,7 +5613,7 @@ var Tokenizer = function(rules) {
 
     this.removeCapturingGroups = function(src) {
         var r = src.replace(
-            /\\.|\[(?:\\.|[^\\\]])*|\(\?[:=!]|(\()/g,
+            /\\.|\[(?:\\.|[^\\\]])*|\(\?[:=!<]|(\()/g,
             function(x, y) {return y ? "(?:" : x;}
         );
         return r;
@@ -14349,6 +14351,8 @@ Editor.$uid = 0;
             });
             this.$toDestroy = null;
         }
+        if (this.$mouseHandler)
+            this.$mouseHandler.destroy();
         this.renderer.destroy();
         this._signal("destroy", this);
         if (this.session)
@@ -17861,7 +17865,7 @@ var VirtualRenderer = function(container, theme) {
 
         if (this.resizing)
             this.resizing = 0;
-        this.scrollBarV.scrollLeft = this.scrollBarV.scrollTop = null;
+        this.scrollBarH.scrollLeft = this.scrollBarV.scrollTop = null;
     };
     
     this.$updateCachedSize = function(force, gutterWidth, width, height) {
@@ -18627,7 +18631,7 @@ var VirtualRenderer = function(container, theme) {
     };
     this.scrollTo = function(x, y) {
         this.session.setScrollTop(y);
-        this.session.setScrollLeft(y);
+        this.session.setScrollLeft(x);
     };
     this.scrollBy = function(deltaX, deltaY) {
         deltaY && this.session.setScrollTop(this.session.getScrollTop() + deltaY);
@@ -21313,8 +21317,7 @@ exports.EditSession = EditSession;
 exports.UndoManager = UndoManager;
 exports.VirtualRenderer = Renderer;
 exports.version = exports.config.version;
-});
-            (function() {
+});            (function() {
                 window.require(["ace/ace"], function(a) {
                     if (a) {
                         a.config.init(true);

@@ -246,9 +246,10 @@ var supportedModes = {
     Mask:        ["mask"],
     MATLAB:      ["matlab"],
     Maze:        ["mz"],
-    MediaWiki:   ["wiki|mediawiki"],
     Mealy:       ["mealy"],
+    MediaWiki:   ["wiki|mediawiki"],
     MEL:         ["mel"],
+    MIPS:        ["s|asm"],
     MIXAL:       ["mixal"],
     MUSHCode:    ["mc|mush"],
     MySQL:       ["mysql"],
@@ -292,6 +293,7 @@ var supportedModes = {
     SJS:         ["sjs"],
     Slim:        ["slim|skim"],
     Smarty:      ["smarty|tpl"],
+    Smithy:      ["smithy"],
     snippets:    ["snippets"],
     Soy_Template:["soy"],
     Space:       ["space"],
@@ -784,8 +786,7 @@ var OptionPanel = function(editor, element) {
 
 exports.OptionPanel = OptionPanel;
 
-});
-                (function() {
+});                (function() {
                     window.require(["ace/ext/options"], function(m) {
                         if (typeof module == "object" && typeof exports == "object" && module) {
                             module.exports = m;
