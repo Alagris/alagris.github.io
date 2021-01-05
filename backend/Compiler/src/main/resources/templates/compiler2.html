@@ -166,13 +166,13 @@
     <!-- <link href="./Jumbotron Template · Bootstrap_files/jumbotron.css" rel="stylesheet"> -->
     <style type="text/css" media="screen">
     #editor {
-       height: 50%;
+       height: 55%;
        width: 100%;
        margin-bottom: 5px;
 
     }
     #outputField {
-       height: 30%;
+       height: 25%;
        width: 100%;
        background-color:#18222d;
        color:#fff;
@@ -187,6 +187,33 @@
     replHistory = []
     replHistoryIndex = 0
     replCurrent = ""
+
+     async function listAutomata(){
+        const response = await fetch('list_automata',{method:'POST'})
+        const replResult = await response.text()
+        const automata = JSON.parse(replResult)
+        var ll = "";
+        while (automataHtmlList.firstChild)
+            automataHtmlList.removeChild(automataHtmlList.firstChild);
+        for(var i=0;i<automata.length;i++){
+            var item = document.createElement('li');
+            ll = ll+automata[i]+" ,";
+            // Set its contents:
+            item.appendChild(document.createTextNode(automata[i]));
+
+            // Add it to the list:
+            automataHtmlList.appendChild(item);
+        }
+        //var tok = automataHtmlList + "";
+       // automataHtmlList.toString();
+       // automataHtmlList.join('; ');
+      var fok = "Define variables: " + ll;
+
+
+        document.getElementsByName('inp')[0].placeholder=fok;
+
+    }
+
     async function repl(){
         const response = await fetch('repl',{method:'POST',body:inputField.value})
         const replResult = await response.text()
@@ -196,19 +223,22 @@
         outputField.value += '> '+trimmedInput+'\n'+replResult+'\n'
         outputField.scrollTop = outputField.scrollHeight
         replCurrent = inputField.value = ""
-
+        listAutomata()
     }
+
     async function compile(){
 
         const code = editor.getValue()
         console.log(code);
         const response = await fetch('compile',{method:'POST',body:code})
         const errorMessage = await response.text()
-        outputField.value += "===REPL RELOADED!===\n"
+
         console.log("Compiler says: "+errorMessage)
+
         if(errorMessage!=""){
-          alert(errorMessage)
+          outputField.value += errorMessage + "\n"
         }
+        listAutomata()
     }
 
     </script>
@@ -280,14 +310,18 @@
                     Console:
 
                     <textarea readonly id="outputField" placeholder=">"></textarea>
+
 <!--                    <br/>-->
 <!--                    Console input (Hit enter to submit, use up and down arrow keys to traverse history):-->
 <!--                    <br/>-->
-                    <textarea id="inputField"  placeholder="Console input (Hit enter to submit, use up and down arrow keys to traverse history):"></textarea>
-                    <footer class="container">
-                        <br>
-                        <p>© AMU 2019-2020</p>
-                    </footer>
+                    <ul hidden="true" id="automataHtmlList"></ul>
+                    <textarea id="inputField" name="inp" placeholder="Console input (Hit enter to submit, use up and down arrow keys to traverse history):"></textarea>
+
+<!--                    <footer class="container">-->
+<!--                        <br>-->
+<!--                        <p>© AMU 2019-2020</p>-->
+<!--                    </footer>-->
+
                     <script>
                         function submitOnEnter(event){
                             if(event.which === 13){
@@ -342,9 +376,9 @@
 <!--                        <ul id="todo-list"></ul>-->
                     </section>
 <!--                    </section>-->
-
+<!--                    <ul id="automataHtmlList"></ul>-->
                     <br>
-                    <iframe src="js/DocPage.html" style="border: 2px solid gray; margin-top: 5px;  height: 95%; margin-bottom: 5px;
+                    <iframe src="js/DocPage.html" style="border: 2px solid gray; margin-top: 5px;  height: 95%; max-height:95%; margin-bottom: 5px;
        width: 100%; "></iframe>
 
                 </div>

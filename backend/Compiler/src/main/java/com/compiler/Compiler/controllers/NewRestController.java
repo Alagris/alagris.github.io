@@ -314,4 +314,33 @@ public class NewRestController {
 
     }
 
+
+
+    @PostMapping("/list_automata")
+    public String listAutomata(HttpSession httpSession){
+        Repl repl = (Repl) httpSession.getAttribute("repl");
+        if(repl==null){
+            try {
+                repl = new Repl(new OptimisedLexTransducer.OptimisedHashLexTransducer(0,Integer.MAX_VALUE,true));
+            } catch (Exception compilationError) {
+                return compilationError.getMessage();
+            }
+            httpSession.setAttribute("repl",repl);
+        }
+        StringBuilder sb = new StringBuilder("[");
+        Iterator<LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>>> iterator = repl.compiler.specs.iterateVariables();
+        while(iterator.hasNext()){
+            final LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> transducer = iterator.next();
+            sb.append('"');
+            sb.append(transducer.name);
+            sb.append('"');
+            if(iterator.hasNext()){
+                sb.append(',');
+            }
+        }
+        sb.append(']');
+        return sb.toString();
+
+    }
+
 }

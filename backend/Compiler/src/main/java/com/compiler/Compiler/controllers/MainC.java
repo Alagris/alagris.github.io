@@ -54,5 +54,10 @@ public class MainC {
         model.addAttribute("title", "Solomonoff - Documentation");
         return "EXindex";
     }
+    @GetMapping("/rest")
+    public String rest1(Model model) {
+        model.addAttribute("title", "Solomonoff - Documentation");
+        return "rest1";
+    }
 
 }

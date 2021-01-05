@@ -19,6 +19,25 @@
     replHistory = []
     replHistoryIndex = 0
     replCurrent = ""
+
+     async function listAutomata(){
+        const response = await fetch('list_automata',{method:'POST'})
+        const replResult = await response.text()
+        const automata = JSON.parse(replResult)
+        while (automataHtmlList.firstChild)
+            automataHtmlList.removeChild(automataHtmlList.firstChild);
+        for(var i=0;i<automata.length;i++){
+            var item = document.createElement('li');
+
+            // Set its contents:
+            item.appendChild(document.createTextNode(automata[i]));
+
+            // Add it to the list:
+            automataHtmlList.appendChild(item);
+        }
+
+    }
+
     async function repl(){
         const response = await fetch('repl',{method:'POST',body:inputField.value})
         const replResult = await response.text()
@@ -28,19 +47,22 @@
         outputField.value += '> '+trimmedInput+'\n'+replResult+'\n'
         outputField.scrollTop = outputField.scrollHeight
         replCurrent = inputField.value = ""
-
+        listAutomata()
     }
+
     async function compile(){
 
         const code = editor.getValue()
         console.log(code);
         const response = await fetch('compile',{method:'POST',body:code})
         const errorMessage = await response.text()
-        outputField.value += "===REPL RELOADED!===\n"
+
         console.log("Compiler says: "+errorMessage)
+
         if(errorMessage!=""){
-          alert(errorMessage)
+          outputField.value += errorMessage + "\n"
         }
+        listAutomata()
     }
 
     </script>
@@ -73,6 +95,7 @@ Console input (Hit enter to submit, use up and down arrow keys to traverse histo
 <textarea id="inputField">
 </textarea>
 
+<ul id="automataHtmlList"></ul>
 <script>
 function submitOnEnter(event){
     if(event.which === 13){
