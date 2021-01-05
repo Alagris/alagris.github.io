@@ -49,5 +49,10 @@ public class MainC {
         model.addAttribute("title", "Solomonoff - Documentation");
         return "DocPage";
     }
+    @GetMapping("/test")
+    public String test1(Model model) {
+        model.addAttribute("title", "Solomonoff - Documentation");
+        return "EXindex";
+    }
 
 }

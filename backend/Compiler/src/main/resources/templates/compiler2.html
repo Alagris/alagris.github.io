@@ -27,6 +27,8 @@
     <script type='text/javascript' src='js/jquery.js'></script>
     <script src="js/FileSaver.js"></script>
     <script src="https://kit.fontawesome.com/a1ef51e063.js" crossorigin="anonymous"></script>
+<!--    <link rel="stylesheet" href="js/example2/bower_components/todomvc-common/base.css">-->
+    <link rel="stylesheet" href="js/example2/enjoyhint/enjoyhint.css">
     <script>
         function saveStaticDataToFile() {
         var val2 = outputField.value;
@@ -282,6 +284,10 @@
 <!--                    Console input (Hit enter to submit, use up and down arrow keys to traverse history):-->
 <!--                    <br/>-->
                     <textarea id="inputField"  placeholder="Console input (Hit enter to submit, use up and down arrow keys to traverse history):"></textarea>
+                    <footer class="container">
+                        <br>
+                        <p>© AMU 2019-2020</p>
+                    </footer>
                     <script>
                         function submitOnEnter(event){
                             if(event.which === 13){
@@ -313,18 +319,29 @@
 </script>
 
 
+
+
                 </div>
 
                 <div class="second">
-                    <button class="button button1" onclick="compile()">
+<!--                    <section id="todoapp">-->
+                    <button class="button button1" id="btnn"  onclick="compile()">
                         Compile
                     </button>
-                    <button class="button button3" onclick="saveStaticDataToFile()">
+                    <button class="button button3" id="btnn1"onclick="saveStaticDataToFile()">
                         Save
                     </button>
-                    <button class="button button2" onclick="compile()">
+
+
+                    <button class="button button2 .btnn"  >
                         More
                     </button>
+<!--                    <section id="main">-->
+<!--                        <input id="toggle-all" type="checkbox">-->
+<!--                        <label for="toggle-all">Mark all as complete</label>-->
+<!--                        <ul id="todo-list"></ul>-->
+                    </section>
+<!--                    </section>-->
 
                     <br>
                     <iframe src="js/DocPage.html" style="border: 2px solid gray; margin-top: 5px;  height: 95%; margin-bottom: 5px;
@@ -332,7 +349,131 @@
 
                 </div>
             </div>
+<!--    <script type="text/template" id="item-template">-->
+<!--        <div class="view">-->
+<!--            <input class="toggle" type="checkbox" <%= completed ? 'checked' : '' %>>-->
+<!--            <label><%- title %></label>-->
+<!--            <button class="destroy"></button>-->
+<!--        </div>-->
+<!--        <input class="edit" value="<%- title %>">-->
+<!--    </script>-->
+<!--    <script type="text/template" id="stats-template">-->
+<!--   /    // <span id="todo-count"><strong><%= remaining %></strong> <%= remaining === 1 ? 'item' : 'items' %> left</span>-->
+<!--        <ul id="filters">-->
+<!--            <li>-->
+<!--                <a class="selected" href="#/">All</a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="#/active">Active</a>-->
+<!--            </li>-->
+<!--            <li>-->
+<!--                <a href="#/completed">Completed</a>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--        <% if (completed) { %>-->
+<!--        <button id="clear-completed">Clear completed (<%= completed %>)</button>-->
+<!--        <% } %>-->
+<!--    </script>-->
+    <script src="js/example2/bower_components/jquery/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/5.2.0/kinetic.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.2/jquery.scrollTo.min.js"></script>
+    <script src="js/example2/bower_components/todomvc-common/base.js"></script>
+    <script src="js/example2/bower_components/underscore/underscore.js"></script>
+    <script src="js/example2/bower_components/backbone/backbone.js"></script>
+    <script src="js/example2/bower_components/backbone.localStorage/backbone.localStorage.js"></script>
+    <script src="js/example2/js/models/todo.js"></script>
+    <script src="js/example2/js/collections/todos.js"></script>
+    <script src="js/example2/js/views/todo-view.js"></script>
+    <script src="js/example2/js/views/app-view.js"></script>
+    <script src="js/example2/js/routers/router.js"></script>
+    <script src="js/example2/js/app.js"></script>
+    <script src="js/example2/enjoyhint/enjoyhint.js"></script>
+    <script>
+<!--      localStorage.clear();-->
+<!--      var enjoyhint_script_data = [-->
+<!--        {-->
+<!--          onBeforeStart: function(){-->
+<!--            $('#new-todo').keypress(function(e){-->
+<!--              if(e.keyCode == 13 && $(this).val() !== ''){-->
+<!--                enjoyhint_instance.trigger('new_todo');-->
+<!--              }-->
+<!--            });-->
+<!--          },-->
+<!--          selector:'#new-todo',-->
+<!--          event:'new_todo',-->
+<!--          event_type:'custom',-->
+<!--          description:'Press for compile code.',-->
+<!--        },-->
+<!--        {-->
+<!--          onBeforeStart: function(){-->
+<!--            $('#new-todo').keydown(function(e){-->
+<!--              if(e.keyCode == 13 && $(this).val() !== ''){-->
+<!--                enjoyhint_instance.trigger('new_todo');-->
+<!--              }-->
+<!--            });-->
+<!--          },-->
+<!--          selector:'#new-todo',-->
+<!--          event:'new_todo',-->
+<!--          event_type:'custom',-->
+<!--          description:'Enter the second task description and press Enter.',-->
+<!--        },-->
+<!--        {-->
+<!--          selector:'#todo-list .toggle:first',-->
+<!--          event:'click',-->
+<!--          description:'Set first task as completed',-->
+<!--          shape:'circle',-->
+<!--          timeout:100-->
+<!--        },-->
+<!--        {-->
+<!--          selector:'#filters li:nth-child(3) a',-->
+<!--          event:'click',-->
+<!--          description:'Select all completed tasks',-->
+<!--        },-->
+<!--        {-->
+<!--          selector:'#todo-list .view:first',-->
+<!--          event_selector:'#todo-list .destroy:first',-->
+<!--          event:'click',-->
+<!--          shape:'circle',-->
+<!--          description:'Remove this task',-->
+<!--          top:20,-->
+<!--          left:510,-->
+<!--          bottom:20,-->
+<!--          right:20-->
+<!--        },-->
+<!--        {-->
+<!--          selector:'#filters li:nth-child(1) a',-->
+<!--          event:'click',-->
+<!--          description:'Back to "All" tasks list',-->
+<!--        }-->
+<!--      ];-->
+<!--      var enjoyhint_instance = null;-->
+<!--      $(document).ready(function(){-->
+<!--        enjoyhint_instance = new EnjoyHint({});-->
+<!--        enjoyhint_instance.setScript(enjoyhint_script_data);-->
+<!--        enjoyhint_instance.runScript();-->
+<!--      });-->
 
+var enjoyhint_instance = new EnjoyHint({});
+var enjoyhint_script_steps = [
+	{
+		'next #btnn' : 'Click to compile code'
+	},
+	{
+		'next #btnn1' : 'Click to save code'
+	},
+	{
+		'next #inputField' : 'Console input'
+	},
+<!--	{-->
+<!--		'next #editor' : Console output'-->
+<!--	},-->
+<!--	{-->
+<!--		'next #outputField' : 'Enter code here'-->
+<!--	},-->
+];
+enjoyhint_instance.set(enjoyhint_script_steps);
+enjoyhint_instance.run();
+    </script>
 
 
 <!--    </div>-->
@@ -340,14 +481,15 @@
 
 
 </body>
+<!--<footer class="container">-->
+<!--    <p>© AMU 2019-2020</p>-->
+<!--</footer>-->
 </html>
 
 
 <!--</main>-->
 
-<!--<footer class="container">-->
-<!--    <p>© AMU 2019-2020</p>-->
-<!--</footer>-->
+
 
 
 
