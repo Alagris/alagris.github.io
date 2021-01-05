@@ -1,6 +1,9 @@
 package com.compiler.Compiler.controllers;
         import net.alagris.*;
+        import org.antlr.v4.runtime.BaseErrorListener;
         import org.antlr.v4.runtime.CharStreams;
+        import org.antlr.v4.runtime.RecognitionException;
+        import org.antlr.v4.runtime.Recognizer;
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.ui.Model;
         import org.springframework.web.bind.annotation.*;
@@ -277,6 +280,14 @@ public class NewRestController {
         if(repl==null){
             try {
                 repl = new Repl(new OptimisedLexTransducer.OptimisedHashLexTransducer(0,Integer.MAX_VALUE,true));
+                repl.compiler.parser.removeErrorListeners();
+                repl.compiler.parser.addErrorListener(new BaseErrorListener() {
+                    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                        throw new RuntimeException("line " + line + ":" + charPositionInLine + " " + msg + " " + e);
+                    }
+                });
+
+
             } catch (Exception compilationError) {
                 return compilationError.getMessage();
             }
@@ -297,6 +308,12 @@ public class NewRestController {
         if(repl==null){
             try {
                 repl = new Repl(new OptimisedLexTransducer.OptimisedHashLexTransducer(0,Integer.MAX_VALUE,true));
+                repl.compiler.parser.removeErrorListeners();
+                repl.compiler.parser.addErrorListener(new BaseErrorListener() {
+                    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                        throw new RuntimeException("line " + line + ":" + charPositionInLine + " " + msg + " " + e);
+                    }
+                });
             } catch (Exception compilationError) {
                 return compilationError.getMessage();
             }

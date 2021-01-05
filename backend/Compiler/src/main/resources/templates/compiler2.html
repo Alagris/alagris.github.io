@@ -220,7 +220,7 @@
       window.document.getElementById("tips").innerText = ll;
 
 
-        document.getElementsByName('inp')[0].placeholder=fok;
+      //  document.getElementsByName('inp')[0].placeholder=fok;
 
     }
 
@@ -247,6 +247,12 @@
 
         if(errorMessage!=""){
           outputField.value += errorMessage + "\n"
+          outputField.style.borderWidth = 'medium'
+          outputField.style.borderColor = "red"
+          setTimeout(function(){
+             outputField.style.borderWidth = 'thin'
+             outputField.style.borderColor = "black"
+             },1000);
         }
         listAutomata()
     }
