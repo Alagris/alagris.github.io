@@ -156,6 +156,15 @@
             margin-left: 8px;
             margin-right: 8px;
         }
+        .gh{
+            margin-top: 5px;
+            border:1px;
+            height: 5%;
+            width: 100%;
+            border-style: none;
+           // background: blue;
+           background-color: #bfc4c9;
+        }
     </style>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -166,7 +175,7 @@
     <!-- <link href="./Jumbotron Template · Bootstrap_files/jumbotron.css" rel="stylesheet"> -->
     <style type="text/css" media="screen">
     #editor {
-       height: 55%;
+       height: 52%;
        width: 100%;
        margin-bottom: 5px;
 
@@ -208,6 +217,7 @@
        // automataHtmlList.toString();
        // automataHtmlList.join('; ');
       var fok = "Define variables: " + ll;
+      window.document.getElementById("tips").innerText = ll;
 
 
         document.getElementsByName('inp')[0].placeholder=fok;
@@ -307,7 +317,7 @@
                     </script>
 
 
-                    Console:
+                   Console:
 
                     <textarea readonly id="outputField" placeholder=">"></textarea>
 
@@ -321,6 +331,7 @@
 <!--                        <br>-->
 <!--                        <p>© AMU 2019-2020</p>-->
 <!--                    </footer>-->
+                    <div  class="border border-dark gh" >Define variables:<span id = "tips"></span></div>
 
                     <script>
                         function submitOnEnter(event){
