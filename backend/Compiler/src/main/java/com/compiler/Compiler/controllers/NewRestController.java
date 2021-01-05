@@ -304,6 +304,7 @@ public class NewRestController {
 
     @PostMapping("/repl")
     public String repl(HttpSession httpSession, @RequestBody String line){
+        if(line.trim().isEmpty())return "";
         Repl repl = (Repl) httpSession.getAttribute("repl");
         if(repl==null){
             try {

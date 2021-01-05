@@ -196,7 +196,7 @@
     replHistory = []
     replHistoryIndex = 0
     replCurrent = ""
-
+    const MAX_REPL_LENGTH = 3000
      async function listAutomata(){
         const response = await fetch('list_automata',{method:'POST'})
         const replResult = await response.text()
@@ -225,6 +225,7 @@
     }
 
     async function repl(){
+        if(inputField.value.trim().length==0)return;
         const response = await fetch('repl',{method:'POST',body:inputField.value})
         const replResult = await response.text()
         const trimmedInput = inputField.value.trim().replaceAll('\n','')
@@ -234,6 +235,14 @@
         outputField.scrollTop = outputField.scrollHeight
         replCurrent = inputField.value = ""
         listAutomata()
+    }
+
+     window.onload = function(){
+      replSavedInCookie = document.cookie.match('(?<=;\\s*repl=)[^;]*')
+      if(replSavedInCookie == null)return
+        outputField.value = decodeURIComponent(replSaveInCookie[0])
+        outputField.scrollTop = outputField.scrollHeight
+
     }
 
     async function compile(){
@@ -256,6 +265,19 @@
         }
         listAutomata()
     }
+
+    </script>
+    <script>
+        function insert(){
+            var customPosition = {
+                row: 0,
+                column: 0
+                };
+            var text = "x = 'trt'";
+            editor.session.insert(customPosition , text);
+
+        }
+
 
     </script>
 </head>
@@ -384,9 +406,10 @@
                     </button>
 
 
-                    <button class="button button2 .btnn"  >
+                    <button class="button button2 .btnn" onclick="" >
                         More
                     </button>
+                    <p onclick="insert()">x = 'trt'</p>
 <!--                    <section id="main">-->
 <!--                        <input id="toggle-all" type="checkbox">-->
 <!--                        <label for="toggle-all">Mark all as complete</label>-->
