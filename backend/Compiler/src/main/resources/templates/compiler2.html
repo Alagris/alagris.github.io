@@ -191,6 +191,13 @@
        background-color:#18222d;
        color:#fff;
     }
+
+    div.ex1 {
+      background-color: lightblue;
+      width: 100%;
+      height: 90%;
+      overflow: scroll;
+    }
     </style>
     <script>
     replHistory = []
@@ -268,13 +275,14 @@
 
     </script>
     <script>
-        function insert(){
+        function insert(text){
             var customPosition = {
                 row: 0,
                 column: 0
                 };
-            var text = "x = 'trt'";
-            editor.session.insert(customPosition , text);
+            //var text = "x = 'trt'";
+            editor.setValue(text);
+            //editor.session.insert(customPosition , text);
 
         }
 
@@ -405,21 +413,36 @@
                         Save
                     </button>
 
-
                     <button class="button button2 .btnn" onclick="" >
                         More
                     </button>
-                    <p onclick="insert()">x = 'trt'</p>
-<!--                    <section id="main">-->
-<!--                        <input id="toggle-all" type="checkbox">-->
-<!--                        <label for="toggle-all">Mark all as complete</label>-->
-<!--                        <ul id="todo-list"></ul>-->
-                    </section>
-<!--                    </section>-->
-<!--                    <ul id="automataHtmlList"></ul>-->
-                    <br>
-                    <iframe src="js/DocPage.html" style="border: 2px solid gray; margin-top: 5px;  height: 95%; max-height:95%; margin-bottom: 5px;
-       width: 100%; "></iframe>
+<!--                    <p onclick="insert()">x = 'trt'</p>-->
+
+
+
+<!--                    <iframe src="js/DocPage.html" style="border: 2px solid gray; margin-top: 5px;  height: 95%; max-height:95%; margin-bottom: 5px;-->
+<!--       width: 100%; "></iframe>-->
+                        <div class="ex1">
+                            <h2>You can try some examples</h2>
+                            <ul>
+                                <li onclick="insert('x =\'trt\'')" > <h4>Example 1</h4><p>x = 'trt'</p></li>
+                                <li onclick="insert('x = \'abcd\' \/\/ some regex \nx \<: [a-z]* \/\/ensure that it uses specific alphabet \nz = x \<404\> x \/\/ use codepoint 404 as some external symbol \nz \<: \([a-z]\|\<404\>\)\*  ')" ><h4>Example 2</h4><pre>
+x = 'abcd' // some regex
+x <: [a-z]* //ensure that it uses specific alphabet
+z = x <404> x // use codepoint 404 as some "external symbol"
+z <: ([a-z]|<404>)*</pre></li>
+                                <li onclick="insert('\/\* and /nmultiline\ncomments\n\*\/')" ><h4>Example 3</h4><pre>//You can use line comments
+/* and
+multiline
+comments
+*/</pre></li>
+                                <li onclick="insert('x = \'abc\':\'01f\' 1 \| \'re\':\'2\' 2')" ><h4>Example 4</h4><pre>x = 'abc':'01f' 1 | 're':'2' 2</pre></li>
+                            </ul>
+
+
+
+                        </div>
+
 
                 </div>
             </div>
