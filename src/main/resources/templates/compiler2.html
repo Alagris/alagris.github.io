@@ -32,6 +32,7 @@
     <script type="text/javascript" src="js/jquerycookie/jquery.cookie.js"></script>
 <!--    <link rel="stylesheet" href="js/example2/bower_components/todomvc-common/base.css">-->
     <link rel="stylesheet" href="js/example2/enjoyhint/enjoyhint.css">
+    <script language="javascript" type="text/javascript" src="js/viz.js"> </script>
     <script>
         function saveStaticDataToFile() {
         var val2 = outputField.value;
@@ -244,6 +245,29 @@
             const graph = await response.text()
             replResult = ''
             console.log(graph)
+
+                const workerURL = 'js/full.render.js';
+                let viz = new Viz({ workerURL });
+
+                viz.renderSVGElement(graph)
+                  .then(function(element) {
+                  //  document.body.appendChild(element);
+                    document.getElementById("ji").appendChild(element);
+<!--                    -->
+<!--                     var para = document.createElement("P");-->
+<!--                      var t = document.createTextNode("This is a paragraph.");-->
+<!--                      para.appendChild(t);-->
+<!--                      document.getElementById("myDIV").appendChild(para);-->
+
+
+                  })
+                  .catch(error => {
+                    // Create a new Viz instance (@see Caveats page for more info)
+                    viz = new Viz({ workerURL });
+
+                    // Possibly display the error
+                    console.error(error);
+                  });
         }else{
             const response = await fetch('repl',{method:'POST',body:trimmedInput})
             replResult = await response.text()
@@ -307,7 +331,7 @@
 
     </script>
 </head>
-<body data-new-gr-c-s-check-loaded="14.984.0" data-gr-ext-installed="" style="overflow: hidden; background: #bfc4c9">
+<body data-new-gr-c-s-check-loaded="14.984.0" data-gr-ext-installed="" style=" background: #bfc4c9">
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
     <a class="navbar-brand" href="/">Start</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
@@ -456,7 +480,7 @@ comments
 */</pre></li>
                                 <li onclick="insert('x = \'abc\':\'01f\' 1 \| \'re\':\'2\' 2')" ><h4>Example 4</h4><pre>x = 'abc':'01f' 1 | 're':'2' 2</pre></li>
                             </ul>
-
+                            <div id="ji">lol</div>
 
 
                         </div>

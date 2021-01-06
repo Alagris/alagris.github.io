@@ -37,6 +37,12 @@
 			<version>0.9.0</version>
 			<type>pom</type>
 		</dependency>
+		<dependency>
+			<groupId>de.learnlib.distribution</groupId>
+			<artifactId>learnlib-distribution</artifactId>
+			<version>0.15.0</version>
+			<type>pom</type>
+		</dependency>
 
 		<dependency>
 			<groupId>org.antlr</groupId>
