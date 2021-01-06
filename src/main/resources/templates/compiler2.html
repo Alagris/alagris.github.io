@@ -235,14 +235,29 @@
     }
 
     async function repl(){
-        if(inputField.value.trim().length==0)return;
-        const response = await fetch('repl',{method:'POST',body:inputField.value})
-        const replResult = await response.text()
         const trimmedInput = inputField.value.trim().replaceAll('\n','')
+        if(trimmedInput.length==0)return;
+        if(trimmedInput.startsWith(":vis ")){
+            automatonToView = trimmedInput.substr(":vis ".length).trim()
+            if(automatonToView.length==0)return "";
+            const response = await fetch('get_graph',{method:'POST',body:automatonToView})
+            const graph = await response.text()
+            replResult = ''
+            console.log(graph)
+        }else{
+            const response = await fetch('repl',{method:'POST',body:trimmedInput})
+            replResult = await response.text()
+        }
         replHistory.push(trimmedInput)
         replHistoryIndex = replHistory.length
-        outputField.value += '> '+trimmedInput+'\n'+replResult+'\n'
+        replBuffer = outputField.value + '> '+trimmedInput+'\n'+(replResult+'\n').trimStart()
+        if(replBuffer.length>MAX_REPL_LENGTH){
+            replBuffer = replBuffer.substr(replBuffer.length-MAX_REPL_LENGTH)
+        }
+        outputField.value = replBuffer
+        document.cookie = "repl="+encodeURIComponent(replBuffer)+";max-age="+(60*60*60)+";"
         outputField.scrollTop = outputField.scrollHeight
+
         replCurrent = inputField.value = ""
         listAutomata()
     }
@@ -250,7 +265,7 @@
      window.onload = function(){
       replSavedInCookie = document.cookie.match('(?<=;\\s*repl=)[^;]*')
       if(replSavedInCookie == null)return
-        outputField.value = decodeURIComponent(replSaveInCookie[0])
+        outputField.value = decodeURIComponent(replSavedInCookie[0])
         outputField.scrollTop = outputField.scrollHeight
 
     }

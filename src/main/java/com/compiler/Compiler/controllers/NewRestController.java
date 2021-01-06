@@ -7,12 +7,10 @@ package com.compiler.Compiler.controllers;
         import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.ui.Model;
         import org.springframework.web.bind.annotation.*;
-
+        import net.automatalib.graphs.Graph;
+        import net.automatalib.serialization.dot.GraphDOT;
         import javax.servlet.http.HttpSession;
-        import java.io.BufferedOutputStream;
-        import java.io.DataOutputStream;
-        import java.io.FileOutputStream;
-        import java.io.IOException;
+        import java.io.*;
         import java.util.*;
         import java.util.function.Consumer;
 
@@ -328,7 +326,8 @@ public class NewRestController {
         try {
             final StringBuilder out = new StringBuilder();
             final String result = repl.run(line, s -> out.append(s).append('\n'), s->{});
-            out.append(result);
+            if(result!=null)out.append(result);
+
             return out.toString();
         }catch (Exception e){
             return e.toString();
@@ -362,6 +361,34 @@ public class NewRestController {
         }
         sb.append(']');
         return sb.toString();
+
+    }
+
+    @PostMapping("/get_graph")
+    public String getGraph(HttpSession httpSession, @RequestBody String name){
+        Repl repl = (Repl) httpSession.getAttribute("repl");
+        if(repl==null){
+            try {
+                repl = new Repl(new OptimisedLexTransducer.OptimisedHashLexTransducer(0,Integer.MAX_VALUE,true));
+            } catch (Exception compilationError) {
+                return compilationError.getMessage();
+            }
+            httpSession.setAttribute("repl",repl);
+        }
+        final LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> tr = repl.compiler.getTransducer(name);
+        if(tr==null)return "ERR:NOT FOUND";
+
+        final Graph<?, ?> graph = LearnLibCompatibility.intermediateAsGraph(tr.graph,Pos.NONE, Pos.NONE);
+        final StringWriter writer = new StringWriter();
+
+        try {
+            GraphDOT.write(graph, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "ERR:"+e;
+        }
+        System.out.println(writer.toString());
+        return writer.toString();
 
     }
 
