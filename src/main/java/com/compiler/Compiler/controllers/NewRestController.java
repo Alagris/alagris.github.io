@@ -215,7 +215,12 @@ public class NewRestController {
 
         public Repl(OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
             this.compiler = compiler;
-            registerCommand("exit", "Exits REPL", (a, b, d, c) -> "");
+            registerCommand("clear", "Clears REPL console", (a, b, d, c) -> "");
+            registerCommand("vis", "Shows graph diagram of automaton", (a, b, d, c) -> "");
+            registerCommand("unset", "Del varible", (repl, logs, debug, args) -> {
+                repl.specs.variableAssignments.remove(args);
+                return "";
+            });
             registerCommand("load", "Loads source code from file", REPL_LOAD);
             registerCommand("pipes", "Lists all currently defined pipelines", REPL_LIST_PIPES);
             registerCommand("run", "Runs pipeline for the given input", REPL_RUN);
@@ -225,8 +230,7 @@ public class NewRestController {
                     "Tests if two DETERMINISTIC transducers are equal. Does not work with nondeterministic ones!",
                     REPL_EQUAL);
             registerCommand("is_det", "Tests whether transducer is deterministic", REPL_IS_DETERMINISTIC);
-            registerCommand("export", "Exports transducer to STAR (Subsequential Transducer ARchie) binary file",
-                    REPL_EXPORT);
+
             registerCommand("eval", "Evaluates transducer on requested input", REPL_EVAL);
             registerCommand("rand_sample", "Generates random sample of input:output pairs produced by ths transducer",
                     REPL_RAND_SAMPLE);
@@ -295,8 +299,8 @@ public class NewRestController {
         }
         try {
             repl.compiler.parse(CharStreams.fromString(text));
-        } catch (CompilationError compilationError) {
-            repl.compiler.listener.automata.clear();
+        } catch (Exception compilationError) {
+
             return compilationError.toString();
         }
         return "";

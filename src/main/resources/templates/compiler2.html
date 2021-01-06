@@ -27,6 +27,9 @@
     <script type='text/javascript' src='js/jquery.js'></script>
     <script src="js/FileSaver.js"></script>
     <script src="https://kit.fontawesome.com/a1ef51e063.js" crossorigin="anonymous"></script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquerycookie/jquery.cookie.js"></script>
 <!--    <link rel="stylesheet" href="js/example2/bower_components/todomvc-common/base.css">-->
     <link rel="stylesheet" href="js/example2/enjoyhint/enjoyhint.css">
     <script>
@@ -550,6 +553,10 @@ comments
 <!--        enjoyhint_instance.runScript();-->
 <!--      });-->
 
+if (document.cookie.match('(?<=(;|^)\\s*FirstTime=)[^;]*')==null){
+    document.cookie = "FirstTime=; Max-Age=216000"
+<!--    document.cookie = "ff=yy; "-->
+
 var enjoyhint_instance = new EnjoyHint({});
 var enjoyhint_script_steps = [
 	{
@@ -569,9 +576,25 @@ var enjoyhint_script_steps = [
 <!--	},-->
 ];
 enjoyhint_instance.set(enjoyhint_script_steps);
-enjoyhint_instance.run();
+enjoyhint_instance.run();}
     </script>
 
+
+
+<!--    <script type="text/javascript">-->
+<!--$(function() {-->
+
+<!--     if (!$.cookie('hideModal')) {-->
+
+<!--alert("Hello! I am an alert box!!");-->
+<!--     }-->
+<!--     $.cookie('hideModal', true, {-->
+<!--  -->
+<!--        expires: 7,-->
+<!--        path: '/'-->
+<!--   });-->
+<!--});-->
+<!--</script>-->
 
 <!--    </div>-->
 </div>
