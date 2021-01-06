@@ -64,6 +64,23 @@
   cursor: pointer;
 }
 
+.buttonSmall {
+  background-color: #FFA500;
+  text-align: right;
+  border: none;
+  color: white;
+  padding: 0px 26px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  //margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 0em;
+}
+
 .button1 {
   background-color: white;
   color: black;
@@ -249,6 +266,7 @@
   float: right;
   font-size: 28px;
   font-weight: bold;
+  margin: 0 auto;
 }
 
 .close:hover,
@@ -317,34 +335,32 @@
             replResult = ''
             console.log(graph)
 
-                const workerURL = 'js/full.render.js';
-                let viz = new Viz({ workerURL });
+            const workerURL = 'js/full.render.js';
+            let viz = new Viz({ workerURL });
 
-                viz.renderSVGElement(graph)
-                  .then(function(element) {
-                  //  document.body.appendChild(element);
-                  ji.innerHTML = '';
-                   ji.appendChild(element);
+            viz.renderSVGElement(graph)
+            .then(function(element) {
+            ji.innerHTML = '';
+            ji.appendChild(element);
 
-<!--                    -->
-<!--                     var para = document.createElement("P");-->
-<!--                      var t = document.createTextNode("This is a paragraph.");-->
-<!--                      para.appendChild(t);-->
-<!--                      document.getElementById("myDIV").appendChild(para);-->
+            var modal = document.getElementById("myModal");
+            modal.style.display = "block";
+            })
 
-                        var modal = document.getElementById("myModal");
-                        modal.style.display = "block";
+             .catch(error => {
+              // Create a new Viz instance (@see Caveats page for more info)
+              viz = new Viz({ workerURL });
 
+              // Possibly display the error
+              console.error(error);
+              });
 
+        }else if(trimmedInput.startsWith(":clear")){
 
-                  })
-                  .catch(error => {
-                    // Create a new Viz instance (@see Caveats page for more info)
-                    viz = new Viz({ workerURL });
+            document.cookie = "repl=; Max-Age=50";
+            document.getElementById('outputField').value='';
+            replResult = "";
 
-                    // Possibly display the error
-                    console.error(error);
-                  });
         }else{
             const response = await fetch('repl',{method:'POST',body:trimmedInput})
             replResult = await response.text()
@@ -482,7 +498,7 @@
                     </script>
 
 
-                   Console:
+                   Console: <span ><button class="buttonSmall float-right" style="background-color: white; color: black; border: 2px solid #FFA500;"  onclick="document.getElementById('outputField').value=''; document.cookie = 'repl=; Max-Age=50';">Clear</button></span>
 
                     <textarea readonly id="outputField" placeholder=">"></textarea>
 
@@ -496,7 +512,7 @@
 <!--                        <br>-->
 <!--                        <p>© AMU 2019-2020</p>-->
 <!--                    </footer>-->
-                    <div  class="border border-dark gh" >Define variables:<span id = "tips"></span></div>
+                    <div  class="border border-dark gh" >Defined variables:<span id = "tips"></span></div>
 
                     <script>
                         function submitOnEnter(event){
@@ -575,7 +591,7 @@ comments
                                 <!-- Modal content -->
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <span class="close" onclick="closeModel()">&times;</span>
+                                        <span class="close" style="margin-left: 0px" onclick="closeModel()">&times;</span>
                                         <h2>Our Graph</h2>
                                     </div>
                                     <div class="modal-body">
