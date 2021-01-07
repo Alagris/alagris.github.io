@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 
 import org.jgrapht.graph.*;
 
+import static net.alagris.OptimisedLexTransducer.makeEmptyExternalPipelineFunction;
+
 public class Compiler {
 
     public static void main(String[] args) {
@@ -35,7 +37,24 @@ public class Compiler {
         final LinkedList<CompilationError> errors = new LinkedList<>();
         ParserListener listener = new ParserListener(dag, errors);
         ParseTreeWalker.DEFAULT.walk(listener, parser.start());
-        
+
+        OptimisedLexTransducer.OptimisedHashLexTransducer compiler = null;
+        try {
+            compiler = new OptimisedLexTransducer.OptimisedHashLexTransducer(
+                    System.getenv("NO_MINIMIZATION") == null,
+                    0,
+                    Integer.MAX_VALUE,
+                    makeEmptyExternalPipelineFunction());
+        } catch (CompilationError compilationError) {
+            compilationError.printStackTrace();
+        }
+        final ReplInfrastruct.Repl repl = new ReplInfrastruct.Repl(compiler);
+
+        try {
+            ReplInfrastruct.loop(repl);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
