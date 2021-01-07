@@ -62,6 +62,15 @@
     </script>
 
     <style>
+.qgca {/*quick guide code area*/
+  background-color:#18222d;
+  color:white;
+  border-radius:3px;
+  border: solid #2a394a thin;
+}
+a.qgca {
+  pointer-events: none;
+}
 .button {
   background-color: #4CAF50; /* Green */
   border: none;
@@ -501,7 +510,10 @@
       listAutomata()
   }
 
-
+  function htmlDecode(input) {
+    var doc = new DOMParser().parseFromString(input, "text/html");
+    return doc.documentElement.textContent;
+  }
   window.onload = function(){
     replSavedInCookie = getCookie('repl')
     if(replSavedInCookie == null)return
@@ -707,68 +719,178 @@
 
                                 Solomonoff is a regular language with many enhancements.
                                 It compiles to symbolic weighted transducers.
-                                Use can use <a style="background-color:#18222d; color:white;">|</a>, <a style="background-color:#18222d; color:white;">*</a>,
-                            <a style="background-color:#18222d; color:white;">?</a>, <a style="background-color:#18222d; color:white;">+</a> just like
-                            in UNIX regexes. Use can even use square brackets with ranges like
-                            <a style="background-color:#18222d; color:white;">[a-z]</a> or <a style="background-color:#18222d; color:white;">[0-1]</a>
-                            but you are not allowed to combine them together. For instance the following are not valid
-                            <a style="background-color:#18222d; color:white;">[a-z0-1]</a>, <a style="background-color:#18222d; color:white;">[a]</a>,
-                            <a style="background-color:#18222d; color:white;">[a-z0]</a>. You also need to mind that
-                            all literal strings have to be enclosed in single quotes, like <a style="background-color:#18222d; color:white;">'a'</a>,
-                            <a style="background-color:#18222d; color:white;">'str\ning'</a> or the empty string <a style="background-color:#18222d; color:white;">''</a>.
-                            Hence the UNIX regex <a style="background-color:#18222d; color:white;">(AA[0-9a-z]BB+)*</a>
-                            might be equivalently written in Solomonoff as
-                            <a style="background-color:#18222d; color:white;">('AA' ([0-9]|[a-z])'B' 'B'+)*</a>.
+                            Just like in UNIX regexes, you can use <a class="qgca">* | ? +</a>
+                            and square brackets with ranges like
+                            <a class="qgca">[a-z]</a> or <a class="qgca">[0-1]</a>.
+                            Each such range is later compiled to a single transition.
+                            For this reason you are not allowed to combine them together.
+                            For instance the following are not valid
+                            <a class="qgca">[a-z0-1]</a>, <a class="qgca">[a]</a>,
+                            <a class="qgca">[a-z0]</a>. All literal strings have to be enclosed in single quotes, like <a class="qgca">'a'</a>,
+                            <a class="qgca">'str\ning'</a> or the empty string <a class="qgca">''</a>.
+                            Hence the UNIX regex <br/> <a class="qgca">(AA[0-9a-z]BB+)*</a> <br/>
+                            might be equivalently written in Solomonoff as <br/>
+                            <a class="qgca">('AA' ([0-9]|[a-z])'B' 'B'+)*</a>.
                             <br/><br/>
                             Every regular expression needs to be defined as a variable
 
-                                <pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
+                                <pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
 x = ('AA' ([0-9]|[a-z])'B' 'B'+)*</pre>
-                            You may group your regular expressions into multiple variables. There
-                            is no need to separate the definitions with semicolons like in some other languages
-                                <pre id="codeTutorial" style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
+                            Several variables can be used as building blocks for larger expressions.
+                                <pre id="codeTutorial" class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
 x = 'he' 'l'+ 'lo'
 y = 'world'
 hello_world=x ' ' y</pre>
                             You can click on the above examples to copy them to code editor. Then press
                             "compile" button and you will be able to test them in REPL.
-                            <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
+                            <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >
 :eval hello_world 'hellllllo world'</pre>
                             Type the above command in console (or click to automatically copy it).
-                            Notice that typing <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
+                            Notice that typing <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >
 :eval x 'hellllllo'</pre>
-                            results in <a style="background-color:#18222d; color:white;">Transducer 'x' not found!</a>.
+                            results in <a class="qgca">Transducer 'x' not found!</a>. That's because
+                            variables can be <b>introduced</b> to the scope as well as <b>consumed</b>.
+                            All copies must be made explicitly by the user (similarly like in Rust).
+                            <br/><br/>
                             Below the REPL console you may see the current list of defined variables. Whenever
-                            you use a variable as a building block for another expression, the variables gets "consumed".
-                            In order to prevent this, you can explicitly copy the variable with double exclamation marks <pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
+                            you use a variable as a building block for another expression, the variables is consumed.
+                            In order to prevent this, you need to explicitly copy the variable using double exclamation marks <pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
 x = 'he' 'l'+ 'lo'
 y = 'world'
 hello_world2= !!x ' ' !!y</pre>
-                            Now if you compile this, you will be able to run <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
+                            Now if you compile this, you will be able to run <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >
 :eval x 'hellllllo'</pre>
                             Be careful not to redefine variables that are already defined. Notice that we
-                            created <a style="background-color:#18222d; color:white;">hello_world2</a> instead of
-                            <a style="background-color:#18222d; color:white;">hello_world</a>, because the latter was already
+                            created <a class="qgca">hello_world2</a> instead of
+                            <a class="qgca">hello_world</a>, because the latter was already
                             created and was not yet consumed. You can only redeclare a variable after it was consumed.
-                            Alternatively you may also run<pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
+                            Alternatively you may also run<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >
 :unset hello_world</pre>
-                            To see the full list of available REPL commands, you may type <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
-:?</pre>
-                            The core feature of Solomonoff are of course the transducers.
+                            <br/>
+                            <br/>
+                            It's possible to use comments. The syntax is the same as in C, Java, Rust and many other languages<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+//single line comment
+
+/*multi
+line
+comment*/</pre>
+
+                            <br/>
+                            <br/>
+                            The core feature of Solomonoff is of course the transducers.
                             This means that you can specify output printed by any regular expression.
-                            For example <pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
+                            For example <pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
 z = 'a':'b'</pre>
-                            will print <a style="background-color:#18222d; color:white;">b</a> as the output
-                            whenever <a style="background-color:#18222d; color:white;">a</a> is matched.
-                            Try it with <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
+                            will print <a class="qgca">b</a> as the output
+                            whenever <a class="qgca">a</a> is matched.
+                            Try it with <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >
 :eval z 'a'</pre>
-                            Another example might be<pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
+                            Another example might be<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
 z2 = ('a':'b')*
 z3 = [0-9]:'cde'
 z4 = :'prefix' !!z2 !!z3
 z5 = '':'01234'</pre>
-                            The output get concatenated if specified one after the other<pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
+                            The outputs get concatenated if specified one after the other<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
 z6= :'a' :'b' '0' </pre>
+                            The order of input and output strings often doesn't matter.
+                            The following are all equivalent<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+z7= 'abc':'012'
+z8= :'012' 'abc'
+z9= :'01' 'a' :'2' 'bc'
+z10= :'0' 'a' :'1' 'b' :'2' 'c'</pre>
+                            However the following are not equivalent<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+z11= 'a':'0' | 'b'
+z12= 'a' | 'b':'0'
+z13= ('a' | 'b'):'0'</pre>
+                            and neither are those<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+z14= 'a'*:'0'
+z15= ('a':'0')*</pre>
+                            In other words, the input strings commute with output strings when concatenated.
+                            <br/>
+                            <br/>
+                            In Solomonoff everything is a 32-bit integer. You can write unicode strings for convenience<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+z16='寿司が好きです'</pre>
+                            but under the hood it's nothing more than a sequence of integers. You can write
+                            with integers directly using the angle bracket notation <a class="qgca">&lt;&gt;</a>. For example the
+                            previous example could be equivalently written as <pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+z17=&lt;23551 21496 12364 22909 12365 12391 12377&gt;</pre>
+                            Similarly, instead of <a class="qgca">[a-z]</a> you may write <a class="qgca">&lt;97-122&gt;</a>
+                            <br/>
+                            <br/>
+                            You can visualise state graphs of automata using the command <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >
+:vis z6</pre>
+                            This way you will exactly see how the regular expression determines structure of automaton.
+                            There is a one-to-one correspondence between symbols input symbols in expressions and states in
+                            automaton. Every range <a class="qgca">[a-z]</a> translates to a single state.
+                            Every input string <a class="qgca">'xyz'</a> is a concatenation of individual letters
+                            <a class="qgca">'x' 'y' 'z'</a> and each of them is nothing more than a singleton range
+                            <a class="qgca">[x-x] [y-y] [z-z]</a>. Each range, like for instance <a class="qgca">[a-z]</a>, becomes an individual state in the graph
+                            and all transitions incoming to it have input label  <a class="qgca"><97-122></a> (because those are the
+                            corresponding ASCII numbers for a and z). There is also one more initial state that does not correspond to
+                            any input symbol. We encourage the user to experiment with different graphs and regexes.
+                            <br/>
+                            <br/>
+                            To see the full list of available REPL commands, you may type
+                            <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >:?</pre>
+                            <br/>
+                            Solomonoff comes with support for inductive inference out-of-the-box.
+                            You can learn automata from examples. The following presents RPNI algorithm
+                            for learning acceptors (also known as DFA) from positive and negative examples.<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+learn1 = rpni!('ab','a':#,'aba':#,'abab','ababa':#)</pre>
+                            The examples <a class="qgca">'ab', 'abab'</a> are recognized by automaton, whereas
+                            <a class="qgca">'a':#, 'aba':#, 'ababa':#</a> are negative examples that could be rejected.
+                            You can now evaluate
+                            <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+:eval learn1 'abababababab'</pre>
+                            and notice that the automaton has successfully learned to continue the pattern.
+                            Similarly you can use RPNI for learning mealy automata<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)" >
+learn2 = rpni_mealy!('ab':'01','a':'0','aba':'012','abab':'0121','ababa':'01210')</pre>
+                            and you can see how the pattern is extrapolated to<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+:eval learn2 'abababababababababab'</pre>
+                            In case of mealy machines, an  <a class="qgca">IllegalArgumentException</a> will be throw
+                            when the length of input string does not match the length of output string.
+                            To learn strings of different lengths a more powerful model is needed. You may
+                            learn transducers with OSTIA algorithm<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+learn3 = ostia!('ab':'0','abab':'01','ababab':'010','abababab':'0101')</pre>
+                            and you may test it with<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+:eval learn3 'ababababababab'</pre>
+
+                            <br/>
+                            <br/>
+                            Solomonoff supports many additional operations. The inverse of transducer swaps inputs with outputs
+                            <pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+inverted = inverse['a':'b']</pre>
+                            Test it with<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+:eval inverted 'b'</pre>
+                            The result is equivalent to writing<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+inverted = :'a' 'b'</pre>
+                            <br/>
+                            The composition operation, feeds the output of one transducer as input to the other.
+                            <pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+composed = compose['a':'b', 'b':'c']</pre>
+                            Test it with<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+:eval composed 'a'</pre>
+                            The result is equivalent to writing<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+composed = 'a':'c'</pre>
+                            <br/>
+                            The difference operation, removes from one transducer all the strings accepted by the other
+                            <pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+difference = subtract['a'|'b', 'b']</pre>
+                            Test it with<pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+:eval difference 'a'</pre>
+                            but notice that it does not work for the other string
+                            <pre class="qgca" onclick="inputField.value=unescape(this.innerHTML)">
+:eval difference 'b'</pre>
+                            The result is equivalent to writing<pre class="qgca" onclick="insert(htmlDecode(this.innerHTML))" >
+difference = 'a'</pre>
+                            <br/>
+
+                            For more information, come to our github page!
+                            Link can be found in the navigation bar under the tab "More".
+
+
+
+
 
 
 
