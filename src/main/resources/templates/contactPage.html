@@ -39,6 +39,34 @@
           font-size: 3.5rem;
         }
       }
+
+      .centerDiv{
+          position: absolute;
+          left: 50%;
+          top: 45%;
+          transform: translate(-50%, -50%);
+          border: 4px double black;
+          /* border: 5px solid #85857c; */
+          /* padding: 10px; */
+          width: 50%;
+          height: 35%;
+          padding: 1%;
+        /* background-color: rgb(189, 185, 185); */
+          background-image: url(images/bg1.png);
+          margin-top: 20px;
+          
+      }
+
+      /* .centerDivDiv{
+          position: relative;
+          border: 5px solid #85857c; 
+          
+          width: 90%;
+          height: 80%;
+
+      } */
+
+
     </style>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -57,28 +85,23 @@
 
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="/compiler1">Compiler</a>
-            </li>
             <li class="nav-item active">
-                <a class="nav-link" href="/DocPage">Documentation <span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="/compiler">Compiler </a>
             </li>
-            <!-- <li class="nav-item">
-              <a class="nav-link disabled" href="https://getbootstrap.com/docs/4.5/examples/jumbotron/#" tabindex="-1" aria-disabled="true">Features</a>
-            </li> -->
+            <li class="nav-item">
+                <a class="nav-link" href="/DocPage">Documentation</a>
+            </li>
+
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a>
+                <a class="nav-link dropdown-toggle" href="" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a><span class="sr-only">(current)</span>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     <a class="dropdown-item" href="/Contact">Contact</a>
-                    <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">Git hub</a>
-<!--                    <a class="dropdown-item" href="https://getbootstrap.com/docs/4.5/examples/jumbotron/#">Something else here</a>-->
+                    <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">Git Hub</a>
+                    <!-- <a class="dropdown-item" href="https://getbootstrap.com/docs/4.5/examples/jumbotron/#">Something else here</a> -->
                 </div>
             </li>
         </ul>
-        <!--        <form class="form-inline my-2 my-lg-0">-->
-        <!--            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">-->
-        <!--            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>-->
-        <!--        </form>-->
+
     </div>
 </nav>
 
@@ -87,56 +110,32 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
         <div class="container">
-            <h1 class="display-3">Solomonoff Compiler Documentation</h1>
+            <h1 class="display-3">Contact</h1>
             <br/>
-            <p>Solomonoff Compiler is an innovative solution designed for ..</p>
+
             <!-- <p><a class="btn btn-primary btn-lg" href="/compiler" role="button">Get Started </a></p> -->
         </div>
+
     </div>
+    <div class="centerDiv"><h5 style="text-align:center">Team</h5> <div class="centerDivDiv">
+        
+        <p> <b>Aleksander Mendoza-Drosik</b> - primarily works on theoretical background,
+            designs prototype in Java and writes tutorials for rest of team. Reviews </p>
+        <p><a href="mailto:alemen1@st.amu.edu.pl?subject=MAIL">alemen1@st.amu.edu.pl</a></p>
+        <p><b>Marcin Jabłoński</b> - implements and optimizes C version of compiler</p>
+        <p><a href="mailto:marjab7@st.amu.edu.pl?subject=MAIL">marjab7@st.amu.edu.pl</a></p>
+        <p> <b>Bohdan Bondar</b> - implements frontend and backend, writes JavaScript bindings</p>
+        <p><a href="mailto:bohbon@st.amu.edu.pl?subject=MAIL">bohbon@st.amu.edu.pl</a></p>
+
+    </div></div>
 
 
-    <nav id="navbar-example3" class="list-group navbar-light bg-light">
-        <a class="navbar-brand" href="#">Content</a>
-        <nav class="nav nav-pills flex-column">
-            <a class="nav-link" href="#item-1">Item 1</a>
-            <nav class="nav nav-pills flex-column">
-                <a class="nav-link ml-3 my-1" href="#item-1-1">Item 1-1</a>
-                <a class="nav-link ml-3 my-1" href="#item-1-2">Item 1-2</a>
-            </nav>
-            <a class="nav-link" href="#item-2">Item2</a>
-            <a class="nav-link" href="#item-3">Item3</a>
-            <nav class="nav nav-pills flex-column">
-                <a class="nav-link ml-3 my-1" href="#item-3-1">Item 3-1</a>
-                <a class="nav-link ml-3 my-1" href="#item-3-2">Item 3-2</a>
-            </nav>
-        </nav>
-    </nav>
-    <br/>
-    <br/>
-    <div data-spy="scroll" data-target="#navbar-example3" data-offset="0">
-        <h4 id="item-1">Item 1</h4>
-        <p>...</p>
-        <h5 id="item-1-1">Item 1-1</h5>
-        <p>...</p>
-        <h5 id="item-1-2">Item 2-2</h5>
-        <p>...</p>
-        <h4 id="item-2">Item 2</h4>
-        <p>...</p>
-        <h4 id="item-3">Item 3</h4>
-        <p>...</p>
-        <h5 id="item-3-1">Item 3-1</h5>
-        <p>...</p>
-        <h5 id="item-3-2">Item 3-2</h5>
-        <p>...</p>
-    </div>
+
 
 
 
 </main>
 
-<footer class="container">
-    <p>© AMU 2019-2020</p>
-</footer>
 
 
 

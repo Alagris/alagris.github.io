@@ -49,10 +49,10 @@ public class MainC {
         model.addAttribute("title", "Solomonoff - Documentation");
         return "DocPage";
     }
-    @GetMapping("/test")
-    public String test1(Model model) {
+    @GetMapping("/Contact")
+    public String contact(Model model) {
         model.addAttribute("title", "Solomonoff - Documentation");
-        return "EXindex";
+        return "contactPage";
     }
     @GetMapping("/rest")
     public String rest1(Model model) {
