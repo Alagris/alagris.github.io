@@ -57,7 +57,8 @@ public class MainC {
     @GetMapping("/rest")
     public String rest1(Model model) {
         model.addAttribute("title", "Solomonoff - Documentation");
-        return "rest1";
+        return "Blog";
+
     }
 
 }
