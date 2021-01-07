@@ -384,6 +384,7 @@
       if(replSavedInCookie == null)return
         outputField.value = decodeURIComponent(replSavedInCookie[0])
         outputField.scrollTop = outputField.scrollHeight
+        listAutomata()
 
     }
 
@@ -561,77 +562,28 @@
                     <button class="button button2 .btnn" onclick="" >
                         More
                     </button>
+<!--                    <p onclick="insert()">x = 'trt'</p>-->
 
+
+
+<!--                    <iframe src="js/DocPage.html" style="border: 2px solid gray; margin-top: 5px;  height: 95%; max-height:95%; margin-bottom: 5px;-->
+<!--       width: 100%; "></iframe>-->
                         <div class="ex1">
-                            <h2>Quick tour</h2>
-
-                                Solomonoff is a regular language with many enhancements.
-                                It compiles to symbolic weighted transducers.
-                                Use can use <a style="background-color:#18222d; color:white;">|</a>, <a style="background-color:#18222d; color:white;">*</a>,
-                            <a style="background-color:#18222d; color:white;">?</a>, <a style="background-color:#18222d; color:white;">+</a> just like
-                            in UNIX regexes. Use can even use square brackets with ranges like
-                            <a style="background-color:#18222d; color:white;">[a-z]</a> or <a style="background-color:#18222d; color:white;">[0-1]</a>
-                            but you are not allowed to combine them together. For instance the following are not valid
-                            <a style="background-color:#18222d; color:white;">[a-z0-1]</a>, <a style="background-color:#18222d; color:white;">[a]</a>,
-                            <a style="background-color:#18222d; color:white;">[a-z0]</a>. You also need to mind that
-                            all literal strings have to be enclosed in single quotes, like <a style="background-color:#18222d; color:white;">'a'</a>,
-                            <a style="background-color:#18222d; color:white;">'str\ning'</a> or the empty string <a style="background-color:#18222d; color:white;">''</a>.
-                            Hence the UNIX regex <a style="background-color:#18222d; color:white;">(AA[0-9a-z]BB+)*</a>
-                            might be equivalently written in Solomonoff as
-                            <a style="background-color:#18222d; color:white;">('AA' ([0-9]|[a-z])'B' 'B'+)*</a>.
-                            <br/><br/>
-                            Every regular expression needs to be defined as a variable
-
-                                <pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
-x = ('AA' ([0-9]|[a-z])'B' 'B'+)*</pre>
-                            You may group your regular expressions into multiple variables. There
-                            is no need to separate the definitions with semicolons like in some other languages
-                                <pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
-x = 'he' 'l'+ 'lo'
-y = 'world'
-hello_world=x ' ' y</pre>
-                            You can click on the above examples to copy them to code editor. Then press
-                            "compile" button and you will be able to test them in REPL.
-                            <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
-:eval hello_world 'hellllllo world'</pre>
-                            Type the above command in console (or click to automatically copy it).
-                            Notice that typing <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
-:eval x 'hellllllo'</pre>
-                            results in <a style="background-color:#18222d; color:white;">Transducer 'x' not found!</a>.
-                            Below the REPL console you may see the current list of defined variables. Whenever
-                            you use a variable as a building block for another expression, the variables gets "consumed".
-                            In order to prevent this, you can explicitly copy the variable with double exclamation marks <pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
-x = 'he' 'l'+ 'lo'
-y = 'world'
-hello_world2= !!x ' ' !!y</pre>
-                            Now if you compile this, you will be able to run <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
-:eval x 'hellllllo'</pre>
-                            Be careful not to redefine variables that are already defined. Notice that we
-                            created <a style="background-color:#18222d; color:white;">hello_world2</a> instead of
-                            <a style="background-color:#18222d; color:white;">hello_world</a>, because the latter was already
-                            created and was not yet consumed. You can only redeclare a variable after it was consumed.
-                            Alternatively you may also run<pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
-:unset hello_world</pre>
-                            To see the full list of available REPL commands, you may type <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
-:?</pre>
-                            The core feature of Solomonoff are of course the transducers.
-                            This means that you can specify output printed by any regular expression.
-                            For example <pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
-z = 'a':'b'</pre>
-                            will print <a style="background-color:#18222d; color:white;">b</a> as the output
-                            whenever <a style="background-color:#18222d; color:white;">a</a> is matched.
-                            Try it with <pre style="background-color:#18222d; color:white;" onclick="inputField.value=unescape(this.innerHTML)" >
-:eval z 'a'</pre>
-                            Another example might be<pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
-z2 = ('a':'b')*
-z3 = [0-9]:'cde'
-z4 = :'prefix' !!z2 !!z3
-z5 = '':'01234'</pre>
-                            The output get concatenated if specified one after the other<pre style="background-color:#18222d; color:white;" onclick="insert(unescape(this.innerHTML))" >
-z6= :'a' :'b' '0' </pre>
-
-
-
+                            <h2>You can try some examples</h2>
+                            <ul>
+                                <li onclick="insert('x =\'trt\'')" > <h4>Example 1</h4><p>x = 'trt'</p></li>
+                                <li onclick="insert('x = \'abcd\' \/\/ some regex \nx \<: [a-z]* \/\/ensure that it uses specific alphabet \nz = x \<404\> x \/\/ use codepoint 404 as some external symbol \nz \<: \([a-z]\|\<404\>\)\*  ')" ><h4>Example 2</h4><pre>
+x = 'abcd' // some regex
+x <: [a-z]* //ensure that it uses specific alphabet
+z = x <404> x // use codepoint 404 as some "external symbol"
+z <: ([a-z]|<404>)*</pre></li>
+                                <li onclick="insert('\/\* and /nmultiline\ncomments\n\*\/')" ><h4>Example 3</h4><pre>//You can use line comments
+/* and
+multiline
+comments
+*/</pre></li>
+                                <li onclick="insert('x = \'abc\':\'01f\' 1 \| \'re\':\'2\' 2')" ><h4>Example 4</h4><pre>x = 'abc':'01f' 1 | 're':'2' 2</pre></li>
+                            </ul>
 <!--                            <div id="ji">lol</div>-->
 
                             <!-- The Modal -->
