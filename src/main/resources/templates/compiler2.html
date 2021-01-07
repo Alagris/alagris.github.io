@@ -320,147 +320,273 @@
     </style>
 
 
-    <script>
-    replHistory = []
-    replHistoryIndex = 0
-    replCurrent = ""
-    const MAX_REPL_LENGTH = 3000
-     async function listAutomata(){
-        const response = await fetch('list_automata',{method:'POST'})
-        const replResult = await response.text()
-        const automata = JSON.parse(replResult)
-        var ll = "";
-        while (automataHtmlList.firstChild)
-            automataHtmlList.removeChild(automataHtmlList.firstChild);
-        for(var i=0;i<automata.length;i++){
-            var item = document.createElement('li');
-            ll = ll+automata[i]+" ,";
-            // Set its contents:
-            item.appendChild(document.createTextNode(automata[i]));
+<script>
+  replHistory = []
+  replHistoryIndex = 0
+  replCurrent = ""
+  const MAX_REPL_LENGTH = 3000
+   async function listAutomata(){
+      const response = await fetch('list_automata',{method:'POST'})
+      const replResult = await response.text()
+      const automata = JSON.parse(replResult)
+      var ll = "";
+      while (automataHtmlList.firstChild)
+          automataHtmlList.removeChild(automataHtmlList.firstChild);
+      for(var i=0;i<automata.length;i++){
+          var item = document.createElement('li');
+          ll = ll+automata[i]+" ,";
+          // Set its contents:
+          item.appendChild(document.createTextNode(automata[i]));
 
-            // Add it to the list:
-            automataHtmlList.appendChild(item);
+          // Add it to the list:
+          automataHtmlList.appendChild(item);
+      }
+      //var tok = automataHtmlList + "";
+     // automataHtmlList.toString();
+     // automataHtmlList.join('; ');
+    var fok = "Define variables: " + ll;
+    tips.innerText = ll;
+
+
+    //  document.getElementsByName('inp')[0].placeholder=fok;
+
+  }
+
+  function escapeCookie(cookieText){
+      escaped = ''
+      for (var i = 0; i < cookieText.length; i++) {
+        if(cookieText.charAt(i)==';'){
+          escaped = escaped+'%s'
+        }else if(cookieText.charAt(i)=='%'){
+          escaped = escaped+'%p'
+        }else if(cookieText.charAt(i)=='\n'){
+          escaped = escaped+'%n'
+        } else {
+          escaped = escaped+cookieText.charAt(i)
         }
-        //var tok = automataHtmlList + "";
-       // automataHtmlList.toString();
-       // automataHtmlList.join('; ');
-      var fok = "Define variables: " + ll;
-      window.document.getElementById("tips").innerText = ll;
-
-
-      //  document.getElementsByName('inp')[0].placeholder=fok;
-
-    }
-
-    async function repl(){
-        const trimmedInput = inputField.value.trim().replaceAll('\n','')
-        if(trimmedInput.length==0)return;
-        if(trimmedInput.startsWith(":vis ")){
-            automatonToView = trimmedInput.substr(":vis ".length).trim()
-            if(automatonToView.length==0)return "";
-            const response = await fetch('get_graph',{method:'POST',body:automatonToView})
-            const graph = await response.text()
-            replResult = ''
-            console.log(graph)
-
-            const workerURL = 'js/full.render.js';
-            let viz = new Viz({ workerURL });
-
-            viz.renderSVGElement(graph)
-            .then(function(element) {
-            ji.innerHTML = '';
-            ji.appendChild(element);
-
-            var modal = document.getElementById("myModal");
-            modal.style.display = "block";
-            })
-
-             .catch(error => {
-              // Create a new Viz instance (@see Caveats page for more info)
-              viz = new Viz({ workerURL });
-
-              // Possibly display the error
-              console.error(error);
-              });
-
-        }else if(trimmedInput.startsWith(":clear")){
-
-            document.cookie = "repl=; Max-Age=50";
-            document.getElementById('outputField').value='';
-            replResult = "";
-
+      }
+      return escaped
+  }
+  function unescapeCookie(cookieText){
+      unescaped = ''
+      for (var i = 0; i < cookieText.length; i++) {
+        if(cookieText.charAt(i)=='%'){
+          if(cookieText.charAt(i+1)=='s'){
+             unescaped = unescaped+';'
+          }else if(cookieText.charAt(i+1)=='p'){
+             unescaped = unescaped+'%'
+          }else if(cookieText.charAt(i+1)=='n'){
+             unescaped = unescaped+'\n'
+          }
+          i++
         }else{
-            const response = await fetch('repl',{method:'POST',body:trimmedInput})
-            replResult = await response.text()
+          unescaped = unescaped+cookieText.charAt(i)
         }
-        replHistory.push(trimmedInput)
-        replHistoryIndex = replHistory.length
-        replBuffer = outputField.value + '> '+trimmedInput+'\n'+(replResult+'\n').trimStart()
-        if(replBuffer.length>MAX_REPL_LENGTH){
-            replBuffer = replBuffer.substr(replBuffer.length-MAX_REPL_LENGTH)
-        }
-        outputField.value = replBuffer
-        document.cookie = "repl="+encodeURIComponent(replBuffer)+";max-age="+(60*60*60)+";"
-        outputField.scrollTop = outputField.scrollHeight
+      }
+      return unescaped
+  }
 
-        replCurrent = inputField.value = ""
-        listAutomata()
-    }
+  function setCookie(key,value){
+     document.cookie = key+"="+escapeCookie(value)+";max-age="+(60*60*60)+";"
+  }
 
-     window.onload = function(){
-      replSavedInCookie = document.cookie.match('(?<=;\\s*repl=)[^;]*')
-      if(replSavedInCookie == null)return
-        outputField.value = decodeURIComponent(replSavedInCookie[0])
-        outputField.scrollTop = outputField.scrollHeight
+  function getCookie(key){
+     matches = document.cookie.match(';\\s*'+key+'=([^;]*)')
+     if(matches==null)return null;
+     return matches[1]
+  }
 
-    }
+  function printToREPL(replCommand, replResult, wasError){
+      if(replCommand!=null){
+         replHistory.push(replCommand)
+         replHistoryIndex = replHistory.length
+         replBuffer = outputField.value + '> '+replCommand+'\n'+(replResult+'\n').trimStart()
+      }else{
+         replBuffer = outputField.value + (replResult+'\n').trimStart()
+      }
 
+      if(replBuffer.length>MAX_REPL_LENGTH){
+          replBuffer = replBuffer.substr(replBuffer.length-MAX_REPL_LENGTH)
+      }
+      outputField.value = replBuffer
+      setCookie('repl',replBuffer)
+      outputField.scrollTop = outputField.scrollHeight
+      replCurrent = inputField.value = ""
 
-
-
-    function closeModel(){
-                  var Cmodal = document.getElementById("myModal");
-                  Cmodal.style.display = "none";
-                  console.log("test");
-                  }
-
-
-    async function compile(){
-
-        const code = editor.getValue()
-        console.log(code);
-        const response = await fetch('compile',{method:'POST',body:code})
-        const errorMessage = await response.text()
-
-        console.log("Compiler says: "+errorMessage)
-
-        if(errorMessage!=""){
-          outputField.value += errorMessage + "\n"
-          outputField.style.borderWidth = 'medium'
-          outputField.style.borderColor = "red"
-          setTimeout(function(){
-             outputField.style.borderWidth = 'thin'
-             outputField.style.borderColor = "black"
-             },1000);
-        }
-        listAutomata()
-    }
-
-    </script>
-    <script>
-        function insert(text){
-            var customPosition = {
-                row: 0,
-                column: 0
-                };
-            //var text = "x = 'trt'";
-            editor.setValue(text);
-            //editor.session.insert(customPosition , text);
-
-        }
+      if(wasError){
+        outputField.style.borderWidth = 'medium'
+        outputField.style.borderColor = "red"
+        setTimeout(function(){
+           outputField.style.borderWidth = 'thin'
+           outputField.style.borderColor = "black"
+           },1000);
+      }
+  }
 
 
-    </script>
+  function preprocessAndPrintToREPL(replCommand, replResult, wasError){
+  const duplicateVarError = 'net.alagris.CompilationError$DuplicateFunction'
+     if(replResult.startsWith(duplicateVarError)){
+       variable = replResult.match('net\\.alagris\\.CompilationError\\$DuplicateFunction:\\s+(\\S+)')[1]
+       wasError = true
+       replResult = "Variable "+variable+" already exists! You cannot redefine it unless you either consume it or run ':unset "+variable+"' command in REPL."
+       prevBorderStyle = tipsDiv.style.borderStyle
+       tipsDiv.style.borderWidth = 'large'
+       tipsDiv.style.borderColor = "red"
+       tipsDiv.style.borderStyle = 'double'
+       setTimeout(function(){
+          tipsDiv.style.borderWidth = 'thin'
+          tipsDiv.style.borderColor = "black"
+          tipsDiv.style.borderStyle = prevBorderStyle
+          },1000);
+     }
+     printToREPL(replCommand, replResult, wasError)
+  }
+
+  async function repl(){
+      const trimmedInput = inputField.value.trim()
+      const input = inputField.value.match(/\S+/g)
+      if(input==null || input.length==0){
+         inputField.value = ''
+         return;
+      }
+      if(input[0] == ":vis"){
+          if(input.length==1){
+             printToREPL(trimmedInput, 'missing argument :vis <TRANSDUCER_NAME>', true)
+             return
+          }else if(input.length>2){
+             printToREPL(trimmedInput, 'too many arguments for :vis <TRANSDUCER_NAME>', true)
+             return
+          }
+          automatonToView = input[1]
+          if(automatonToView.length==0)return "";
+          const response = await fetch('get_graph',{method:'POST',body:automatonToView})
+          const graph = await response.text()
+          replResult = ''
+          console.log(graph)
+
+          const workerURL = 'js/full.render.js';
+          let viz = new Viz({ workerURL });
+
+          viz.renderSVGElement(graph)
+          .then(function(element) {
+          ji.innerHTML = '';
+          ji.appendChild(element);
+
+          var modal = document.getElementById("myModal");
+          modal.style.display = "block";
+
+        if (document.cookie.match('(?<=(;|^)\\s*FirstTimeGraph=)[^;]*')==null){
+        document.cookie = "FirstTimeGraph=; Max-Age=216000"
+          graphTitle.innerHTML =  'The edges are labeled with input ranges, output strings and weights. The format is (&lt;rangeBeginning-rangeEnd&gt;\:\'outputString\' weight)'
+        
+          }})
+
+           .catch(error => {
+            // Create a new Viz instance (@see Caveats page for more info)
+            viz = new Viz({ workerURL });
+
+            // Possibly display the error
+            console.error(error);
+            });
+
+      }else if(input[0] == ":clear"){
+          clearREPL()
+          replResult = "";
+      }else{
+          const response = await fetch('repl',{method:'POST',body:trimmedInput})
+          replResult = await response.text()
+      }
+      preprocessAndPrintToREPL(trimmedInput,replResult,replResult.startsWith('java.lang.RuntimeException'))
+      listAutomata()
+  }
+
+
+  window.onload = function(){
+    replSavedInCookie = getCookie('repl')
+    if(replSavedInCookie == null)return
+    outputField.value = unescapeCookie(replSavedInCookie)
+    outputField.scrollTop = outputField.scrollHeight
+    inputField.addEventListener("keydown", submitOnEnter);
+    inputField.addEventListener("paste", function(e){
+      var clipboardData = e.clipboardData || e.originalEvent.clipboardData || window.clipboardData;
+      if (clipboardData){
+        var text = clipboardData.getData('text');
+        text = text.replace(/\n/g, ' ');
+        e.target.value = text;
+        e.preventDefault();
+      }
+    });
+
+  }
+
+
+  function closeModel(){
+      var Cmodal = document.getElementById("myModal");
+      Cmodal.style.display = "none";
+      console.log("test");
+  }
+
+
+  async function compile(){
+
+      const code = editor.getValue().trim()
+      if(code.length==0)return
+      const response = await fetch('compile',{method:'POST',body:code})
+      const errorMessage = await response.text()
+
+      preprocessAndPrintToREPL(null,errorMessage, errorMessage.trim().length>0)
+
+      listAutomata()
+  }
+
+  function clearREPL(){
+      outputField.value='';
+      setCookie('repl','')
+  }
+
+  function insert(text){
+      var customPosition = {
+          row: 0,
+          column: 0
+          };
+      //var text = "x = 'trt'";
+      editor.setValue(text);
+      //editor.session.insert(customPosition , text);
+
+  }
+
+  function submitOnEnter(event){
+      console.log(event.which)
+      if(event.which === 13){
+          repl()
+      }else if(event.which === 38){
+         if(replHistoryIndex>0){
+             if(replHistoryIndex===replHistory.length){
+                 replCurrent = inputField.value
+             }
+             replHistoryIndex--
+             inputField.value = replHistory[replHistoryIndex]
+             inputField.selectionEnd = inputField.selectionStart = 0
+         }
+      }else if(event.which === 40){
+         if(replHistoryIndex+1<replHistory.length){
+             replHistoryIndex++
+             inputField.value = replHistory[replHistoryIndex]
+             inputField.selectionEnd = inputField.selectionStart = 0
+         }else if(replHistoryIndex + 1 === replHistory.length){
+             replHistoryIndex++
+             inputField.value = replCurrent
+             inputField.selectionEnd = inputField.selectionStart = 0
+         }
+      }
+  }
+
+
+
+
+
+  </script>
 </head>
 <body data-new-gr-c-s-check-loaded="14.984.0" data-gr-ext-installed="" style="  background: #c7b39b url(images/bg3.jpg);">
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
@@ -511,7 +637,7 @@
                     </script>
 
 
-                   Console: <span ><button class="buttonSmall float-right" style="background-color: white; color: black; border: 2px solid #FFA500;"  onclick="document.getElementById('outputField').value=''; document.cookie = 'repl=; Max-Age=50';">Clear</button></span>
+                   Console: <span ><button class="buttonSmall float-right" style="background-color: white; color: black; border: 2px solid #FFA500;"  onclick="clearREPL()">Clear</button></span>
 
                     <textarea readonly id="outputField" placeholder=">"></textarea>
 
@@ -525,7 +651,7 @@
 <!--                        <br>-->
 <!--                        <p>© AMU 2019-2020</p>-->
 <!--                    </footer>-->
-                    <div  class="border border-dark gh" >Defined variables:<span id = "tips"></span></div>
+                    <div  id="tipsDiv" class="" >Defined variables:<span id = "tips"></span></div>
 
                     <script>
                         function submitOnEnter(event){
@@ -655,10 +781,10 @@ z6= :'a' :'b' '0' </pre>
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <span class="close" style="margin-left: 0px" onclick="closeModel()">&times;</span>
-                                        <h2>Our Graph</h2>
+                                        <h2>State Graph</h2>
                                     </div>
                                     <div class="modal-body">
-                                        <p>The graph bellow:</p>
+                                        <p id = "graphTitle">The graph bellow:</p>
 
                                         <div id="ji">lol</div>
                                     </div>
