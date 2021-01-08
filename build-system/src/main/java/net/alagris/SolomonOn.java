@@ -1,19 +1,8 @@
 package net.alagris;
 
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.stream.Stream;
 
-import org.jgrapht.graph.*;
 import picocli.CommandLine;
 import picocli.CommandLine.*;
 
@@ -23,25 +12,42 @@ import static net.alagris.OptimisedLexTransducer.makeEmptyExternalPipelineFuncti
         description = "Solomonoff compiler")
 class Compiler implements Callable<Integer> {
 
-    @Parameters(index = "0", defaultValue = "run", description = "\nbuild\nrun")
+    @Parameters(index = "0", defaultValue = "build", description = "\nbuild\nrun\ninteractive")
     private String command;
 
-    @Option(names = {"-f", "--file"}, description = "default is build.toml")
-    private String file = "build.toml";
+    @Option(names = {"-f", "--file"}, description = "file to run")
+    private String inputFile;
+    
+    @Option(names = {"-b", "--build-file"}, defaultValue = "build.toml", description = "default is build.toml")
+    private String buildFile;
+
+    @Option(names = {"-n", "--no-minimization"}, description = "disable minimization")
+    private boolean disableMinimimization;
 
     @Override
     public Integer call() throws Exception { // your business logic goes here...
         OptimisedLexTransducer.OptimisedHashLexTransducer compiler = null;
-        try {
+
+        if (command.equals("interactive")) {
             compiler = new OptimisedLexTransducer.OptimisedHashLexTransducer(
-                    System.getenv("NO_MINIMIZATION") == null,
+                    (!disableMinimimization),
                     0,
                     Integer.MAX_VALUE,
                     makeEmptyExternalPipelineFunction());
-        } catch (CompilationError compilationError) {
-            compilationError.printStackTrace();
-        }
+        } else if (command.equals("run") || command.equals("build")) {
+            compiler = new OptimisedLexTransducer.OptimisedHashLexTransducer(
+                    0,
+                    Integer.MAX_VALUE,
+                    false);
+            SolomonoffBuildSystem.run(buildFile, compiler.specs, i -> {
+                compiler.specs.pseudoMinimize(i);
+                return i;
+            });
 
+        } else {
+            System.err.println("Invalid command. Try -h for help");
+            return 1;
+        }
 
         final ReplInfrastruct.Repl repl = new ReplInfrastruct.Repl(compiler);
 
