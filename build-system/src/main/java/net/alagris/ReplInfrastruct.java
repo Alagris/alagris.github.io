@@ -266,6 +266,8 @@ public class ReplInfrastruct {
 
     public static void loop(Repl repl) throws IOException{
         try (final BufferedReader sc = new BufferedReader(new InputStreamReader(System.in))) {
+            System.err.println("Solomonoff interactive console. Type :? for help");
+            System.err.flush();
             while (true) {
                 System.err.print(">");
                 System.err.flush();

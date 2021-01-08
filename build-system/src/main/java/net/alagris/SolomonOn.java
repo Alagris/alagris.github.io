@@ -10,34 +10,27 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
 import org.jgrapht.graph.*;
+import picocli.CommandLine;
+import picocli.CommandLine.*;
 
 import static net.alagris.OptimisedLexTransducer.makeEmptyExternalPipelineFunction;
 
-public class Compiler {
+@Command(name = "solomonoff", mixinStandardHelpOptions = true,
+        description = "Solomonoff compiler")
+class Compiler implements Callable<Integer> {
 
-    public static void main(String[] args) {
-        StringBuilder contentBuilder = new StringBuilder();
+    @Parameters(index = "0", defaultValue = "run", description = "\nbuild\nrun")
+    private String command;
 
-        try (Stream<String> stream = Files.lines(Paths.get("sample.mealy"), StandardCharsets.UTF_8))
-        {
-            stream.forEach(s -> contentBuilder.append(s).append("\n"));
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+    @Option(names = {"-f", "--file"}, description = "default is build.toml")
+    private String file = "build.toml";
 
-        String source = contentBuilder.toString();
-        final GrammarLexer lexer = new GrammarLexer(CharStreams.fromString(source));
-        final GrammarParser parser = new GrammarParser(new CommonTokenStream(lexer));
-        DirectedAcyclicGraph<Token, DefaultEdge> dag = new DirectedAcyclicGraph<>(DefaultEdge.class);
-        final LinkedList<CompilationError> errors = new LinkedList<>();
-        ParserListener listener = new ParserListener(dag, errors);
-        ParseTreeWalker.DEFAULT.walk(listener, parser.start());
-
+    @Override
+    public Integer call() throws Exception { // your business logic goes here...
         OptimisedLexTransducer.OptimisedHashLexTransducer compiler = null;
         try {
             compiler = new OptimisedLexTransducer.OptimisedHashLexTransducer(
@@ -48,6 +41,8 @@ public class Compiler {
         } catch (CompilationError compilationError) {
             compilationError.printStackTrace();
         }
+
+
         final ReplInfrastruct.Repl repl = new ReplInfrastruct.Repl(compiler);
 
         try {
@@ -56,6 +51,11 @@ public class Compiler {
             e.printStackTrace();
         }
 
+        return 0;
     }
 
+    public static void main(String... args) {
+        int exitCode = new CommandLine(new Compiler()).execute(args);
+        System.exit(exitCode);
+    }
 }
