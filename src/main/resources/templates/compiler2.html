@@ -156,6 +156,12 @@ a.qgca {
 
 
     <style>
+      @media only screen and (max-height: 750px) {
+  body {
+    /* background-color: lightblue; */
+    overflow: auto;
+  }
+}
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -189,9 +195,10 @@ a.qgca {
             width:60%;
             border: 2px solid gray;
             margin-left: 8px;
+           /* padding-bottom: 4%;*/
             margin-bottom: 5px;
             border-right: 6px solid rgb(111, 114, 111);
-            border-bottom: 6px solidrgb(111, 114, 111);
+            border-bottom: 6px solid rgb(111, 114, 111);
         }
         .buttonSection{
           border-left: 6px solid rgb(111, 114, 111);
@@ -228,7 +235,7 @@ a.qgca {
        margin-bottom: 5px;
 
     }
-    html {
+   body {
         overflow: hidden;
     }
     #outputField {
@@ -629,8 +636,8 @@ a.qgca {
     </div>
 </nav>
 
-<!--<main role="main">-->
-<div style="padding-top: 7vh;">
+<main role="main">
+<div style="padding-top: 64px;">
 <!--    <div class="container">-->
 
             <div class="row_cont">
@@ -657,13 +664,13 @@ a.qgca {
 <!--                    Console input (Hit enter to submit, use up and down arrow keys to traverse history):-->
 <!--                    <br/>-->
                     <ul hidden="true" id="automataHtmlList"></ul>
-                    <textarea id="inputField" name="inp" placeholder="Console input (Hit enter to submit, use up and down arrow keys to traverse history):"></textarea>
+                    <textarea id="inputField" name="inp" style="min-height:1em" placeholder="Console input (Hit enter to submit, use up and down arrow keys to traverse history):"></textarea>
 
 <!--                    <footer class="container">-->
 <!--                        <br>-->
 <!--                        <p>© AMU 2019-2020</p>-->
 <!--                    </footer>-->
-                    <div  id="tipsDiv" class="" >Defined variables:<span id = "tips"></span></div>
+                    <div  id="tipsDiv" class="" style="min-height:5%" >Defined variables:<span id = "tips"></span></div>
 
                     <script>
                         function submitOnEnter(event){
@@ -922,7 +929,7 @@ difference = 'a'</pre>
                 </div>
             </div>
 
-
+</main>
 
 
     <script>
