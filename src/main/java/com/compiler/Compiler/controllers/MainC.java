@@ -60,5 +60,12 @@ public class MainC {
         return "DownloadPage";
 
     }
+    @GetMapping("/Download2")
+    public String download2(Model model) {
+        model.addAttribute("title", "Solomonoff - Documentation");
+        return "DownloadPage2";
+
+    }
+
 
 }
