@@ -104,24 +104,25 @@
     <main class="container">
 
     <div class="row mb-2">
-        <div class="col-md-6">
+        <div class="col-md-6" style="overflow: auto;">
           <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative" style="margin-right: 20px;">
-            <div class="col p-4 d-flex flex-column position-static">
-              <strong class="d-inline-block mb-2 text-primary" style="font-size: xx-large;">Contact</strong>
-
-              <p class="card-text mb-auto">
+            <div class="col   flex-column " style=" overflow: auto; flex:content; padding: 10px;">
+              <strong class="d-inline-block mb-2 text-primary" style="font-size: xx-large">Contact</strong>
+                <div style="overflow: auto;">
+              <!-- <p class="card-text mb-auto"> -->
                 <p><a href="mailto:alemen1@st.amu.edu.pl?subject=MAIL"><b >Aleksander Mendoza-Drosik</b></a> - Developed the theoretical foundations and implemented the compiler backend</p>
                 <p><a href="mailto:marjab7@st.amu.edu.pl?subject=MAIL"><b>Marcin Jabłoński</b></a> - Implemented the build system, REPL and assisted Aleksander with compiler development</p>
                 <p><a href="mailto:bohbon@st.amu.edu.pl?subject=MAIL"><b>Bohdan Bondar</b></a> - Implemented frontend and backend, wrote JavaScript bindings</p>
-              </p>
- 
+              <!-- </p> -->
+            </div>
             </div>
             
           </div>
         </div>
+        
         <div class="col-md-6">
           <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative" >
-            <div class="col p-4 d-flex flex-column position-static " >
+            <div class="col  d-flex flex-column position-static " style="padding: 10px;" >
               <strong class="d-inline-block mb-2 text-success" style="font-size: xx-large;">License</strong>
              
               <p class="mb-auto">
@@ -140,7 +141,7 @@
   0. You just DO WHAT THE FUCK YOU WANT TO.
 </pre>
               </p>
-              <
+              
             </div>
             
           </div>
