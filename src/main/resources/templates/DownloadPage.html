@@ -109,63 +109,67 @@
   <main role="main">
       <div class="jumbotron">
           <div class="container">
-              <h1 class="display-3">Solomonoff</h1>
+              <h1 class="display-3">Get Solomonoff</h1>
               <br/>
           </div>
 
       </div>
       <div class="centerDiv">
-        <button class="btn" onclick="document.location='https://drive.google.com/file/d/1irvdvQrwI4p1zL-P9i_yd-GJP6zqX7fJ/view?usp=sharing'"><i class="fa fa-download"></i> Download</button>
+        <button class="btn" onclick="document.location='https://drive.google.com/file/d/1irvdvQrwI4p1zL-P9i_yd-GJP6zqX7fJ/view?usp=sharing'"><i class="fa fa-download"></i> Download (version 1.8)</button>
       </div>
-        <div style="margin-top: 20%;margin-left: 32px; background-color: aliceblue; width:55%;  padding-left: 20px;  border-left-color: #706b6e; border-left-style: solid;  border-left-width: 5px;">
-        <h2><a id="user-content-usage" class="anchor" aria-hidden="true" href="https://github.com/aleksander-mendoza/SolomonoffLib#usage"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Usage</h2>
-        <h4><a id="user-content-build-jar-from-sources" class="anchor" aria-hidden="true" href="https://github.com/aleksander-mendoza/SolomonoffLib#build-jar-from-sources"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Build jar from sources</h4>
-        <p>You can compile the project using</p>
-        <pre>mvn clean compile assembly:single</pre>
-        <p>Then you can run</p>
-        <pre>java -jar target/solomonoff-1.5-jar-with-dependencies.jar</pre>
-        <h4><a id="user-content-dowload-prepackaged-jar" class="anchor" aria-hidden="true" href="https://github.com/aleksander-mendoza/SolomonoffLib#dowload-prepackaged-jar"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Dowload prepackaged jar</h4>
-        <p>Here is <a href="https://drive.google.com/file/d/1irvdvQrwI4p1zL-P9i_yd-GJP6zqX7fJ/view?usp=sharing" rel="nofollow">download link</a>. Then run</p><pre>java -jar solomonoff-1.5.jar</pre>
+        <div style="margin-top: 20%; background-color: aliceblue;margin-left: 5%;margin-right:5% ;  padding: 2%;">
+        <h5>Command-line usage</h5>
+        <p>Download prepackaged jar above and run the following command to start up REPL</p> 
+        <pre>java -jar solomonoff.jar</pre>
+        <p>You can specify file to compile</p> 
+        <pre>java -jar solomonoff.jar source.mealy</pre>
+        <p>Or you can point to some TOML build script</p> 
+        <pre>java -jar solomonoff.jar build.toml</pre>
+        <p>Alternatively you can use Java API directly</p>
+        <h5>Maven</h5>
+        <pre>
+&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;solomonoff&lt;/id&gt;
+        &lt;url&gt;https://raw.github.com/aleksander-mendoza/SolomonoffLib/repository/&lt;/url&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;
 
-        <br>
-
-                <h4><a id="user-content-programmatic-usage-from-java-api" class="anchor" aria-hidden="true" href="https://github.com/aleksander-mendoza/SolomonoffLib#programmatic-usage-from-java-api"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Programmatic usage from java API</h4>
-        <p>You can very easily use the compiler with Java API</p>
-        <pre>final OptimisedHashLexTransducer compiled = new OptimisedHashLexTransducer(
-                        CharStreams.fromFileName("some/file/path.mealy"),true);
-        String output = compiled.run("function name","input string");
+&lt;dependencies&gt;
+        &lt;dependency&gt;
+        &lt;groupId&gt;org.antlr&lt;/groupId&gt;
+        &lt;artifactId&gt;antlr4-runtime&lt;/artifactId&gt;
+        &lt;version&gt;4.7.1&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;solomonoff&lt;/groupId&gt;
+        &lt;artifactId&gt;solomonoff&lt;/artifactId&gt;
+        &lt;version&gt;1.8&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;    
         </pre>
-        <h5><a id="user-content-maven" class="anchor" aria-hidden="true" href="https://github.com/aleksander-mendoza/SolomonoffLib#maven"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Maven</h5>
-        <pre>&lt;repositories&gt;
-            &lt;repository&gt;
-                &lt;id&gt;solomonoff&lt;/id&gt;
-                &lt;url&gt;https://raw.github.com/aleksander-mendoza/SolomonoffLib/repository/&lt;/url&gt;
-            &lt;/repository&gt;
-        &lt;/repositories&gt;
+        <h5>Gradle</h5>
+        <pre>
+repositories {
+    maven { url "https://raw.github.com/aleksander-mendoza/SolomonoffLib/repository/" }
+}
 
-        &lt;dependencies&gt;
-            &lt;dependency&gt;
-            &lt;groupId&gt;org.antlr&lt;/groupId&gt;
-            &lt;artifactId&gt;antlr4-runtime&lt;/artifactId&gt;
-            &lt;version&gt;4.7.1&lt;/version&gt;
-          &lt;/dependency&gt;
-          &lt;dependency&gt;
-            &lt;groupId&gt;solomonoff&lt;/groupId&gt;
-            &lt;artifactId&gt;solomonoff&lt;/artifactId&gt;
-            &lt;version&gt;1.5&lt;/version&gt;
-          &lt;/dependency&gt;
-        &lt;/dependencies&gt;    
+dependencies {
+    compile group: 'solomonoff', name: 'solomonoff', version:'1.8'
+    compile group: 'org.antlr', name: 'antlr4-runtime', version:'4.7.1'
+}
         </pre>
-        <h5><a id="user-content-gradle" class="anchor" aria-hidden="true" href="https://github.com/aleksander-mendoza/SolomonoffLib#gradle"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Gradle</h5>
-        <pre>repositories {
-            maven { url "https://raw.github.com/aleksander-mendoza/SolomonoffLib/repository/" }
-        }
 
-        dependencies {
-            compile group: 'solomonoff', name: 'solomonoff', version:'1.2'
-            compile group: 'org.antlr', name: 'antlr4-runtime', version:'4.7.1'
-        }
+        <p>To invoke the compiler just use</p>
+        <pre>
+final OptimisedHashLexTransducer compiled = new OptimisedHashLexTransducer(
+    CharStreams.fromFileName("some/file/path.mealy"),true);
+String output = compiled.run("function name","input string");
         </pre>
+        
+        <p>Clone our <a href="https://github.com/aleksander-mendoza/SolomonoffLib">GitHub</a> repo from</p>
+        <pre>git clone https://github.com/aleksander-mendoza/SolomonoffLib.git</pre>
+       
       
       </div>
 
