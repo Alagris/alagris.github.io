@@ -14,10 +14,10 @@ package com.compiler.Compiler.controllers;
 @Controller
 public class MainC {
 
-    // inject via application.properties
+
     @Value("${welcome.message:test}")
     private String message = "Hello World";
-    // /pdfjs/web/viewer.html
+
     @RequestMapping("/")
     public String index(Map<String, Object> model) {
         model.put("message", this.message);
@@ -33,16 +33,6 @@ public class MainC {
         return "compiler2";
     }
 
-//    @GetMapping("/compiler1")
-//    public String compiler1(Model model) {
-//        model.addAttribute("title", "Solomonoff - InfoPage");
-//        return "compiler2";
-   //}
-    @GetMapping("/infpage")
-    public String infpage(Model model) {
-        model.addAttribute("title", "Solomonoff - InfoPage");
-        return "ttt";
-    }
 
     @GetMapping("/DocPage")
     public String DocPage(Model model) {
