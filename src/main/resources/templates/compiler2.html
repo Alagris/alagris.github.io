@@ -320,24 +320,24 @@
    async function listAutomata(){
       const response = await fetch('list_automata',{method:'POST'})
       const replResult = await response.text()
-      const automata = JSON.parse(replResult)
-      var ll = "";
-      while (automataHtmlList.firstChild)
-          automataHtmlList.removeChild(automataHtmlList.firstChild);
-      for(var i=0;i<automata.length;i++){
-          var item = document.createElement('li');
-          ll = ll+automata[i]+" ,";
+     // const automata = JSON.parse(replResult)
+     // var ll = "";
+     // while (automataHtmlList.firstChild)
+     //     automataHtmlList.removeChild(automataHtmlList.firstChild);
+     // for(var i=0;i<automata.length;i++){
+     //    var item = document.createElement('li');
+     //     ll = ll+automata[i]+" ,";
           // Set its contents:
-          item.appendChild(document.createTextNode(automata[i]));
+     //     item.appendChild(document.createTextNode(automata[i]));
 
           // Add it to the list:
-          automataHtmlList.appendChild(item);
-      }
+     //     automataHtmlList.appendChild(item);
+    //  }
       //var tok = automataHtmlList + "";
      // automataHtmlList.toString();
      // automataHtmlList.join('; ');
-    var fok = "Define variables: " + ll;
-    tips.innerText = ll;
+    //var fok = "Define variables: " + ll;
+    tips.innerText = replResult;
 
 
     //  document.getElementsByName('inp')[0].placeholder=fok;
@@ -591,7 +591,7 @@
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
           <ul class="navbar-nav mr-auto">
               <li class="nav-item active">
-                  <a class="nav-link" href="/compiler1">Compiler <span class="sr-only">(current)</span></a>
+                  <a class="nav-link" href="/compiler">Compiler <span class="sr-only">(current)</span></a>
               </li>
               <li class="nav-item">
                   <a class="nav-link" href="/DocPage">Documentation</a>
@@ -601,7 +601,7 @@
                   <a class="nav-link dropdown-toggle" href="" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a>
                   <div class="dropdown-menu" aria-labelledby="dropdown01">
                       <a class="dropdown-item" href="/Contact">Contact</a>
-                      <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">Git Hub</a>
+                      <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">GitHub</a>
                       <a class="dropdown-item" href="/Download">Download</a>
                       <!-- <a class="dropdown-item" href="https://getbootstrap.com/docs/4.5/examples/jumbotron/#">Something else here</a> -->
                   </div>
@@ -637,7 +637,7 @@
                     <ul hidden="true" id="automataHtmlList"></ul>
                     <textarea id="inputField" name="inp" style="min-height:1em" placeholder="Console input (Hit enter to submit, use up and down arrow keys to traverse history):"></textarea>
 
-                    <div  id="tipsDiv" class="" style="min-height:5%" >Defined variables:<span id = "tips"></span></div>
+                    <div  id="tipsDiv" class="" style="min-height:5%" >Defined variables:<span id = "tips" th:text="${automata}"></span></div>
 
                     <script>
                         function submitOnEnter(event){
@@ -905,26 +905,26 @@ difference = 'a'</pre>
 
       var enjoyhint_instance = new EnjoyHint({});
       var enjoyhint_script_steps = [
-        {
-        	'next #editor' : 'Short guide for you.  Here you can put huge values of code'
+       {
+        	'next #editor' : 'You can write Solomonoff code in this editor'
       	},
         {
-          'next #btnn' : 'Click to compile code'
+          'next #btnn' : 'Then click this button to compile your code'
         },
         {
-      	  'next #outputField' : 'Here you get a result'
+      	  'next #outputField' : 'After compiling, you can interact with the automata from REPL'
         },
         {
-          'next #inputField' : 'Put commands or code all time'
+          'next #inputField' : 'Write REPL input in this line'
         },
         {
-          'next #btnn1' : 'Click to save code locally'
+          'next #btnn1' : 'If you want to save your changes for later or work with them locally, you can conveniently click this button'
         },
         {
-          'next #tutorial' : 'Here is a short tutorial'
+          'next #tutorial' : 'Go ahead and check out the interactive tutorial we made speically for you'
         },
         {
-          'next #codeTutorial' : 'Click on the code and it automatically puts to codefield'
+          'next #codeTutorial' : 'If you click on any sample, it will automatically appear in the correct places'
         },
 
 

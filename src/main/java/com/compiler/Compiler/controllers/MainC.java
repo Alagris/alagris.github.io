@@ -14,6 +14,8 @@ package com.compiler.Compiler.controllers;
 @Controller
 public class MainC {
 
+    @Autowired
+    public NewRestController rest;
 
     @Value("${welcome.message:test}")
     private String message = "Hello World";
@@ -26,10 +28,11 @@ public class MainC {
     }
 
 
-    @RequestMapping("/compiler1")
+    @RequestMapping("/compiler")
     public String read(Map<String, Object> model, HttpSession httpSession) {
         final String text = (String)httpSession.getAttribute("code");
         model.put("code",text);
+        model.put("automata",rest.listAutomata(httpSession));
         return "compiler2";
     }
 

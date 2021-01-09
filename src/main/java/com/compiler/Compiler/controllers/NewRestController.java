@@ -215,7 +215,7 @@ public class NewRestController {
             this.compiler = compiler;
             registerCommand("clear", "Clears REPL console", (a, b, d, c) -> "");
             registerCommand("vis", "Shows graph diagram of automaton", (a, b, d, c) -> "");
-            registerCommand("unset", "Del varible", (repl, logs, debug, args) -> {
+            registerCommand("unset", "Deletes a variable", (repl, logs, debug, args) -> {
                 repl.specs.variableAssignments.remove(args);
                 return "";
             });
@@ -348,18 +348,15 @@ public class NewRestController {
             }
             httpSession.setAttribute("repl",repl);
         }
-        StringBuilder sb = new StringBuilder("[");
+        StringBuilder sb = new StringBuilder();
         Iterator<LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>>> iterator = repl.compiler.specs.iterateVariables();
         while(iterator.hasNext()){
             final LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> transducer = iterator.next();
-            sb.append('"');
             sb.append(transducer.name);
-            sb.append('"');
             if(iterator.hasNext()){
-                sb.append(',');
+                sb.append(", ");
             }
         }
-        sb.append(']');
         return sb.toString();
 
     }
