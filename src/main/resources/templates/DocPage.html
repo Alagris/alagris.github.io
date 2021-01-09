@@ -52,7 +52,7 @@
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="/compiler1">Compiler</a>
+                <a class="nav-link" href="/compiler">Compiler</a>
             </li>
             <li class="nav-item active">
                 <a class="nav-link" href="/DocPage">Documentation <span class="sr-only">(current)</span></a>
@@ -62,7 +62,7 @@
                 <a class="nav-link dropdown-toggle" href="" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     <a class="dropdown-item" href="/Contact">Contact</a>
-                    <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">Git hub</a>
+                    <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">GitHub</a>
                     <a class="dropdown-item" href="/Download">Download</a>
 
                 </div>
@@ -78,7 +78,7 @@
         <div class="container">
             <h1 class="display-3">Solomonoff Compiler Documentation</h1>
             <br/>
-            <p>Solomonoff Compiler is an innovative solution designed for ..</p>
+            <p>Technical documentation and implementation details</p>
  
         </div>
     </div>
@@ -171,53 +171,52 @@
 
             <p>Solomonoff is written in Java using the "typeclass pattern". Almost everything is an interface. Each of the interfaces corresponds to some formal mathematical definition and stores a handful of axioms (each axiom is a method). Non-axiom methods are canonically represented as pure static functions. For example consider set of finite sequences \(\Omega_X\)  of elements from set \(X\) . A string \(\sigma_1\sigma_2\sigma_1\)  over alphabet \(\Sigma=\{\sigma_1,\sigma_2\}\)  might be represented as a sequence \(\langle \sigma_1,\sigma_2,\sigma_1\rangle\)  of \(\Omega_\Sigma\) . An axiomatization of finite sequences might be a (dependent) pair \((n, f)\)  of some number \(n\)  and function \(f\)  that to every integer between \(0\)  and \(n\)  assigns some element of \(X\). Formally written as \((n, f) : \mathbb{N} \times (0\ldots n \rightarrow X)\) . Then in Java we could represent it as class
 
-<pre class="prettyprint"><code>class Omega&lt;X&gt;{
-    int n();
-    X f(int i); //requires 0&lt;=i&lt;n
-}
+<pre class="prettyprint"><code>    class Omega&lt;X&gt;{
+        int n();
+        X f(int i); //requires 0&lt;=i&lt;n
+    }
 </code></pre>
 
     Then a function that operates on \(\Omega_X\) , like concatenation for instance, would have to be represented using a pure static method.
 
-<pre class="prettyprint"><code>static &lt;X&gt; Omega&lt;X&gt; concat(Omega&lt;X&gt; left, Omega&lt;X&gt; right){...}
-</code></pre>
+<pre class="prettyprint"><code>
+    static &lt;X&gt; Omega&lt;X&gt; concat(Omega&lt;X&gt; left, Omega&lt;X&gt; right){...}</code></pre>
 
 Sometimes, different implementations of \(\Omega_X\)  might use different underlying data structures, which in turn allow for more efficient implementations of certain functions. For example the generic implementation of <code>concat</code> might create a new instance with a new backing array and copy the elements of the two previous sequences. However, if we know that the exact implementation uses linked lists, a much more efficient procedure could work in constant time.  For this reason Solomonoff sometimes defines the non-axiomatic methods directly as part of interface, not because they are necessary, but because can be implemented more efficiently. The programmer should still be aware of the underlying formal specification. </p>
 
     <p>Our Java code also strictly follows the specification of linear types. Even though Java compiler does not have any support for borrowing, ownership and lifetimes, that does not mean the code cannot be properly annotated in such a manner. For example consider the above definition of <code>concat</code>. It might produce a new instance for each call, but a more efficient implementation would mutate one of the arguments. The only problem is that mutations might leads to bugs and data races when not used properly. To avoid that, we explicitly specify (in the comments), which function arguments are linear. For instance, if we specified that <code>left</code> argument is "consumed", then we should ever use it after calling <code>concat</code>. Suppose that \(\Omega_X\)  is implemented using linked lists and the right argument is appended to the left one. We could write something like this to concatenate <code>a + b1 + b2</code>.
-<pre class="prettyprint"><code>concat(a,b1);
-concat(a,b2);
-</code></pre>
+<pre class="prettyprint"><code>    concat(a,b1);
+    concat(a,b2);</code></pre>
 but this solution might break as soon as the implementation is changed. The canonical way of writing code with linear types would be instead
-<pre class="prettyprint"><code>a2 = concat(a,b1);
-//a is consumed and should never be touched again!
-a3 = concat(a2,b2);
-//a2 is consumed and should never be touched again!
-</code></pre>
+<pre class="prettyprint"><code>
+    a2 = concat(a,b1);
+    //a is consumed and should never be touched again!
+    a3 = concat(a2,b2);
+    //a2 is consumed and should never be touched again!</code></pre>
  Programmer must also keep in mind that in order to invoke <code>concat(left,right)</code> we must also make sure that we own the <code>left</code> argument. If a reference to this variable was simultaneously used in some other place and we consumed it here, that other place would have no way of knowing that <code>left</code> is no longer valid. Therefore attention must be paid whenever we copy references from one place to the other (which is sometiems referred to as "borrowing"). </p>
  
 
 <p>Every function that mutates its arguments, can also be represented as linear function without mutations. For instance 
-  <pre class="prettyprint"><code>static &lt;X&gt; void concat(Omega&lt;X&gt; left, Omega&lt;X&gt; right)
- </code></pre>
+  <pre class="prettyprint"><code>    static &lt;X&gt; void concat(Omega&lt;X&gt; left, Omega&lt;X&gt; right)</code></pre>
  is the mutating version of 
- <pre class="prettyprint"><code> /**consumes left*/
-static &lt;X&gt; Omega&lt;X&gt; concat(Omega&lt;X&gt; left, Omega&lt;X&gt; right)
- </code></pre>
+ <pre class="prettyprint"><code>
+    /**consumes left*/
+    static &lt;X&gt; Omega&lt;X&gt; concat(Omega&lt;X&gt; left, Omega&lt;X&gt; right)</code></pre>
  In object-oriented languages we have one more possible approach
- <pre class="prettyprint"><code>void concat(Omega&lt;X&gt; right)
- </code></pre>
+ <pre class="prettyprint"><code>
+     void concat(Omega&lt;X&gt; right)</code></pre>
  where <code>this</code> instance is implied to be linear (<code>this=left</code>). </p>
  
 <p>In Solomonoff, the convention is to use the second approach for static functions, but third approach whenever the method is part of an interface, although there are some exceptions. In particular, note that the static functions require all generic arguments to be mentioned explicitly. When there are too many of them, it becomes more convenient and readable to turn static methods into interface methods and let all the generics be declared only once globally as the interface generics. Instead of
- <pre class="prettyprint"><code>static &lt;X1,X2,X3,Y&gt; Y f1(X1 x1, X2 x2, X3 x3){...}
-static &lt;X1,X2,X3,Y&gt; Y f2(X1 x1, X2 x2, X3 x3){...}
+ <pre class="prettyprint"><code>    static &lt;X1,X2,X3,Y&gt; Y f1(X1 x1, X2 x2, X3 x3){...}
+    static &lt;X1,X2,X3,Y&gt; Y f2(X1 x1, X2 x2, X3 x3){...}
 </code></pre>
 we obtain more concise notation
- <pre class="prettyprint"><code>interface ShareGenerics&lt;X1,X2,X3,Y&gt;
-    default Y f1(X1 x1, X2 x2, X3 x3){...}
-    default Y f2(X1 x1, X2 x2, X3 x3){...}
-}
+ <pre class="prettyprint"><code>
+    interface ShareGenerics&lt;X1,X2,X3,Y&gt;
+        default Y f1(X1 x1, X2 x2, X3 x3){...}
+        default Y f2(X1 x1, X2 x2, X3 x3){...}
+    }
 </code></pre>
 This approach should be considered merely as syntactic sugar. Those functions are usually not meant to be extended in any way. Most of the methods in Solomonoff are pure and do not have any state. Even the seemingly impure functions become pure when linear logic is taken into account.  </p>
 
@@ -228,12 +227,12 @@ This approach should be considered merely as syntactic sugar. Those functions ar
 <p> We formally define singly-linked graph \(G\)  over set of vertices \(N\)  and edges \(E\)  as product \(G= N \times E \times N\) , where \((n_1,e,n_2)\in G\)  should be understood as edge outgoing from \(n_1\)  and incoming to \(n_2\)  with label \(e\) . We also define mapping \(v : N \rightarrow V\)  from vertices to states \(V\) .
 Java implementation of \(G\)  together with \(v\)  is represented as the class <code>SinglyLinkedGraph&lt;V, E, N&gt;</code>. The axioms are
 
- <pre class="prettyprint"><code>V getState(N vertex)
-void setState(N vertex, V v)
-Map&lt;E, N&gt; outgoing(N from)
-N create(V state)
-void add(N from, E edge, N to)
-boolean remove(N from, E edge, N to)
+ <pre class="prettyprint"><code>    V getState(N vertex)
+    void setState(N vertex, V v)
+    Map&lt;E, N&gt; outgoing(N from)
+    N create(V state)
+    void add(N from, E edge, N to)
+    boolean remove(N from, E edge, N to)
 </code></pre>
 </p>
 
@@ -241,43 +240,43 @@ boolean remove(N from, E edge, N to)
 <p> There are also two very important implicit axioms for \(N\)  and \(E\) . The <code>n1.equals(n2)</code> is true if and only if the vertex instances are the same <code>n1==n2</code>. Similarly for edges <code>e1.equals(e2)</code>. Hence the map <code>Map&lt;E, N&gt;</code> implies that the target is uniquely determined by the edge. Hence \(G\)  is actually a function \(G= N \times E \rightarrow N\). </p>
 
 <p> For convenience we also define the mapping 
- <pre class="prettyprint"><code>Object getColor(N vertex)
-void setColor(N vertex, Object color)
+<pre class="prettyprint"><code>    Object getColor(N vertex)
+    void setColor(N vertex, Object color)
 </code></pre>
  which to every vertex assigns some "color". Here color is to be understood as auxiliary piece of information that can be stored in each vertex. It is useful whenever some procedure requires to perform additional bookkeeping of temporary values. For example, the <code>pseudoMinimize</code> procedure uses "color" for temporarily storing edges incoming to every vertex.  </p>
  
 <p> Let \(P\)  be some set of partial outgoing edges. Then automaton is obtained by combining \(G\)  together with initial edges \(E \rightarrow N\) , final edges \(N\rightarrow P\)  and one epsilon edge \(p_\epsilon \in P \cup \{\emptyset\}\)  which might be null. Java implements this as <code>IntermediateGraph&lt;V, E, P, N&gt;</code>. 
 It's axioms are
  
- <pre class="prettyprint"><code>P getEpsilon()
-void setEpsilon(P epsilon)
-Map&lt;E, N&gt; allInitialEdges()
-Map&lt;N, P&gt; allFinalEdges()
+ <pre class="prettyprint"><code>    P getEpsilon()
+    void setEpsilon(P epsilon)
+    Map&lt;E, N&gt; allInitialEdges()
+    Map&lt;N, P&gt; allFinalEdges()
 </code></pre> </p>
 
 
  <h4 id="item-4">Transducers</h4>
  
- <p> The heart of Solomonoff lies in the interface \\
- <code>Specification&lt;V, E, P, In, Out, W, N, G&gt;</code>. \\
+ <p> In the heart of Solomonoff lies the interface
+ <code>Specification&lt;V, E, P, In, Out, W, N, G&gt;</code>.
  Let \(\Sigma\)  be the input alphabet (\(\Sigma \cup \{\bot\}\) <code>=In</code> in Java), \(O\)  be the set of output values (\(O\cup\{\emptyset\}\) <code>=Out</code> in Java) and \(W\)  the set of transition weights. The \(O\)  and \(W\)  are required to be monoids. The axioms are
   <
- <pre class="prettyprint"><code>Out multiplyOutputs(Out lhs, Out rhs)
-W multiplyWeights(W lhs, W rhs)
-W weightNeutralElement()
-Out outputNeutralElement()
+ <pre class="prettyprint"><code>    Out multiplyOutputs(Out lhs, Out rhs)
+    W multiplyWeights(W lhs, W rhs)
+    W weightNeutralElement()
+    Out outputNeutralElement()
 </code></pre> </p>
  
 
  
- <p> Assume a total order \(\le\)  on \(\Sigma\) . A range \(R_<code>In</code>\)  over <code>In</code> is a pair \((\sigma_1,\sigma_2]\) . An element \(\sigma\)  belongs to range \((\sigma_1,\sigma_2]\)  if and only if \(\sigma_1\lt \sigma\le\sigma_2\) . The element \(\sigma_1\)  is the (exclusive) lower bound and \(\sigma_2\)  is the (inclusive) upper bound). Let there be a mapping \(\pi\)  from edges \(E\)  to ranges \(R_<code>In</code>\) . Because a range is a pair of elements, it's often more convenient to represent \(\pi\)  as two separate mapping \(\pi_1\)  and \(\pi_2\)  that map each edge to the lower/upper bound respectively. The axioms are
+ <p> Assume a total order \(\le\)  on \(\Sigma\) . A range \(R_In\)  over <code>In</code> is a pair \((\sigma_1,\sigma_2]\) . An element \(\sigma\)  belongs to range \((\sigma_1,\sigma_2]\)  if and only if \(\sigma_1\lt \sigma\le\sigma_2\) . The element \(\sigma_1\)  is the (exclusive) lower bound and \(\sigma_2\)  is the (inclusive) upper bound). Let there be a mapping \(\pi\)  from edges \(E\)  to ranges \(R_In\) . Because a range is a pair of elements, it's often more convenient to represent \(\pi\)  as two separate mapping \(\pi_1\)  and \(\pi_2\)  that map each edge to the lower/upper bound respectively. The axioms are
    
- <pre class="prettyprint"><code>In fromExclusive(E edge)
-In toInclusive(E edge)
-In successor(In predecessor)
-In minimal() 
-In maximal()
-int compare(In point1, In point2)
+ <pre class="prettyprint"><code>    In fromExclusive(E edge)
+    In toInclusive(E edge)
+    In successor(In predecessor)
+    In minimal() 
+    In maximal()
+    int compare(In point1, In point2)
  </code></pre>
  It is assumed that minimal symbol of <code>In</code> is the element \(\bot\) ,  which does not belong to \(\Sigma\) . </p>
  
@@ -287,7 +286,7 @@ int compare(In point1, In point2)
 P createPartialEdge(Out out, W weight)
 </code></pre> </p>
  
-<p> Furthermore, despite \(E\)  not being a monoid by itself, \(P\)  is in a sense a "quotient set" of \(E\) . Similarly to how \(O\times W\)  can act on \(P\) , the set \(P\)  can both act on and be embedded in \(E\) . Indeed \(E\)  can be treated like \(E=P\times R_\Sigma\)  and it should satisfy \((op,r)=o(p,r)\)  and \((po,r)=(p,r)o\)  where \(p\in P, o\in O,r\in R_<code>In</code>, (p,r)\in E\) .  The axioms are
+<p> Furthermore, despite \(E\)  not being a monoid by itself, \(P\)  is in a sense a "quotient set" of \(E\) . Similarly to how \(O\times W\)  can act on \(P\) , the set \(P\)  can both act on and be embedded in \(E\) . Indeed \(E\)  can be treated like \(E=P\times R_\Sigma\)  and it should satisfy \((op,r)=o(p,r)\)  and \((po,r)=(p,r)o\)  where \(p\in P, o\in O,r\in R_In, (p,r)\in E\) .  The axioms are
  
  <pre class="prettyprint"><code>E leftAction(P edge, E edge2)
 E rightAction(E edge, P edge2)
@@ -322,28 +321,33 @@ Solomonoff goes with a very different approach
  
  <p> The interfaces of Solomonoff are generic and they allow for supplying specialised functions for parsing strings and ranges. While the default implementation treats <code>In</code> as integers and <code>Out</code> as sequences of integers, it is not enforced.
 The following functions are responsible for parsing atomic expressions
-<pre class="prettyprint"><code>Out parseStr(IntSeq ints)
-W parseW(int integer)
-Pair&lt;In, In&gt; parseRangeInclusive(
-   int codepointFromInclusive, 
-   int codepointToInclusive)
+<pre class="prettyprint"><code>
+    Out parseStr(IntSeq ints)
+    W parseW(int integer)
+    Pair&lt;In, In&gt; parseRangeInclusive(
+       int codepointFromInclusive,
+       int codepointToInclusive)
 </code></pre>
-It would be possible to parse strings differently. For instance <code>In</code> might be the set of matrices and <code>parseStr</code> could parse matrix literals like\\
+It would be possible to parse strings differently. For instance <code>In</code> might be the set of matrices and <code>parseStr</code> could parse matrix literals like
  <code>'[1,2,3;-3,4,0;0,-1,0]'</code>. </p>
 
-<p> The <code>ParserListener</code> makes one additional restriction on <code>Out</code>. It requires that <code>Out extends Seq<In></In>. By assuming that \(O=\Sigma^*\) , many things become simpler, without sacrificing too much flexibility. If we want the output alphabet to be different from input, Solomonoff provides type system that can be used for such purposes (more on that below).  </code>
+        <p> The <code>ParserListener</code> makes one additional restriction on <code>Out</code>. It requires that <code>Out extends Seq&lt;In&gt;</code>. By assuming that \(O=\Sigma^*\) , many things become simpler, without sacrificing too much flexibility. If we want the output alphabet to be different from input, Solomonoff provides type system that can be used for such purposes (more on that below).  </code>
 
 <p> From the above atomic expressions we can easily build automata. The <code>ParserListener</code> class contains several helper methods. We can build automata from input strings using
-<pre class="prettyprint"><code>G fromString(V meta, Iterable&lt;A&gt; string)
+<pre class="prettyprint"><code>
+        G fromString(V meta, Iterable&lt;A&gt; string)
 </code></pre>
 which internally builds even smaller automata for singleton ranges using
-<pre class="prettyprint"><code>G atomic(V meta, Pair&lt;A, A&gt; range)
+<pre class="prettyprint"><code>
+    G atomic(V meta, Pair&lt;A, A&gt; range)
 </code></pre>
 The output strings are turned into automata using
-<pre class="prettyprint"><code>G fromOutputString(V meta, O str)
+<pre class="prettyprint"><code>
+    G fromOutputString(V meta, O str)
 </code></pre>
 This last one is perhaps most interesting. Every atomic output string <code>:o</code> is treated as output produced by empty input string <code>'':o</code>. Therefore, to produce automaton accepting empty string and producing the specific output <code>o</code> it's enough to run
-<pre class="prettyprint"><code>P p = createPartialEdge(o, weightNeutralElement());
+<pre class="prettyprint"><code>
+P p = createPartialEdge(o, weightNeutralElement());
 G g = createEmptyGraph();
 g.setEpsilon(p);
 </code></pre>
@@ -353,7 +357,8 @@ It's exact implementation can be found in <code>Specification</code>
 G concat(G lhs, G rhs){...}
 </code></pre>
 Essentially we want to connect every final edge of \(lhs\)  with every initial edge of \(rhs\) . The initial edges of \(lhs\)  become initial edges of resulting transducer \(lhs \cdot rhs\) . Similarly final edges of rhs become final edges of  \(lhs \cdot rhs\) . Additionally if \(rhs\)  contains epsilon edge,  \(lhs \cdot rhs\)  should also inherit final edges of \(lhs\) . Analogically if \(lhs\)  contains epsilon edge, then \(lhs \cdot rhs\)  should contain initial edges of \(rhs\) . The operation of connecting final edges of \(lhs\)  with every initial edges of \(rhs\)  is performed by the following pseudocode
-<pre class="prettyprint"><code>for((lhsFinN,lhsFinP) : lhs.finalEdges){
+<pre class="prettyprint"><code>
+for((lhsFinN,lhsFinP) : lhs.finalEdges){
     for((rhsInitE,rhsInitN) : rhs.initialEdges){
         connectedE = leftAction(lhsFinP, rhsInitE)
         lhs.add(lhsFinN,connectedE,rhsInitN)
@@ -367,7 +372,20 @@ The exact details explaining why this works can be found in <a href="https://arx
 G union(G lhs, G rhs, 
      BiFunction&lt;P, P, P&gt; mergeEpsilons)
 </code></pre>
-The initial edges of both \(lhs\)  and \(rhs\)  should become initial edges of \(lhs|rhs\) . Analogically for final edges. The only problem is that we cannot perform union of epsilon transition. Let's recall the definition of epsilon edge \(p_\epsilon \in P \cup \{\emptyset\}\) . The union  \(lhs.p_\epsilon \cup rhs.p_\epsilon\)  is only defined when at least one of the epsilons is \(\emptyset\) . When both of them are not \(\emptyset\) , then we need to call special function <code>mergeEpsilons</code> that decides how to merge the two into one. As the transducers are meant to be functional, <code>mergeEpsilons</code> will throw compilation exception, unless both epsilons are equivalent (have the same output) or one of them has higher weight than the other (in which case the one with higher weight always takes priority over the other). If both have equal weights and differ in outputs, then there is no way the resulting transducer could be functional, so the only solution is to abort compilation.  </p>
+The initial edges of both \(lhs\)  and \(rhs\)
+should become initial edges of \(lhs|rhs\) . Analogically for final edges.
+The only problem is that we cannot perform union of epsilon transition.
+        Let's recall the definition of epsilon edge \(p_\epsilon \in P \cup \{\emptyset\}\).
+        The union  \(lhs.p_\epsilon \cup rhs.p_\epsilon\)  is only defined when at least one
+        of the epsilons is \(\emptyset\) . When both of them are not \(\emptyset\) ,
+        then we need to call special function <code>mergeEpsilons</code> that decides how to
+        merge the two into one. As the transducers are meant to be functional,
+        <code>mergeEpsilons</code> will throw compilation exception, unless both
+        epsilons are equivalent (have the same output) or one of them has higher weight
+        than the other (in which case the one with higher weight always takes priority over
+        the other). If both have equal weights and differ in outputs, then there is no way the
+        resulting transducer could be functional, so the only solution is to abort compilation.
+        </p>
 
 <p> The Kleene closure can be seen like trying to concatenate the automaton with itself. The exact implementation can be found under
 <pre class="prettyprint"><code>/**consumes g*/
