@@ -54,10 +54,10 @@ public class MainC {
         model.addAttribute("title", "Solomonoff - Documentation");
         return "contactPage";
     }
-    @GetMapping("/rest")
-    public String rest1(Model model) {
+    @GetMapping("/Download")
+    public String download(Model model) {
         model.addAttribute("title", "Solomonoff - Documentation");
-        return "Blog";
+        return "DownloadPage";
 
     }
 
