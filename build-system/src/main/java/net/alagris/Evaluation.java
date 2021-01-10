@@ -7,8 +7,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.NoViableAltException;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class ReplInfrastruct {
     private final static Random RAND = new Random();
@@ -264,7 +267,7 @@ public class ReplInfrastruct {
         }
     }
 
-    public static void loop(Repl repl) throws IOException{
+    public static void loop(Repl repl) throws IOException {
         try (final BufferedReader sc = new BufferedReader(new InputStreamReader(System.in))) {
             System.err.println("Solomonoff interactive console. Type :? for help");
             System.err.flush();
@@ -277,5 +280,24 @@ public class ReplInfrastruct {
                 if(out!=null)System.out.println(out);
             }
         }
+    }
+    
+    public static void evalFileContent(Repl repl, File file) throws IOException {
+//        Scanner scanner = new Scanner(file);
+//        Pattern pattern = Pattern.compile("(?<!\\)\s*\n|(?<!\\)\s*\r\n|\s*;");
+//        scanner.useDelimiter(pattern);
+        FileReader _file = new FileReader(file);
+        BufferedReader reader = new BufferedReader(_file);
+        String line = reader.readLine();
+
+        while (line != null) {
+            final String out = repl.run(line,System.out::println,System.err::println);
+            if(out!=null)System.out.println(out);
+
+            line = reader.readLine();
+        }
+
+        reader.close();
+        _file.close();
     }
 }
