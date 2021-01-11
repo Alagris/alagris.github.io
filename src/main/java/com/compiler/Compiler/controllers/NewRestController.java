@@ -161,11 +161,11 @@ public class NewRestController {
         compiler.specs.variableAssignments.remove(args);
         return null;
     };
-    public static final ReplCommand<String> REPL_LOAD = (httpSession, compiler, log, debug, args) -> {
+    public static final ReplCommand<String> REPL_RESET = (httpSession, compiler, log, debug, args) -> {
         compiler.specs.variableAssignments.keySet().removeIf(k->!(k.equals("Σ")||k.equals("#")||k.equals("∅")||k.equals("ε")||k.equals(".")));
         return null;
     };
-    public static final ReplCommand<String> REPL_RESET = (httpSession, compiler, log, debug, args) -> {
+    public static final ReplCommand<String> REPL_LOAD = (httpSession, compiler, log, debug, args) -> {
         String code = (String)httpSession.getAttribute("code");
         if(code!=null)compiler.parse(CharStreams.fromString(code));
         return null;
@@ -218,7 +218,7 @@ public class NewRestController {
                 if (args.isEmpty()) {
                     final StringBuilder sb = new StringBuilder();
                     for (Map.Entry<String, Repl.CmdMeta<String>> cmd : commands.entrySet()) {
-                        sb.append(":").append(cmd.getValue().template).append("\n    ").append(cmd.getValue().help).append('\n');
+                        sb.append(cmd.getValue().template).append("\n    ").append(cmd.getValue().help).append('\n');
                     }
                     return sb.toString();
                 } else {
