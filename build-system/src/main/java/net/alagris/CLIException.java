@@ -1,31 +1,35 @@
 package net.alagris;
 
-public class  extends Exception{
+public class CLIException extends Exception{
     private static final long serialVersionUID = 1L;
 
-    public (String msg) {
+    public CLIException(String msg) {
         super(msg);
     }
 
-    public (String msg, Throwable cause) {
+    public CLIException(String msg, Throwable cause) {
         super(msg, cause);
     }
 
-    public (Throwable cause) {
+    public CLIException(Throwable cause) {
         super(cause);
     }
 
     public static class MealyFileException extends CLIException {
-        private final Pos node;
 
-        public ParseException(Pos node, Throwable cause) {
-            super(cause);
-            this.node = node;
+        public MealyFileException(String fileName, Throwable cause) {
+            super("Cannot find " + fileName, cause);
         }
 
-        public Pos getNode() {
-            return node;
+        public MealyFileException(String fileName) {
+            super("Cannot find " + fileName);
         }
     }
 
+    public static class InputFileException extends CLIException {
+
+        public InputFileException(String fileName, Throwable cause) {
+            super("Cannot find " + fileName, cause);
+        }
+    }
 }

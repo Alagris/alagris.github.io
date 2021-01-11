@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class ReplInfrastruct {
+public class Evaluation {
     private final static Random RAND = new Random();
 
     public interface ReplCommand<Result> {
