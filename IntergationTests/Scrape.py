@@ -20,6 +20,12 @@ class text_to_change(object):
         actual_text = EC._find_element(driver, self.locator).get_attribute("value")
         return actual_text != self.text
 
+def assertEquals(var1, var2):
+    if var1 == var2:
+        return True
+    else:
+        return False
+
 
 class PythonOrgSearch(unittest.TestCase):
 
@@ -33,11 +39,13 @@ class PythonOrgSearch(unittest.TestCase):
     def test1(self):
         # open our web page
         driver = self.driver
-        driver.get("http://localhost/compiler1")
+        driver.get("http://localhost/compiler")
         # Get website's title
         title = driver.title
         # test if the title is correct. It should contain "Solomonoff" string in the title
         assert "Solomonoff" in driver.title
+
+        
 
         # at the beginning the tips open
         # but they usually show up after a tiny delay. Here we wait for
@@ -51,6 +59,7 @@ class PythonOrgSearch(unittest.TestCase):
         # Now we focus on the Ace editor. We query it with CSS selector
         editor = driver.find_element_by_css_selector('#editor > div.ace_scroller > div')  
 
+     
         # Now we type some code into the Ace editor
         webdriver.ActionChains(driver).move_to_element(editor).click().send_keys("x = 'tre':'00'").perform()
 
@@ -82,6 +91,78 @@ class PythonOrgSearch(unittest.TestCase):
         replOutputText2 = replOutput.get_attribute("value")
         # print(replOutputText2) 
         assert replOutputText2.strip() == "> :eval x 'tre'\n'00'"
+
+        def_func = driver.find_element_by_id('tips')
+        def_func_value = def_func.get_attribute("value")
+        #print(def_func_value)
+
+        tips = driver.find_element_by_css_selector('#tips')
+        tips_text = tips.text
+        #print(tips_text)
+        assert "x" in tips_text
+
+
+        clear = driver.find_element_by_css_selector('body > main > div > div > div.first > span > button')
+        clear.click()
+        replOutput_test2 = driver.find_element_by_id('outputField')
+        replOutputText1_test2 = replOutput.get_attribute("value")
+      # print(replOutputText1_test2)
+        assert replOutputText1_test2 == ""
+
+
+        code_from_doc = driver.find_element_by_css_selector('#tutorial > pre:nth-child(18)')
+        code_from_doc.click()
+
+        tips_1 = driver.find_element_by_css_selector('#tips')
+        tips_text_1 = tips_1.text
+        if "x" in tips_text_1:
+            replInput_1 = driver.find_element_by_id('inputField')
+            replInput_1.send_keys(':unset x')
+            replInput_1.send_keys(Keys.RETURN)
+
+        compile_1 = driver.find_element_by_css_selector('#btnn')
+        compile_1.click()
+        replInput_2 = driver.find_element_by_id('inputField')
+        replInput_2.send_keys(':eval x \'tre\'')
+        replInput_2.send_keys(Keys.RETURN)
+        replOutput_test_3 = driver.find_element_by_id('outputField')
+        replOutputText1_test_3 = replOutput_test_3.get_attribute("value")
+        #print(replOutputText1_test_3)
+        assert "No match!" in replOutputText1_test_3
+
+        URL = driver.current_url
+        assertEquals(URL, "http://localhost/compiler" )
+
+        Start_URL = driver.find_element_by_css_selector('body > nav > a')
+        Start_URL_text = Start_URL.get_attribute('href')
+        assertEquals(Start_URL, "http://localhost/")
+
+        Compiler_URL = driver.find_element_by_css_selector('#navbarsExampleDefault > ul > li.nav-item.active > a')
+        Compiler_URL_text = Compiler_URL.get_attribute('href')
+        assertEquals(Compiler_URL, "http://localhost/compiler")
+
+        Documentation_URL = driver.find_element_by_css_selector('#navbarsExampleDefault > ul > li:nth-child(2) > a')
+        Documentation_URL_text = Documentation_URL.get_attribute('href')
+        assertEquals(Documentation_URL, "http://localhost/DocPage")
+
+        Contact_URL = driver.find_element_by_id('bigl1')
+        Contact_URL_text = Contact_URL.get_attribute('href')
+        assertEquals(Contact_URL, "http://localhost/Contact")
+
+        GitHub_URL = driver.find_element_by_id('bigl2')
+        GitHub_URL_text =  GitHub_URL.get_attribute('href')
+        assertEquals( GitHub_URL, "https://github.com/aleksander-mendoza/SolomonoffLib")
+
+        Download_URL = driver.find_element_by_id('bigl3')
+        Download_URL_text =  Download_URL.get_attribute('href')
+        assertEquals(Download_URL, "http://localhost/Download")
+
+
+
+
+
+
+
 
 
 
