@@ -161,11 +161,11 @@ public class NewRestController {
         compiler.specs.variableAssignments.remove(args);
         return null;
     };
-    public static final ReplCommand<String> REPL_RESET = (httpSession, compiler, log, debug, args) -> {
+    public static final ReplCommand<String>REPL_RESET = (httpSession, compiler, log, debug, args) -> {
         compiler.specs.variableAssignments.keySet().removeIf(k->!(k.equals("Σ")||k.equals("#")||k.equals("∅")||k.equals("ε")||k.equals(".")));
         return null;
     };
-    public static final ReplCommand<String> REPL_LOAD = (httpSession, compiler, log, debug, args) -> {
+    public static final ReplCommand<String> REPL_LOAD  = (httpSession, compiler, log, debug, args) -> {
         String code = (String)httpSession.getAttribute("code");
         if(code!=null)compiler.parse(CharStreams.fromString(code));
         return null;
@@ -296,6 +296,7 @@ public class NewRestController {
         if (!line.endsWith("\n")) history.append('\n');
         try {
             final StringBuilder out = new StringBuilder();
+            repl.compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> out.append("Warning! Variable ").append(var.name).append(" redefined!\n"));
             final String result = repl.run(httpSession, line, s -> out.append(s).append('\n'), s -> {
             });
             if (result != null) out.append(result);
@@ -357,7 +358,7 @@ public class NewRestController {
         final LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> tr = repl.compiler.getTransducer(name);
         if (tr == null) return "ERR:NOT FOUND";
 
-        final Graph<?, ?> graph = LearnLibCompatibility.intermediateAsGraph(tr.graph, Pos.NONE, Pos.NONE);
+        final Graph<?, ?> graph = LearnLibCompatibility.intermediateAsGraph(tr.graph, Pos.NONE);
         final StringWriter writer = new StringWriter();
         GraphDOT.write(graph, writer);
         return writer.toString();
