@@ -23,18 +23,18 @@ class CompilerApplicationTests {
 	@Test
 	void restTest(){
 		MockHttpSession s = new MockHttpSession();
-		final String output =controller.compile(s,"a='ter'");
-		Assert.assertEquals("",output);
+		final NewRestController.ReplResponse output =controller.compile(s,"a='ter'");
+		Assert.assertEquals("",output.output);
 	}
 
 	@Test
 	void restAndReplTest(){
 		MockHttpSession s = new MockHttpSession();
-		final String output =controller.compile(s,"a='ter':'11'");
-		Assert.assertEquals("",output);
+		final NewRestController.ReplResponse output =controller.compile(s,"a='ter':'11'");
+		Assert.assertEquals("",output.output);
 
-		final String output2 = controller.repl(s,":eval a 'ter'");
-		Assert.assertEquals("'11'",output2);
+		final NewRestController.ReplResponse output2 = controller.repl(s,":eval a 'ter'");
+		Assert.assertEquals("'11'",output2.output);
 	}
 
 
