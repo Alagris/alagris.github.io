@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -170,5 +170,25 @@ public class SolomonoffBuildSystem {
                         false);
         return compiler;
     }
-
+    
+    public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>> void
+    saveBinary(OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
+        File directory = new File("bin/cache/");
+        if (! directory.exists()){
+            directory.mkdir();
+        }
+        
+        for (Iterator<Var> it = compiler.specs.iterateVariables(); it.hasNext(); ) {
+            Var symbol = it.next();
+            LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>,
+                    HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> g =
+                    .getTransducer(symbol);
+            try (FileOutputStream f = new FileOutputStream(String.valueOf(symbol.hashCode()))) {
+                compiler.specs.compressBinary(g.graph, new DataOutputStream(new BufferedOutputStream(f)));
+                return null;
+            } catch (IOException e) {
+                return e.toString();
+            }
+        }
+    }
 }

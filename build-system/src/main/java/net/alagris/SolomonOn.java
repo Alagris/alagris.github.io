@@ -12,7 +12,7 @@ import picocli.CommandLine.*;
         description = "Solomonoff compiler")
 class Compiler implements Callable<Integer> {
 
-    @Parameters(index = "0", defaultValue = "build", description = "${COMPLETION-CANDIDATES}")
+    @Parameters(index = "0", defaultValue = "interactive", description = "${COMPLETION-CANDIDATES}")
     private Mode mode;
 
     @Option(names = {"-f", "--input-file"}, defaultValue = "__NONE__", description = "file to evaluate")
@@ -39,14 +39,14 @@ class Compiler implements Callable<Integer> {
         final OptimisedLexTransducer.OptimisedHashLexTransducer compiler =
                 SolomonoffBuildSystem.getCompiler();
 
-        SolomonoffBuildSystem.runCompiler(buildFile, compiler.specs, i -> {
-            compiler.specs.pseudoMinimize(i);
-            return i;
-        });
         Evaluation.Repl repl;
 
         switch (mode) {
             case build:
+                SolomonoffBuildSystem.runCompiler(buildFile, compiler.specs, i -> {
+                    compiler.specs.pseudoMinimize(i);
+                    return i;
+                });
                 break;
             case run:
                 SolomonoffBuildSystem.runCompiler(buildFile, compiler.specs, i -> {
@@ -65,9 +65,7 @@ class Compiler implements Callable<Integer> {
                 break;
             case interactive:
                 repl = new Evaluation.Repl(compiler);
-                if (interactive) {
-                    Evaluation.loop(repl);
-                }
+                Evaluation.loop(repl);
         }
         return 0;
     }
