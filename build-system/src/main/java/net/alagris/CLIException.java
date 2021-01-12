@@ -32,4 +32,11 @@ public class CLIException extends Exception{
             super("Cannot find " + fileName, cause);
         }
     }
+
+    public static class BuildFileException extends CLIException {
+
+        public BuildFileException(String fileName) {
+            super("Cannot find " + fileName);
+        }
+    }
 }
