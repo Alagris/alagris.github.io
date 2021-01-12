@@ -185,7 +185,7 @@ public class NewRestController {
         }
 
         private final HashMap<String, Repl.CmdMeta<String>> commands = new HashMap<>();
-        private final OptimisedLexTransducer.OptimisedHashLexTransducer compiler;
+        public final OptimisedLexTransducer.OptimisedHashLexTransducer compiler;
 
         public ReplCommand<String> registerCommand(String name, String help, String template, ReplCommand<String> cmd) {
             final Repl.CmdMeta<String> prev = commands.put(name, new Repl.CmdMeta<>(cmd, help, template));
@@ -328,15 +328,18 @@ public class NewRestController {
             }
             httpSession.setAttribute("repl", repl);
         }
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("[");
         Iterator<LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>>> iterator = repl.compiler.specs.iterateVariables();
         while (iterator.hasNext()) {
             final LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> transducer = iterator.next();
+            sb.append("\"");
             sb.append(transducer.name);
+            sb.append("\"");
             if (iterator.hasNext()) {
                 sb.append(", ");
             }
         }
+        sb.append("]");
         return sb.toString();
 
     }

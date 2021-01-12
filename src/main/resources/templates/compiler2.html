@@ -83,18 +83,29 @@
                 Console: <span ><button class="buttonSmall float-right" style="background-color: white; color: black; border: 2px solid #FFA500;"  onclick="repl(':clear')">Clear</button></span>
 
                 <textarea readonly style="resize: none;" id="outputField" th:text="${repl_history}" placeholder=">"></textarea>
+                <div style="min-height:2rem; background-color: #18222d;  display: flex; align-items: center;">
+                    <div id="inputField" name="inp" class="boob" style="min-height:1rem; background-color: #18222d;"></div>
+                </div>
 
-                <ul hidden="true" id="automataHtmlList"></ul>
-                <div id="inputField" name="inp" class="boob" style="min-height:1rem; background-color: #18222d;"></div>
+                <!--                <div  id="tipsDiv" class="" style="min-height:5%" >Defined variables:<span id = "tips" th:text="${automata}"></span></div>-->
 
+                <div style="padding-left:16px;overflow-x:auto; ">
 
-                <div  id="tipsDiv" class="" style="min-height:5%" >Defined variables:<span id = "tips" th:text="${automata}"></span></div>
+                    <div id="automataHtmlList" class="row" style="display: flex; flex-wrap: nowrap;">
+                        <span  style="white-space: nowrap;">
+                            <b>  Defined variables:</b>
+                        </span>
+                        <span class="border" th:each="automaton:${automata}">
+                            <a th:text="${automaton}"></a>
+                        </span>
 
+                    </div>
+                </div>
             </div>
 
             <div class="second" style="background: #bfc4c9">
 
-                <div class="buttonSection">
+                <div class="buttonSection flex-nowrap">
                     <button class="button button1" id="btnn"  onclick="compile()">
                         Compile
                     </button>
@@ -104,7 +115,8 @@
 
                     <button class="button button2 .btnn" onclick="repl(':reset')" >
                         Reset
-                    </button></div>
+                    </button>
+                </div>
 
                 <div class="ex1" id="tutorial" style="overflow-y: scroll; overflow-x: hidden;">
                     <h2>Quick tour</h2>

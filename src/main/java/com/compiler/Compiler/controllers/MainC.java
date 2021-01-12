@@ -1,5 +1,6 @@
 package com.compiler.Compiler.controllers;
 
+import net.alagris.OptimisedLexTransducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,16 @@ public class MainC {
 
     @RequestMapping("/compiler")
     public String read(Map<String, Object> model, HttpSession httpSession) {
-        model.put("automata",rest.listAutomata(httpSession));
+        NewRestController.Repl repl = (NewRestController.Repl) httpSession.getAttribute("repl");
+        if (repl == null) {
+            try {
+                repl = new NewRestController.Repl(new OptimisedLexTransducer.OptimisedHashLexTransducer(0, Integer.MAX_VALUE, true));
+            } catch (Exception compilationError) {
+                return compilationError.getMessage();
+            }
+            httpSession.setAttribute("repl", repl);
+        }
+        model.put("automata",repl.compiler.specs.variableAssignments.keySet());
         model.put("repl_history",httpSession.getAttribute("repl_history"));
         return "compiler2";
     }

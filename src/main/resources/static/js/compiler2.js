@@ -20,24 +20,23 @@ async function listAutomata() {
         method: 'POST'
     })
     const replResult = await response.text()
-    // const automata = JSON.parse(replResult)
+    const automata = JSON.parse(replResult)
     // var ll = "";
-    // while (automataHtmlList.firstChild)
-    //     automataHtmlList.removeChild(automataHtmlList.firstChild);
-    // for(var i=0;i<automata.length;i++){
-    //    var item = document.createElement('li');
-    //     ll = ll+automata[i]+" ,";
-    // Set its contents:
-    //     item.appendChild(document.createTextNode(automata[i]));
-
-    // Add it to the list:
-    //     automataHtmlList.appendChild(item);
-    //  }
+     while (automataHtmlList.childNodes.length > 2) {
+         automataHtmlList.removeChild(automataHtmlList.lastChild);
+     }
+    for(var i=0;i<automata.length;i++){
+        var span = document.createElement('span');
+        var a = document.createElement('a');
+        span.appendChild(document.createTextNode(automata[i]));
+        span.className = "border"
+        automataHtmlList.appendChild(span);
+     }
     //var tok = automataHtmlList + "";
     // automataHtmlList.toString();
     // automataHtmlList.join('; ');
     //var fok = "Define variables: " + ll;
-    tips.innerText = replResult;
+    //tips.innerText = replResult;
 
 
     //  document.getElementsByName('inp')[0].placeholder=fok;
