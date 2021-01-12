@@ -284,7 +284,7 @@ public class Evaluation {
     
     public static void evalFileContent(Repl repl, File file) throws IOException {
 //        Scanner scanner = new Scanner(file);
-//        Pattern pattern = Pattern.compile("(?<!\\)\s*\n|(?<!\\)\s*\r\n|\s*;");
+        Pattern pattern = Pattern.compile("(?<!\\)\\s*\\n|(?<!\\)\\s*\\r\\n|\\s*;");
 //        scanner.useDelimiter(pattern);
         FileReader _file = new FileReader(file);
         BufferedReader reader = new BufferedReader(_file);
