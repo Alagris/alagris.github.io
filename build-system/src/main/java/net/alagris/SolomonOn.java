@@ -1,5 +1,7 @@
 package net.alagris;
 
+import net.alagris.ConfigParser.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -10,12 +12,12 @@ import picocli.CommandLine.*;
 
 @Command(name = "solomonoff", mixinStandardHelpOptions = true,
         description = "Solomonoff compiler")
-class Compiler implements Callable<Integer> {
+class SolomonOn implements Callable<Integer> {
 
-    @Parameters(index = "0", defaultValue = "interactive", description = "${COMPLETION-CANDIDATES}")
+    @Parameters(index = "0", defaultValue = "build", description = "${COMPLETION-CANDIDATES}")
     private Mode mode;
 
-    @Option(names = {"-f", "--input-file"}, defaultValue = "__NONE__", description = "file to evaluate")
+    @Parameters(index = "1", arity = "0..1", defaultValue = "__NONE__", description = "file to evaluate")
     private File inputFile;
 
     @Option(names = {"-b", "--build-file"}, defaultValue = "build.toml", description = "default is build.toml")
@@ -33,23 +35,35 @@ class Compiler implements Callable<Integer> {
 
     private enum Mode { run, build, interactive }
 
-
     @Override
     public Integer call() throws Exception { // your business logic goes here...
         final OptimisedLexTransducer.OptimisedHashLexTransducer compiler =
                 SolomonoffBuildSystem.getCompiler();
 
+        SolomonoffWeightedParser.ConcurrentCollector collector;
+
         Evaluation.Repl repl;
+        Config config;
 
         switch (mode) {
             case build:
-                SolomonoffBuildSystem.runCompiler(buildFile, compiler.specs, i -> {
+                try {
+                    config = ConfigParser.parse(buildFile);
+                } catch (CLIException.BuildFileException e) {
+                    return 2;
+                }
+                collector = SolomonoffBuildSystem.runCompiler(config, compiler.specs, i -> {
                     compiler.specs.pseudoMinimize(i);
                     return i;
                 });
+                
+                if (!noBinary) {
+                    SolomonoffBuildSystem.saveBinary();
+                }
+                
                 break;
             case run:
-                SolomonoffBuildSystem.runCompiler(buildFile, compiler.specs, i -> {
+                collector = SolomonoffBuildSystem.runCompiler(buildFile, compiler.specs, i -> {
                     compiler.specs.pseudoMinimize(i);
                     return i;
                 });
@@ -71,7 +85,7 @@ class Compiler implements Callable<Integer> {
     }
 
     public static void main(String... args) {
-        int exitCode = new CommandLine(new Compiler()).execute(args);
+        int exitCode = new CommandLine(new SolomonOn()).execute(args);
         System.exit(exitCode);
     }
 }

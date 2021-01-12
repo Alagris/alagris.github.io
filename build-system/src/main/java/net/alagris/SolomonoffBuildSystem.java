@@ -1,7 +1,7 @@
 package net.alagris;
 
+import net.alagris.ConfigParser.*;
 
-import com.moandjiezana.toml.Toml;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jgrapht.graph.DirectedAcyclicGraph;
@@ -13,26 +13,6 @@ import java.util.Queue;
 import java.util.concurrent.*;
 
 public class SolomonoffBuildSystem {
-
-    public static class BuildConfig {
-        Mealy[] mealy;
-        Kolmogorov[] kolmogorov;
-        Infer[] infer;
-    }
-
-    public static class Infer {
-        String path;
-        String algorithm; //"RPNI", "OSTIA"
-        String name;//name of produced transducer
-    }
-
-    public static class Mealy {
-        String path;
-    }
-
-    public static class Kolmogorov {
-        String path;
-    }
 
     interface Minimize<G> {
         G minimize(G g) throws CompilationError;
@@ -48,11 +28,11 @@ public class SolomonoffBuildSystem {
         }
     }
 
-    public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>> void
-    runCompiler(File buildFile, ParseSpecs<Pipeline, Var, V, E, P, A, O, W, N, G> specs, Minimize<G> minimize)
+    public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>>
+    SolomonoffWeightedParser.ConcurrentCollector
+    runCompiler(File buildFile, ParseSpecs<Pipeline, Var, V, E, P, A, O, W, N, G> specs, Minimize<G> minimize,
+                Config config)
             throws ExecutionException, InterruptedException, CompilationError {
-        final Toml toml = new Toml().read(buildFile);
-        final BuildConfig config = toml.to(BuildConfig.class);
 
         final ExecutorService pool = Executors.newWorkStealingPool();
         final Queue<Future<Void>> queue = new LinkedList<>();
@@ -60,10 +40,13 @@ public class SolomonoffBuildSystem {
         final SolomonoffWeightedParser.ConcurrentCollector collector =
                 new SolomonoffWeightedParser.ConcurrentCollector();
 
-        for (final Mealy mealy : config.mealy) {
+        for (final Source sourceFile : config.source) {
             // define tasks
+            if (!sourceFile.path.endsWith(".mealy")) {
+                continue;
+            }
             queue.add(pool.submit(() -> {
-                final File mealyFile = new File(mealy.path);
+                final File mealyFile = new File(sourceFile.path);
                 if (!mealyFile.exists()) {
                     throw new CLIException.MealyFileException(mealyFile.getPath());
                 }
@@ -79,7 +62,7 @@ public class SolomonoffBuildSystem {
                     }
                 });
 
-                final SolomonoffWeightedParser listener = new SolomonoffWeightedParser(collector);
+                final SolomonoffWeightedParser listener = new SolomonoffWeightedParser(collector, sourceFile.path);
                 ParseTreeWalker.DEFAULT.walk(listener, parser.start());
                 assert listener.stack.isEmpty();
                 return null;
@@ -91,6 +74,8 @@ public class SolomonoffBuildSystem {
             task.get();
         }
         queue.clear();
+        
+        importFromPackages(collector);
 
         // initialize dependency graph
         final DirectedAcyclicGraph<String, Object> dependencyOf =
@@ -133,7 +118,13 @@ public class SolomonoffBuildSystem {
             final VarDef var = definitions.get(id);
             if (var != null) {
                 assert var.def != null : id;
-                compiled.put(id, pool.submit(() -> minimize.minimize(var.def.compile(specs, i -> {
+                Future<G> compiledNode;
+
+                checkCache(id, collector).ifPresentOrElse( x -> {
+                    compiled.put(id, CompletableFuture.completedFuture(x));
+                }
+
+                pool.submit(() -> minimize.minimize(var.def.compile(specs, i -> {
                             try {
                                 final Future<G> f = compiled.get(i);
                                 if (f == null) {
@@ -147,7 +138,8 @@ public class SolomonoffBuildSystem {
                                 throw new RuntimeException(e);
                             }
                         }
-                ))));
+                )));
+                compiled.put(id, compiledNode);
             } else {
                 assert specs.borrowVariable(id) != null : id;
             }
@@ -159,6 +151,14 @@ public class SolomonoffBuildSystem {
             assert specs.borrowVariable(id) == null : id;
             specs.introduceVariable(id, Pos.NONE, g, false);
         }
+        
+        return collector;
+    }
+
+    public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>>
+    Optional<G> checkCache(String id, SolomonoffWeightedParser.ConcurrentCollector collector) {
+
+        return Optional.ofNullable(null);
     }
 
     public static OptimisedLexTransducer.OptimisedHashLexTransducer
@@ -172,23 +172,14 @@ public class SolomonoffBuildSystem {
     }
     
     public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>> void
+    saveBinary(File buildFile, ParseSpecs<Pipeline, Var, V, E, P, A, O, W, N, G> specs, Minimize<G> minimize,
     saveBinary(OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
         File directory = new File("bin/cache/");
         if (! directory.exists()){
             directory.mkdir();
         }
+
+
         
-        for (Iterator<Var> it = compiler.specs.iterateVariables(); it.hasNext(); ) {
-            Var symbol = it.next();
-            LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>,
-                    HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> g =
-                    .getTransducer(symbol);
-            try (FileOutputStream f = new FileOutputStream(String.valueOf(symbol.hashCode()))) {
-                compiler.specs.compressBinary(g.graph, new DataOutputStream(new BufferedOutputStream(f)));
-                return null;
-            } catch (IOException e) {
-                return e.toString();
-            }
-        }
     }
 }

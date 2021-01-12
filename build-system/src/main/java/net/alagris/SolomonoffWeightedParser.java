@@ -13,17 +13,19 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
 
     final Stack<SolomonoffWeighted> stack = new Stack<>();
     private final ResultCollector collector;
+    private final String sourceFile;
     String currentVariable = null;
 
     interface ResultCollector{
-        void define(String var,SolomonoffWeighted definition);
+        void define(String var, SolomonoffWeighted definition, String sourceFile);
         void dependsOn(String varX,String varY);
         /**@param isFunction true for function types, false for product types*/
-        void typeOf(String varX,SolomonoffWeighted in,SolomonoffWeighted out,boolean isFunction);
+        void typeOf(String varX, SolomonoffWeighted in, SolomonoffWeighted out, boolean isFunction);
     }
     public static class ConcurrentCollector implements  ResultCollector {
         final Set<Pair<String,String>> dependsOn = ConcurrentHashMap.newKeySet();
         final ConcurrentHashMap<String, SolomonoffWeighted> definitions = new ConcurrentHashMap<>();
+        final ConcurrentHashMap<String, String> sourceFiles = new ConcurrentHashMap<>();
         public static class Type {
             final String var;
             final SolomonoffWeighted in;
@@ -40,7 +42,8 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
         final ConcurrentLinkedQueue<Type> types = new ConcurrentLinkedQueue<>();
 
         @Override
-        public void define(String var, SolomonoffWeighted definition) {
+        public void define(String var, SolomonoffWeighted definition, String sourceFile) {
+            sourceFiles.put(var, sourceFile);
             final SolomonoffWeighted prev = definitions.put(var, definition);
             if (prev!=null) {
                 throw new IllegalArgumentException("Variable " + var + " has been defined twice!");
@@ -59,8 +62,9 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
 
     }
 
-    public SolomonoffWeightedParser(ResultCollector collector){
+    public SolomonoffWeightedParser(ResultCollector collector, String sourceFile){
         this.collector = collector;
+        this.sourceFile = sourceFile;
     }
 
     @Override
@@ -90,7 +94,7 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
     public void exitFuncDef(SolomonoffGrammarParser.FuncDefContext funcDefContext) {
         final SolomonoffWeighted def = stack.pop();
         assert currentVariable.equals(funcDefContext.ID().getText());
-        collector.define(currentVariable,def);
+        collector.define(currentVariable, def, sourceFile);
         assert stack.isEmpty();
         currentVariable = null;
     }
