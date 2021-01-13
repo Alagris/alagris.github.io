@@ -89,18 +89,25 @@
 
                 <!--                <div  id="tipsDiv" class="" style="min-height:5%" >Defined variables:<span id = "tips" th:text="${automata}"></span></div>-->
 
-                <div style="padding-left:16px;overflow-x:auto; ">
-
-                    <div id="automataHtmlList" class="row" style="display: flex; flex-wrap: nowrap;">
-                        <span  style="white-space: nowrap;">
-                            <b>  Defined variables:</b>
-                        </span>
-                        <span class="border" th:each="automaton:${automata}">
-                            <a th:text="${automaton}"></a>
-                        </span>
-
+                <div class="dropdown">
+                    <div style="padding-left:16px;overflow-x:auto; overflow-y: visible;">
+                        <div id="automataHtmlList" class="row" style="display: flex; flex-wrap: nowrap;">
+                            <span style="white-space: nowrap;">
+                                <b>  Defined variables:</b>
+                            </span>
+                            <span th:text="${automaton}" onclick="variableSelected(htmlDecode(this.innerText))" class="border dropbtn" th:each="automaton:${automata}">
+                            </span>
+                        </div>
+                    </div>
+                    <div id="myDropdown" class="dropdown-content">
+                        <a id="dropdownTitle" style="background-color:#18222d;color:white;">xxx</a>
+                        <a onclick="repl(':unset '+htmlDecode(dropdownTitle.innerText));">Remove</a>
+                        <a onclick="repl(':vis '+htmlDecode(dropdownTitle.innerText)); ">Visualize Graph</a>
+                        <a onclick="repl(':rand_sample '+htmlDecode(dropdownTitle.innerText)+' of_size 10'); ">Random Sample</a>
+                        <a onclick="navigator.clipboard.writeText(htmlDecode(dropdownTitle.innerText))">Copy to Clipboard</a>
                     </div>
                 </div>
+
             </div>
 
             <div class="second" style="background: #bfc4c9">
@@ -325,7 +332,7 @@ difference = 'a'</pre>
 
             </div>
         </div>
-
+    </div>
 </main>
 
 <script src="js/compiler2_after_html.js"></script>

@@ -15,6 +15,9 @@ replHistory = []
 replHistoryIndex = 0
 replCurrent = ""
 const MAX_REPL_LENGTH = 3000
+function createDropdownCallback(automaton){
+    return function(){variableSelected(automaton)}
+}
 async function listAutomata() {
     const response = await fetch('list_automata', {
         method: 'POST'
@@ -27,9 +30,10 @@ async function listAutomata() {
      }
     for(var i=0;i<automata.length;i++){
         var span = document.createElement('span');
-        var a = document.createElement('a');
-        span.appendChild(document.createTextNode(automata[i]));
-        span.className = "border"
+        var automaton = automata[i]
+        span.appendChild(document.createTextNode(automaton));
+        span.className = "border dropbtn"
+        span.onclick = createDropdownCallback(automaton)
         automataHtmlList.appendChild(span);
      }
     //var tok = automataHtmlList + "";
@@ -144,7 +148,7 @@ async function repl(replCommand) {
     } else {
         toBeAppended = (replResult.output).trim()
     }
-    if (outputField.value.endsWith('\n')) {
+    if (outputField.value.endsWith('\n') || outputField.value.length==0) {
         outputField.value += toBeAppended
     } else {
         outputField.value += '\n' + toBeAppended
@@ -156,7 +160,6 @@ async function repl(replCommand) {
         outputField.style.borderWidth = 'thick'
         outputField.style.borderColor = "red"
         rangeID = null
-        console.log(replResult)
         if (replResult.col > -1) {
             range = new Range(replResult.row, replResult.col - 1, replResult.row, replResult.col + 1)
             rangeID = editor.session.addMarker(range, "red", "text");
@@ -179,11 +182,34 @@ function htmlDecode(input) {
     var doc = new DOMParser().parseFromString(input, "text/html");
     return doc.documentElement.textContent;
 }
+function variableSelected(variable) {
+  if(myDropdown.classList.contains('show')){
+     if(htmlDecode(dropdownTitle.innerText)==variable){
+       myDropdown.classList.remove('show');
+       document.getElementById('inputField').style.pointerEvents = 'all';
+       return
+     }
+  }else{
+      myDropdown.classList.add('show');
+      document.getElementById('inputField').style.pointerEvents = 'none';
+  }
+  dropdownTitle.innerText = variable;
+}
+
 window.onload = function() {
     codeSavedInCookie = getCookie('code')
     if (codeSavedInCookie == null) return
     editor.setValue(codeSavedInCookie);
     outputField.scrollTop = outputField.scrollHeight
+}
+
+window.onclick = function(event) {
+  if(myDropdown.classList.contains('show')){
+      if (!event.target.classList.contains('dropbtn')) {
+          myDropdown.classList.remove('show');
+          document.getElementById('inputField').style.pointerEvents = 'all';
+      }
+  }
 }
 
 function compile() {

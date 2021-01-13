@@ -161,16 +161,17 @@ public class NewRestController {
         compiler.specs.variableAssignments.remove(args);
         return null;
     };
-    public static final ReplCommand<String>REPL_RESET = (httpSession, compiler, log, debug, args) -> {
-        compiler.specs.variableAssignments.keySet().removeIf(k->!(k.equals("Σ")||k.equals("#")||k.equals("∅")||k.equals("ε")||k.equals(".")));
+    public static final ReplCommand<String> REPL_RESET = (httpSession, compiler, log, debug, args) -> {
+        compiler.specs.variableAssignments.keySet().removeIf(k -> !(k.equals("Σ") || k.equals("#") || k.equals("∅") || k.equals("ε") || k.equals(".")));
         return null;
     };
-    public static final ReplCommand<String> REPL_LOAD  = (httpSession, compiler, log, debug, args) -> {
-        String code = (String)httpSession.getAttribute("code");
-        if(code!=null)compiler.parse(CharStreams.fromString(code));
+    public static final ReplCommand<String> REPL_LOAD = (httpSession, compiler, log, debug, args) -> {
+        String code = (String) httpSession.getAttribute("code");
+        if (code != null) compiler.parse(CharStreams.fromString(code));
         return null;
     };
-    public static final ReplCommand<String> REPL_VIS = (httpSession, compiler, log, debug, args) -> buildGraph(httpSession,args.trim());
+    public static final ReplCommand<String> REPL_VIS = (httpSession, compiler, log, debug, args) -> buildGraph(httpSession, args.trim());
+
     public static class Repl {
         private static class CmdMeta<Result> {
             final ReplCommand<Result> cmd;
@@ -223,13 +224,13 @@ public class NewRestController {
                     return sb.toString();
                 } else {
                     final Repl.CmdMeta<String> cmd = commands.get(args);
-                    return cmd.help + ". Usage:\n        " + cmd.template+'\n';
+                    return cmd.help + ". Usage:\n        " + cmd.template + '\n';
                 }
             });
             compiler.parser.removeErrorListeners();
             compiler.parser.addErrorListener(new BaseErrorListener() {
                 public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                    throw new RuntimeException("line " + line + ":" + charPositionInLine + " " + msg + " " + e);
+                    throw e;
                 }
             });
             compiler.parser.setErrorHandler(new BailErrorStrategy());
@@ -269,10 +270,54 @@ public class NewRestController {
     public static class ReplResponse {
         public boolean wasError;
         public String output;
+        public int col;
+        public int row;
 
-        public ReplResponse(boolean wasError, String output) {
-            this.wasError = wasError;
+        public ReplResponse(String output) {
+            this.wasError = false;
             this.output = output;
+            col = -1;
+            row = -1;
+        }
+
+        public ReplResponse(Throwable exception) {
+            if (exception.getClass().equals(RuntimeException.class) && exception.getCause() != null) {
+                exception = exception.getCause();
+            }
+            this.wasError = true;
+            if (exception instanceof CompilationError.DuplicateFunction) {
+                CompilationError.DuplicateFunction e = (CompilationError.DuplicateFunction) exception;
+                output = "Variable " + e.getName() + " already exists! You cannot redefine it unless you either consume it or run ':unset " + e.getName() + "' command in REPL.";
+                col = e.secondDeclaration.getColumn();
+                row = e.secondDeclaration.getLine();
+            } else if (exception instanceof CompilationError.MissingFunction) {
+                CompilationError.MissingFunction e = (CompilationError.MissingFunction) exception;
+                output = "Variable " + e.id + " not found!";
+                col = e.pos.getColumn();
+                row = e.pos.getLine();
+            } else if (exception instanceof CompilationError.KleeneNondeterminismException) {
+                CompilationError.KleeneNondeterminismException e = (CompilationError.KleeneNondeterminismException) exception;
+                output = e.toString();
+                col = e.kleenePos.getColumn();
+                row = e.kleenePos.getLine();
+            } else if (exception instanceof CompilationError.IllegalCharacter) {
+                CompilationError.IllegalCharacter e = (CompilationError.IllegalCharacter) exception;
+                output = e.toString();
+                col = e.pos.getColumn();
+                row = e.pos.getLine();
+            } else if(exception instanceof NoViableAltException) {
+                NoViableAltException e = (NoViableAltException) exception;
+                output = e.toString();
+                col = e.getStartToken().getCharPositionInLine();
+                row = e.getStartToken().getLine();
+            }else if(exception instanceof RecognitionException) {
+                RecognitionException e = (RecognitionException) exception;
+                output = e.toString();
+                col = e.getOffendingToken().getCharPositionInLine();
+                row = e.getOffendingToken().getLine();
+            }else{
+                output = exception.toString();
+            }
         }
     }
 
@@ -283,7 +328,7 @@ public class NewRestController {
             try {
                 repl = new Repl(new OptimisedLexTransducer.OptimisedHashLexTransducer(0, Integer.MAX_VALUE, true));
             } catch (Exception compilationError) {
-                return new ReplResponse(true, compilationError.getMessage());
+                return new ReplResponse(compilationError);
             }
             httpSession.setAttribute("repl", repl);
         }
@@ -292,7 +337,8 @@ public class NewRestController {
             history = new StringBuilder();
             httpSession.setAttribute("repl_history", history);
         }
-        history.append(">").append(line);
+        if (history.length()>0 && history.charAt(history.length()-1)!='\n') history.append('\n');
+        history.append("> ").append(line);
         if (!line.endsWith("\n")) history.append('\n');
         try {
             final StringBuilder out = new StringBuilder();
@@ -301,17 +347,11 @@ public class NewRestController {
             });
             if (result != null) out.append(result);
             history.append(out);
-            return new ReplResponse(false, out.toString());
+            return new ReplResponse(out.toString());
         } catch (Exception e) {
-            final String out;
-            if (e instanceof CompilationError.DuplicateFunction) {
-                CompilationError.DuplicateFunction f = (CompilationError.DuplicateFunction) e;
-                out = "Variable "+f.getName()+" already exists! You cannot redefine it unless you either consume it or run ':unset "+f.getName() + "' command in REPL.";
-            } else {
-                out = e.toString();
-            }
-            history.append(out);
-            return new ReplResponse(true, out);
+            final ReplResponse r = new ReplResponse(e);
+            history.append(r.output);
+            return r;
         }
 
     }
@@ -347,12 +387,13 @@ public class NewRestController {
     @PostMapping("/get_graph")
     public String getGraph(HttpSession httpSession, @RequestBody String name) {
         try {
-            return buildGraph(httpSession,name);
+            return buildGraph(httpSession, name);
         } catch (Exception e) {
             return e.toString();
         }
     }
-    public static String buildGraph(HttpSession httpSession, String name) throws Exception{
+
+    public static String buildGraph(HttpSession httpSession, String name) throws Exception {
         Repl repl = (Repl) httpSession.getAttribute("repl");
         if (repl == null) {
             repl = new Repl(new OptimisedLexTransducer.OptimisedHashLexTransducer(0, Integer.MAX_VALUE, true));
