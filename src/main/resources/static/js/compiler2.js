@@ -155,24 +155,28 @@ async function repl(replCommand) {
     }
     outputField.scrollTop = outputField.scrollHeight
     replCurrent = inputField.value = ""
-
+    console.log(replResult)
     if (replResult.wasError) {
         outputField.style.borderWidth = 'thick'
         outputField.style.borderColor = "red"
         rangeID = null
+        rangeID2 = null
         if (replResult.col > -1) {
-            range = new Range(replResult.row, replResult.col - 1, replResult.row, replResult.col + 1)
-            rangeID = editor.session.addMarker(range, "red", "text");
-            console.log("rangeID=" + rangeID)
+            range2 = new Range(replResult.row-1, 0, replResult.row-1, 1000)
+            rangeID2 = editor.session.addMarker(range2, "semi-red", "fullLine", true);
+            range = new Range(replResult.row-1, replResult.col - 1, replResult.row-1, replResult.col + 1)
+            rangeID = editor.session.addMarker(range, "red", "text", true);
         }
 
         setTimeout(function() {
             outputField.style.borderWidth = 'thin'
             outputField.style.borderColor = "black"
+            if (rangeID != null) {
+                editor.session.removeMarker(rangeID, "red", "text");
+                editor.session.removeMarker(rangeID2, "semi-red", "fullLine");
+            }
         }, 1500);
-        if (rangeID != null) {
-            editor.session.removeMarker(rangeID, "red", "text");
-        }
+
     }
     listAutomata()
 

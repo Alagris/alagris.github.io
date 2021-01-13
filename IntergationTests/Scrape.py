@@ -36,6 +36,8 @@ class PythonOrgSearch(unittest.TestCase):
             self.driver = webdriver.Chrome()
 
 
+  
+
     def test1(self):
         # open our web page
         driver = self.driver
@@ -99,7 +101,15 @@ class PythonOrgSearch(unittest.TestCase):
         tips = driver.find_element_by_css_selector('#tips')
         tips_text = tips.text
         #print(tips_text)
-        assert "x" in tips_text
+        assert "x" in tips_text<!doctype html>
+<html>
+  <head>
+    <title>This is the title of the webpage!</title>
+  </head>
+  <body>
+    <p>This is an example paragraph. Anything in the <strong>body</strong> tag will appear on the page, just like this <strong>p</strong> tag and its contents.</p>
+  </body>
+</html>
 
 
         clear = driver.find_element_by_css_selector('body > main > div > div > div.first > span > button')

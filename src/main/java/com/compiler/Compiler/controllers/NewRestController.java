@@ -230,7 +230,7 @@ public class NewRestController {
             compiler.parser.removeErrorListeners();
             compiler.parser.addErrorListener(new BaseErrorListener() {
                 public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                    throw e;
+                    throw new ParseError(line,charPositionInLine,msg,e);
                 }
             });
             compiler.parser.setErrorHandler(new BailErrorStrategy());
@@ -254,6 +254,21 @@ public class NewRestController {
                 compiler.parse(CharStreams.fromString(line));
                 return null;
             }
+        }
+    }
+
+    public static class ParseError extends RuntimeException{
+
+        public final int line;
+        public final int charPositionInLine;
+        public final String msg;
+        public final RecognitionException e;
+
+        public ParseError(int line, int charPositionInLine, String msg, RecognitionException e) {
+            this.line = line;
+            this.charPositionInLine = charPositionInLine;
+            this.msg = msg;
+            this.e = e;
         }
     }
 
@@ -285,38 +300,70 @@ public class NewRestController {
                 exception = exception.getCause();
             }
             this.wasError = true;
+            output = exception.toString();
+            col = -1;
+            row = -1;
             if (exception instanceof CompilationError.DuplicateFunction) {
                 CompilationError.DuplicateFunction e = (CompilationError.DuplicateFunction) exception;
                 output = "Variable " + e.getName() + " already exists! You cannot redefine it unless you either consume it or run ':unset " + e.getName() + "' command in REPL.";
-                col = e.secondDeclaration.getColumn();
-                row = e.secondDeclaration.getLine();
+                if(e.secondDeclaration!=null) {
+                    col = e.secondDeclaration.getColumn();
+                    row = e.secondDeclaration.getLine();
+                }
             } else if (exception instanceof CompilationError.MissingFunction) {
                 CompilationError.MissingFunction e = (CompilationError.MissingFunction) exception;
                 output = "Variable " + e.id + " not found!";
-                col = e.pos.getColumn();
-                row = e.pos.getLine();
+                if(e.pos!=null) {
+                    col = e.pos.getColumn();
+                    row = e.pos.getLine();
+                }
             } else if (exception instanceof CompilationError.KleeneNondeterminismException) {
                 CompilationError.KleeneNondeterminismException e = (CompilationError.KleeneNondeterminismException) exception;
                 output = e.toString();
-                col = e.kleenePos.getColumn();
-                row = e.kleenePos.getLine();
+                if(e.kleenePos!=null) {
+                    col = e.kleenePos.getColumn();
+                    row = e.kleenePos.getLine();
+                }
             } else if (exception instanceof CompilationError.IllegalCharacter) {
                 CompilationError.IllegalCharacter e = (CompilationError.IllegalCharacter) exception;
                 output = e.toString();
-                col = e.pos.getColumn();
-                row = e.pos.getLine();
+                if(e.pos!=null) {
+                    col = e.pos.getColumn();
+                    row = e.pos.getLine();
+                }
             } else if(exception instanceof NoViableAltException) {
                 NoViableAltException e = (NoViableAltException) exception;
                 output = e.toString();
-                col = e.getStartToken().getCharPositionInLine();
-                row = e.getStartToken().getLine();
+                if(e.getStartToken()!=null) {
+                    col = e.getStartToken().getCharPositionInLine();
+                    row = e.getStartToken().getLine();
+                }
+            }else if(exception instanceof CompilationError.UndefinedExternalFunc) {
+                CompilationError.UndefinedExternalFunc e = (CompilationError.UndefinedExternalFunc) exception;
+                output = e.toString();
+                if(e.pos!=null) {
+                    col = e.pos.getColumn();
+                    row = e.pos.getLine();
+                }
+            }else if(exception instanceof CompilationError.TypecheckException) {
+                CompilationError.TypecheckException e = (CompilationError.TypecheckException) exception;
+                if(e.typePos!=null) {
+                    col = e.typePos.getColumn();
+                    row = e.typePos.getLine();
+                }
+                output = "[line " + row + ":" + col + "] Function "+e.name+" does not conform to type";
             }else if(exception instanceof RecognitionException) {
                 RecognitionException e = (RecognitionException) exception;
                 output = e.toString();
-                col = e.getOffendingToken().getCharPositionInLine();
-                row = e.getOffendingToken().getLine();
-            }else{
-                output = exception.toString();
+                if(e.getOffendingToken()!=null) {
+                    col = e.getOffendingToken().getCharPositionInLine();
+                    row = e.getOffendingToken().getLine();
+                }
+            }else if(exception instanceof ParseError) {
+                ParseError e = (ParseError) exception;
+                col = e.charPositionInLine;
+                row = e.line;
+                output = "[line " + row + ":" + col + "] "+e.msg+" ("+e.e.toString()+")";
             }
         }
     }
