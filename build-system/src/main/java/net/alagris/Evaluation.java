@@ -276,8 +276,12 @@ public class Evaluation {
                 System.err.flush();
                 final String line = sc.readLine();
                 if(line==null||line.equals(":exit"))break;
-                final String out = repl.run(line,System.out::println,System.err::println);
-                if(out!=null)System.out.println(out);
+                try {
+                    final String out = repl.run(line, System.out::println, System.err::println);
+                    if(out!=null)System.out.println(out);
+                }catch (Throwable e){
+                    e.printStackTrace();
+                }
             }
         }
     }

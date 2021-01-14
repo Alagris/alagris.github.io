@@ -50,24 +50,11 @@ class SolomonOn implements Callable<Integer> {
 
         switch (mode) {
             case build:
-                if (config == null) {
-                    return 2;
-                }
-                SolomonoffBuildSystem.runCompiler(config, compiler.specs, i -> {
-                    compiler.specs.pseudoMinimize(i);
-                    return i;
-                });
-                
-                if (!noBinaryOrCache) {
-                    SolomonoffBuildSystem.saveBinary(config, compiler);
-                }
+                SolomonoffBuildSystem.runCompiler(config, compiler);
                 
                 break;
             case run:
-                SolomonoffBuildSystem.runCompiler(config, compiler.specs, i -> {
-                    compiler.specs.pseudoMinimize(i);
-                    return i;
-                });
+                SolomonoffBuildSystem.runCompiler(config, compiler);
                 repl = new Evaluation.Repl(compiler);
                 if (!inputFile.equals("__NONE__") || inputFile.isFile()) {
                     Evaluation.evalFileContent(repl, inputFile);
