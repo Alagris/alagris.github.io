@@ -14,6 +14,7 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
     final Stack<SolomonoffWeighted> stack = new Stack<>();
     private final ResultCollector collector;
     private final String sourceFile;
+    private final OptimisedLexTransducer<?, ?> specs;
     String currentVariable = null;
 
     interface ResultCollector{
@@ -62,9 +63,10 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
 
     }
 
-    public SolomonoffWeightedParser(ResultCollector collector, String sourceFile){
+    public SolomonoffWeightedParser(ResultCollector collector, String sourceFile,OptimisedLexTransducer<?, ?> specs){
         this.collector = collector;
         this.sourceFile = sourceFile;
+        this.specs = specs;
     }
 
     @Override
@@ -189,10 +191,10 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
             final SolomonoffWeighted ast = stack.get(stackIdx);
             final int weight;
             final ParseTree concatOrWeight = ctx.children.get(childIdx);
-            if (concatOrWeight instanceof TerminalNode) {
-                final TerminalNode weightNode = (TerminalNode) concatOrWeight;
-                assert weightNode.getSymbol().getType() == SolomonoffGrammarLexer.Weight;
-                weight = Integer.parseInt(weightNode.getText());
+            if (concatOrWeight instanceof SolomonoffGrammarParser.WeightsContext) {
+                final SolomonoffGrammarParser.WeightsContext w =
+                        (SolomonoffGrammarParser.WeightsContext) concatOrWeight;
+                weight = specs.listener.parseW(w.Weight());
                 childIdx += 1;
             } else {
                 weight = 0;
@@ -230,21 +232,21 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
             final int weight;
             if(childIdx<children) {
                 final ParseTree dotOrWeightOrKleene = ctx.children.get(childIdx);
-                if (dotOrWeightOrKleene instanceof TerminalNode) {
-                    final TerminalNode dotOrWeight = (TerminalNode) dotOrWeightOrKleene;
-                    if (dotOrWeight.getSymbol().getType() == SolomonoffGrammarLexer.Weight) {
-                        weight = Integer.parseInt(dotOrWeight.getText());
-                        if (childIdx + 1 < children && ctx.children.get(childIdx + 1) instanceof TerminalNode) {
-                            childIdx += 2;
-                            assert ctx.children.get(childIdx + 1).getText().equals("∙");
-                        } else {
-                            childIdx += 1;
-                        }
+                if(dotOrWeightOrKleene instanceof SolomonoffGrammarParser.WeightsContext){
+                    final SolomonoffGrammarParser.WeightsContext w =
+                            (SolomonoffGrammarParser.WeightsContext) dotOrWeightOrKleene;
+                    weight = specs.listener.parseW(w.Weight());
+                    if (childIdx + 1 < children && ctx.children.get(childIdx + 1) instanceof TerminalNode) {
+                        childIdx += 2;
+                        assert ctx.children.get(childIdx + 1).getText().equals("∙");
                     } else {
-                        weight = 0;
-                        assert dotOrWeight.getText().equals("∙");
                         childIdx += 1;
                     }
+                } else if (dotOrWeightOrKleene instanceof TerminalNode) {
+                    final TerminalNode dot = (TerminalNode) dotOrWeightOrKleene;
+                    weight = 0;
+                    assert dot.getText().equals("∙");
+                    childIdx += 1;
                 } else {
                     weight = 0;
                 }
@@ -272,11 +274,11 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
         } else if (ctx.star != null) {
             type = ctx.star.getText();
         } else {
-            assert ctx.Weight() == null;
+            assert ctx.weights() == null;
             return;//pass
         }
         assert type.length() == 1;
-        int weight = ctx.Weight() == null ? 0 : Integer.parseInt(ctx.Weight().getText());
+        int weight = specs.listener.parseW(ctx.weights().Weight());
         SolomonoffWeighted nested = stack.pop();
         nested = new SolomonoffWeighted.Kleene(weight, nested, type.charAt(0));
         stack.push(nested);
@@ -367,6 +369,12 @@ public class SolomonoffWeightedParser implements SolomonoffGrammarListener {
 
     @Override
     public void exitInformant(SolomonoffGrammarParser.InformantContext informantContext) {}
+
+    @Override
+    public void enterWeights(SolomonoffGrammarParser.WeightsContext weightsContext) {}
+
+    @Override
+    public void exitWeights(SolomonoffGrammarParser.WeightsContext weightsContext) {}
 
     @Override
     public void visitTerminal(TerminalNode terminalNode) {}
