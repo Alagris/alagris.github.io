@@ -55,8 +55,8 @@ class Test(unittest.TestCase):
         replInput.send_keys(Keys.RETURN)
         WebDriverWait(driver, 10).until(text_to_change((By.ID, "outputField"), replOutputText1))
         replOutputText2 = replOutput.get_attribute("value")
-        #print(replOutputText2.strip())
-        #self.assertEqual(replOutputText2.strip(), "> :eval x 'tre'\n'00'")
+        # print(replOutputText2.strip())
+        self.assertEqual(replOutputText2.strip(), "> :load\n> :eval x 'tre'\n'00'")
     
 
     def test_2(self):
@@ -82,9 +82,7 @@ class Test(unittest.TestCase):
         clear = driver.find_element_by_css_selector('body > main > div > div > div.first > span > button')
         clear.click()
         replOutput = driver.find_element_by_id('outputField').get_attribute("value")
-        
-        print(replOutput)
-        assert replOutput == "..> :clear/n/nF"
+        self.assertEqual(replOutput, "> :clear\n")
        
 
     
