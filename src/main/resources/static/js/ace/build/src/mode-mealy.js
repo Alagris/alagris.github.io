@@ -6,6 +6,22 @@ var MealyHighlightRules = function() {
 this.$rules = {
 "start" : [
    {
+      "token" : ["keyword.operator", "punctuation"],
+      "regex" : "([#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_][#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_0-9]*)(\\s*\\[)"
+   },
+   {
+      "token" : ["keyword.operator", "punctuation.definition", "keyword.operator"],
+      "regex" : "(!!\\s*)?([#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_][#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_0-9]*)(\\s*=)"
+   },
+   {
+      "token" : ["punctuation.definition", "punctuation.definition", "keyword.operator"],
+      "regex" : "(@\\s*)([#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_][#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_0-9]*)(\\s*=)"
+   },
+   {
+      "token" : ["keyword.operator", "variable", "keyword.operator"],
+      "regex" : "(!!\\s*)?([#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_][#.a-zA-Z\u03b1-\u03c9\u0391-\u03a9\u2205_0-9]*)(!)"
+   },
+   {
       "token" : ["variable.other", "variable.parameter"],
       "regex" : "(^:eval\\s+)(.*$)"
    },
@@ -26,16 +42,16 @@ this.$rules = {
       "regex" : "(<[0-9]+-[0-9]+>|\\[\\\\?.-\\\\?.\\])"
    },
    {
-      "token" : "punctuation.definition",
-      "regex" : "(=)"
-   },
-   {
       "token" : "entity.name.type",
       "regex" : "(&&|->|<:|[;{}])"
    },
    {
       "token" : "keyword.operator",
-      "regex" : "([|?*+:()])"
+      "regex" : "([|?*+:])"
+   },
+   {
+      "token" : "punctuation",
+      "regex" : "([\\](),])"
    },
    {
       "token" : "string punctuation",
@@ -67,7 +83,7 @@ this.$rules = {
    {
       defaultToken : "text",
    }
-], 
+],
 "main__1" : [
    {
       "token" : "string punctuation",
@@ -85,7 +101,7 @@ this.$rules = {
    {
       defaultToken : "text",
    }
-], 
+],
 "main__2" : [
    {
       "token" : "string",
@@ -95,7 +111,7 @@ this.$rules = {
    {
       defaultToken : "string",
    }
-], 
+],
 "main__3" : [
    {
       "token" : "comment",
