@@ -267,12 +267,22 @@ public class SolomonoffBuildSystem {
                         false);
         return compiler;
     }
-//
-//    public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>> void
-//    saveBinary(File buildFile, ParseSpecs<Pipeline, Var, V, E, P, A, O, W, N, G> specs, Minimize<G> minimize,
-//    saveBinary(OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
-//
-//
-//
-//    }
+
+    public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>> void
+    saveBinary(Config config, OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
+        for (Target t : config.target) {
+            LexUnicodeSpecification.Var<N, G> g = compiler.getTransducer(t.id);
+            try (FileOutputStream f = new FileOutputStream(t.out)) {
+                compiler.specs.compressBinary(g.graph, new DataOutputStream(new BufferedOutputStream(f)));
+                return null;
+            } catch (IOException e) {
+                return e.toString();
+            }
+        }
+    }
+
+    public static <Pipeline, Var, V, E, P, A, O extends Seq<A>, W, N, G extends IntermediateGraph<V, E, P, N>> void
+    loadBinary(Config config, OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
+        }
+    }
 }

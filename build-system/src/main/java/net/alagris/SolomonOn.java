@@ -29,8 +29,8 @@ class SolomonOn implements Callable<Integer> {
             description = "Enable interactive mode")
     private boolean interactive;
 
-    @Option(names = {"-u", "--volatile"}, description = "Do not save to a file")
-    private boolean noBinary;
+    @Option(names = {"-u", "--volatile"}, description = "Do not save any files")
+    private boolean noBinaryOrCache;
 
     private enum Mode { run, build, interactive }
 
@@ -43,6 +43,9 @@ class SolomonOn implements Callable<Integer> {
         final OptimisedLexTransducer.OptimisedHashLexTransducer compiler = SolomonoffBuildSystem.getCompiler();
 
         final Config config = TomlParser.Config.parse(buildFile);
+        if (noBinaryOrCache) {
+            config.cashing = false;
+        }
         Evaluation.Repl repl;
 
         switch (mode) {
@@ -55,8 +58,8 @@ class SolomonOn implements Callable<Integer> {
                     return i;
                 });
                 
-                if (!noBinary) {
-//                    SolomonoffBuildSystem.saveBinary();
+                if (!noBinaryOrCache) {
+                    SolomonoffBuildSystem.saveBinary(config, compiler);
                 }
                 
                 break;
