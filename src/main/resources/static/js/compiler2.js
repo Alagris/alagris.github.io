@@ -23,7 +23,7 @@ async function listAutomata() {
         method: 'POST'
     })
     const replResult = await response.text()
-    const automata = JSON.parse(replResult)
+    const automata = JSON.parse(replResult)//["x","try","yt"]
     // var ll = "";
      while (automataHtmlList.childNodes.length > 2) {
          automataHtmlList.removeChild(automataHtmlList.lastChild);
@@ -35,7 +35,7 @@ async function listAutomata() {
         span.className = "border dropbtn"
         span.onclick = createDropdownCallback(automaton)
         automataHtmlList.appendChild(span);
-     }
+    }
     //var tok = automataHtmlList + "";
     // automataHtmlList.toString();
     // automataHtmlList.join('; ');
@@ -161,7 +161,7 @@ async function repl(replCommand) {
         outputField.style.borderColor = "red"
         rangeID = null
         rangeID2 = null
-        if (replResult.col > -1) {
+        if (replResult.col > -1 && firstWord == ":load") {
             range2 = new Range(replResult.row-1, 0, replResult.row-1, 1000)
             rangeID2 = editor.session.addMarker(range2, "semi-red", "fullLine", true);
             range = new Range(replResult.row-1, replResult.col - 1, replResult.row-1, replResult.col + 1)
@@ -176,11 +176,27 @@ async function repl(replCommand) {
                 editor.session.removeMarker(rangeID2, "semi-red", "fullLine");
             }
         }, 1500);
-
     }
     listAutomata()
+    if(outputField.value.length>5000){
+      if(!clearWarningAlreadyDisplayed){
+        var enjoyhint_instance = new EnjoyHint({});
+        var enjoyhint_script_steps = [
+            {
+                'click #clrBtnn': "Warning! Console output is too large and might slow down the page. Clearing it is recommended."
+            }
+        ];
+        enjoyhint_instance.set(enjoyhint_script_steps);
+        enjoyhint_instance.run();
+        clearWarningAlreadyDisplayed = true
+      }
+    }else{
+        clearWarningAlreadyDisplayed = false
+    }
 
 }
+
+clearWarningAlreadyDisplayed = false
 
 function htmlDecode(input) {
     var doc = new DOMParser().parseFromString(input, "text/html");

@@ -80,7 +80,7 @@
 
                 <div id="editor" class="boob" style=" background-color: #18222d;"></div>
 
-                Console: <span ><button class="buttonSmall float-right" style="background-color: white; color: black; border: 2px solid #FFA500;"  onclick="repl(':clear')">Clear</button></span>
+                Console: <span ><button id="clrBtnn" class="buttonSmall float-right" style="background-color: white; color: black; border: 2px solid #FFA500;"  onclick="repl(':clear')">Clear</button></span>
 
                 <textarea readonly style="resize: none;" id="outputField" th:text="${repl_history}" placeholder=">"></textarea>
                 <div style="min-height:2rem; background-color: #18222d;  display: flex; align-items: center;">

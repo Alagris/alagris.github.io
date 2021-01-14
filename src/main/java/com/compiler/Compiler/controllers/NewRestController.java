@@ -11,6 +11,7 @@ import net.automatalib.serialization.dot.GraphDOT;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 
@@ -236,23 +237,32 @@ public class NewRestController {
             compiler.parser.setErrorHandler(new BailErrorStrategy());
         }
 
-        public String run(HttpSession httpSession, String line, Consumer<String> log, Consumer<String> debug) throws Exception {
-            if (line.startsWith(":")) {
-                final int space = line.indexOf(' ');
-                final String firstWord;
-                final String remaining;
-                if (space >= 0) {
-                    firstWord = line.substring(1, space);
-                    remaining = line.substring(space + 1);
+        public String run(HttpSession httpSession, String line, Consumer<String> log, Consumer<String> debug) throws Throwable {
+            Future<String> out = executor.submit(()-> {
+                if (line.startsWith(":")) {
+                    final int space = line.indexOf(' ');
+                    final String firstWord;
+                    final String remaining;
+                    if (space >= 0) {
+                        firstWord = line.substring(1, space);
+                        remaining = line.substring(space + 1);
+                    } else {
+                        firstWord = line.substring(1);
+                        remaining = "";
+                    }
+                    final Repl.CmdMeta<String> cmd = commands.get(firstWord);
+                    return cmd.cmd.run(httpSession, compiler, log, debug, remaining);
                 } else {
-                    firstWord = line.substring(1);
-                    remaining = "";
+                    compiler.parse(CharStreams.fromString(line));
+                    return null;
                 }
-                final Repl.CmdMeta<String> cmd = commands.get(firstWord);
-                return cmd.cmd.run(httpSession, compiler, log, debug, remaining);
-            } else {
-                compiler.parse(CharStreams.fromString(line));
-                return null;
+            });
+            try {
+                return out.get(30, TimeUnit.SECONDS);
+            } catch (ExecutionException e){
+                throw e.getCause();
+            }finally {
+                out.cancel(true);
             }
         }
     }
@@ -368,6 +378,8 @@ public class NewRestController {
         }
     }
 
+    public static final ExecutorService executor = Executors.newCachedThreadPool();
+
     @PostMapping("/repl")
     public ReplResponse repl(HttpSession httpSession, @RequestBody String line) {
         Repl repl = (Repl) httpSession.getAttribute("repl");
@@ -390,12 +402,11 @@ public class NewRestController {
         try {
             final StringBuilder out = new StringBuilder();
             repl.compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> out.append("Warning! Variable ").append(var.name).append(" redefined!\n"));
-            final String result = repl.run(httpSession, line, s -> out.append(s).append('\n'), s -> {
-            });
+            final String result = repl.run(httpSession, line, s -> out.append(s).append('\n'), s -> { });
             if (result != null) out.append(result);
             history.append(out);
             return new ReplResponse(out.toString());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             final ReplResponse r = new ReplResponse(e);
             history.append(r.output);
             return r;
