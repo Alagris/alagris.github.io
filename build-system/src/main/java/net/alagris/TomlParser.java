@@ -13,12 +13,12 @@ public class TomlParser {
     public static class Config {
         String projectName;
         Source[] source;
-        Target[] target;
+//        Target[] target;
         String cacheLocation;
         boolean cashing;
         
         public Config() {
-            cacheLocation = "bin/cache/";
+            cacheLocation = "bin/";
             cashing = true;
         }
 
@@ -26,16 +26,21 @@ public class TomlParser {
             final Toml toml = new Toml().read(configFile);
             Config config;
             config = toml.to(Config.class);
-            if(config.projectName==null){
-                throw new IllegalArgumentException("projectName is missing from "+configFile);
+//            if (config.projectName == null) {
+//                throw new IllegalArgumentException( "projectName is missing from " + configFile);
+//            }
+            if (config.source != null) {
+                String buildFilePath = configFile.getAbsoluteFile().getParent();
+                for (Source src : config.source) {
+                    if (!Paths.get(src.path).isAbsolute()) {
+                        src.path = Paths.get(buildFilePath, src.path).toString();
+                    }
+                }
             }
-            for(Source src: config.source){
-                src.path = configFile.toPath().getParent().resolve(src.path).toString();
-            }
-            if(config.target==null || config.target.length==0){
-                System.err.println("No targets specified. Defaulting to 'main'");
-                config.target = new Target[]{new Target("main","bin/main.star")};
-            }
+//            if (config.target==null || config.target.length==0){
+//                System.err.println("No targets specified. Defaulting to 'main'");
+//                config.target = new Target[]{new Target("main","bin/main.star")};
+//            }
             Files.createDirectories(Paths.get(config.cacheLocation));
             return config;
         }
