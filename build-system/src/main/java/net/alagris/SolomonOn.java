@@ -1,9 +1,8 @@
 package net.alagris;
 
-import net.alagris.ConfigParser.*;
+import net.alagris.TomlParser.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import picocli.CommandLine;
@@ -35,35 +34,34 @@ class SolomonOn implements Callable<Integer> {
 
     private enum Mode { run, build, interactive }
 
+    private void loadSettingFromFile() throws CLIException.BuildFileException {
+
+    }
+
     @Override
     public Integer call() throws Exception { // your business logic goes here...
-        final OptimisedLexTransducer.OptimisedHashLexTransducer compiler =
-                SolomonoffBuildSystem.getCompiler();
+        final OptimisedLexTransducer.OptimisedHashLexTransducer compiler = SolomonoffBuildSystem.getCompiler();
 
-        SolomonoffWeightedParser.ConcurrentCollector collector;
-
+        final Config config = TomlParser.Config.parse(buildFile);
         Evaluation.Repl repl;
-        Config config;
 
         switch (mode) {
             case build:
-                try {
-                    config = ConfigParser.parse(buildFile);
-                } catch (CLIException.BuildFileException e) {
+                if (config == null) {
                     return 2;
                 }
-                collector = SolomonoffBuildSystem.runCompiler(config, compiler.specs, i -> {
+                SolomonoffBuildSystem.runCompiler(config, compiler.specs, i -> {
                     compiler.specs.pseudoMinimize(i);
                     return i;
                 });
                 
                 if (!noBinary) {
-                    SolomonoffBuildSystem.saveBinary();
+//                    SolomonoffBuildSystem.saveBinary();
                 }
                 
                 break;
             case run:
-                collector = SolomonoffBuildSystem.runCompiler(buildFile, compiler.specs, i -> {
+                SolomonoffBuildSystem.runCompiler(config, compiler.specs, i -> {
                     compiler.specs.pseudoMinimize(i);
                     return i;
                 });
