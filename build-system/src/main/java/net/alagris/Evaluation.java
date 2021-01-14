@@ -7,17 +7,16 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.NoViableAltException;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class Evaluation {
     private final static Random RAND = new Random();
 
     public interface ReplCommand<Result> {
-        Result run(OptimisedLexTransducer.OptimisedHashLexTransducer compiler, Consumer<String> log, Consumer<String> debug, String args);
+        Result run(OptimisedLexTransducer.OptimisedHashLexTransducer compiler, Consumer<String> log,
+                   Consumer<String> debug, String args);
     }
 
     public static final ReplCommand<String> REPL_LOAD = (compiler, log, debug, args) -> {
@@ -29,7 +28,8 @@ public class Evaluation {
             debug.accept("Optimising took " + (System.currentTimeMillis() - optimisingBegin) + " miliseconds");
             final long ambiguityCheckingBegin = System.currentTimeMillis();
             compiler.checkStrongFunctionality();
-            debug.accept("Checking ambiguity " + (System.currentTimeMillis() - ambiguityCheckingBegin) + " miliseconds");
+            debug.accept(
+                    "Checking ambiguity " + (System.currentTimeMillis() - ambiguityCheckingBegin) + " miliseconds");
             final long typecheckingBegin = System.currentTimeMillis();
             debug.accept("Typechecking took " + (System.currentTimeMillis() - typecheckingBegin) + " miliseconds");
             debug.accept("Total time " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
@@ -39,8 +39,8 @@ public class Evaluation {
         }
     };
 
-    public static final ReplCommand<String> REPL_LIST = (compiler, logs, debug, args) -> compiler.specs.variableAssignments
-            .keySet().toString();
+    public static final ReplCommand<String> REPL_LIST =
+            (compiler, logs, debug, args) -> compiler.specs.variableAssignments.keySet().toString();
     public static final ReplCommand<String> REPL_SIZE = (compiler, logs, debug, args) -> {
         try {
             RangedGraph<Pos, Integer, E, P> r = compiler.getOptimisedTransducer(args);
@@ -80,8 +80,8 @@ public class Evaluation {
         }
         final String pipelineInput = parts[1].trim();
         final long evaluationBegin = System.currentTimeMillis();
-        final LexPipeline<net.alagris.HashMapIntermediateGraph.N<Pos, E>, HashMapIntermediateGraph<Pos, E, P>> pipeline = compiler
-                .getPipeline(pipelineName.substring(1));
+        final LexPipeline<net.alagris.HashMapIntermediateGraph.N<Pos, E>, HashMapIntermediateGraph<Pos, E, P>>
+                pipeline = compiler.getPipeline(pipelineName.substring(1));
         if (pipeline == null)
             return "Pipeline '" + pipelineName + "' not found!";
         final IntSeq input = ParserListener.parseCodepointOrStringLiteral(pipelineInput);
@@ -160,8 +160,8 @@ public class Evaluation {
                 return null;
             } else if (mode.equals("of_length")) {
                 final int maxLength = param;
-                compiler.specs.generateRandomSampleBoundedByLength(transducer, maxLength, 10, RAND,
-                        (backtrack, finalState) -> {
+                compiler.specs.generateRandomSampleBoundedByLength(transducer, maxLength,
+                        10, RAND, (backtrack, finalState) -> {
                             final BacktrackingHead head = new BacktrackingHead(
                                     backtrack, transducer.getFinalEdge(finalState));
                             final IntSeq in = head.randMatchingInput(RAND);
@@ -218,15 +218,20 @@ public class Evaluation {
                     "Tests if two DETERMINISTIC transducers are equal. Does not work with nondeterministic ones!",
                     REPL_EQUAL);
             registerCommand("is_det", "Tests whether transducer is deterministic", REPL_IS_DETERMINISTIC);
-            registerCommand("export", "Exports transducer to STAR (Subsequential Transducer ARchie) binary file",
+            registerCommand(
+                    "export", "Exports transducer to STAR (Subsequential Transducer ARchie) binary file",
                     REPL_EXPORT);
             registerCommand("eval", "Evaluates transducer on requested input", REPL_EVAL);
-            registerCommand("rand_sample", "Generates random sample of input:output pairs produced by ths transducer",
+            registerCommand(
+                    "rand_sample", "Generates random sample of input:output pairs produced by ths transducer",
                     REPL_RAND_SAMPLE);
             registerCommand("vis", "Visualizes transducer as a graph", REPL_VISUALIZE);
         }
 
         public String run(String line, Consumer<String> log, Consumer<String> debug) {
+            if (line.trim().isEmpty()) {
+                return "";
+            }
             if (line.startsWith(":")) {
                 final int space = line.indexOf(' ');
                 final String firstWord;
@@ -253,6 +258,15 @@ public class Evaluation {
                     }
                 } else {
                     final CmdMeta<String> cmd = commands.get(firstWord);
+                    if (cmd == null) {
+                        System.err.println("Wrong commad");
+                        final StringBuilder sb = new StringBuilder();
+                        for (Map.Entry<String, CmdMeta<String>> _cmd : commands.entrySet()) {
+                            final String name = _cmd.getKey();
+                            sb.append(":").append(name).append("\t").append(_cmd.getValue().help).append("\n");
+                        }
+                        return sb.toString();
+                    }
                     return cmd.cmd.run(compiler, log, debug, remaining);
                 }
 
@@ -286,22 +300,20 @@ public class Evaluation {
         }
     }
     
-    public static void evalFileContent(Repl repl, File file) throws IOException {
-//        Scanner scanner = new Scanner(file);
-        Pattern pattern = Pattern.compile("(?<!\\)\\s*\\n|(?<!\\)\\s*\\r\\n|\\s*;");
-//        scanner.useDelimiter(pattern);
-        FileReader _file = new FileReader(file);
-        BufferedReader reader = new BufferedReader(_file);
-        String line = reader.readLine();
+    public static void evalFileContent(Repl repl, InputStream input) throws IOException {
+        Scanner scanner = new Scanner(input);
+        Pattern pattern = Pattern.compile("(?<!\\\\)\\n|(?<!\\\\)\\r\\n");
+        scanner.useDelimiter(pattern);
+        String line = scanner.next();
 
         while (line != null) {
             final String out = repl.run(line,System.out::println,System.err::println);
             if(out!=null)System.out.println(out);
 
-            line = reader.readLine();
+            line = scanner.next();
         }
 
-        reader.close();
-        _file.close();
+        scanner.close();
+        input.close();
     }
 }

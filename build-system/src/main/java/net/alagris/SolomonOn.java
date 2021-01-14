@@ -2,8 +2,7 @@ package net.alagris;
 
 import net.alagris.TomlParser.*;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.concurrent.Callable;
 
@@ -16,6 +15,7 @@ import picocli.CommandLine.*;
 class SolomonOn implements Callable<Integer> {
 
     private Config config;
+    private InputStream scriptStream;
 
     @Parameters(index = "0", description = "${COMPLETION-CANDIDATES}")
     private Mode mode;
@@ -39,11 +39,18 @@ class SolomonOn implements Callable<Integer> {
     @Option(names = {"-u", "--volatile"}, description = "Do not save any files")
     private boolean noCaching;
 
+    @Option(names = {"-@", "--stdin"}, description = "set stdin as script file")
+    private  boolean setStdin;
+
     private enum Mode { run, build, interactive, clean }
 
-    private void updateConfig() {
-        if (noCaching) {
-            config.cashing = false;
+    private void updateConfig() throws FileNotFoundException {
+        config.cashing = !noCaching;
+        if (scriptFile != null) {
+            scriptStream = new FileInputStream(scriptFile);
+        }
+        if (setStdin) {
+            scriptStream = System.in;
         }
     }
 
@@ -73,7 +80,11 @@ class SolomonOn implements Callable<Integer> {
         final OptimisedLexTransducer.OptimisedHashLexTransducer compiler = SolomonoffBuildSystem.getCompiler();
         if (buildFile.exists()) {
             config = TomlParser.Config.parse(buildFile);
-            updateConfig();
+            try {
+                updateConfig();
+            } catch (FileNotFoundException e) {
+                return 2;
+            }
         }
         Evaluation.Repl repl;
 
@@ -92,10 +103,12 @@ class SolomonOn implements Callable<Integer> {
                 }
                 SolomonoffBuildSystem.runCompiler(config, compiler);
                 repl = new Evaluation.Repl(compiler);
-                if ((!scriptFile.equals("__NONE__")) && scriptFile.isFile()) {
-                    Evaluation.evalFileContent(repl, scriptFile);
-                } else {
-                    return 2;
+                if (scriptFile != null) {
+                    if (scriptStream != null) {
+                        Evaluation.evalFileContent(repl, scriptStream);
+                    } else {
+                        return 2;
+                    }
                 }
                 if (interactive || scriptFile == null) {
                     Evaluation.loop(repl);
@@ -103,6 +116,9 @@ class SolomonOn implements Callable<Integer> {
                 break;
             case interactive:
                 repl = new Evaluation.Repl(compiler);
+                if (scriptStream != null) {
+                    Evaluation.evalFileContent(repl, scriptStream);
+                }
                 Evaluation.loop(repl);
                 break;
             case clean:
