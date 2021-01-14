@@ -104,7 +104,7 @@
                         <a onclick="repl(':unset '+htmlDecode(dropdownTitle.innerText));">Remove</a>
                         <a onclick="repl(':vis '+htmlDecode(dropdownTitle.innerText)); ">Visualize Graph</a>
                         <a onclick="repl(':rand_sample '+htmlDecode(dropdownTitle.innerText)+' of_size 10'); ">Random Sample</a>
-                        <a onclick="navigator.clipboard.writeText(htmlDecode(dropdownTitle.innerText))">Copy to Clipboard</a>
+                        <a onclick="copyTextToClipboard(htmlDecode(dropdownTitle.innerText))">Copy to Clipboard</a>
                     </div>
                 </div>
 
