@@ -35,16 +35,8 @@ public class Executor {
             final long typecheckingBegin = System.currentTimeMillis();
             debug.accept("Typechecking took " + (System.currentTimeMillis() - typecheckingBegin) + " miliseconds");
             debug.accept("Total time " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
-            compiler.specs.setVariableRedefinitionCallback((prev, n, pos) -> {
-                assert prev.name.equals(n.name);
-                throw new CompilationError.DuplicateFunction(prev.pos, pos, n.name);
-            });
             return null;
         } catch (CompilationError | IOException e) {
-            compiler.specs.setVariableRedefinitionCallback((prev, n, pos) -> {
-                assert prev.name.equals(n.name);
-                throw new CompilationError.DuplicateFunction(prev.pos, pos, n.name);
-            });
             return e.toString();
         }
     };

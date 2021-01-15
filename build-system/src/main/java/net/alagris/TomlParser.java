@@ -5,15 +5,22 @@ import com.moandjiezana.toml.Toml;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class TomlParser {
     public static class Config {
         String projectName;
+        String version;
+        String remote_repo;
+        String private_key;
+        String local_repo;
         ArrayList<Source> source;
+        ArrayList<Package> pkg;
 //        Target[] target;
         String cacheLocation;
+        boolean verify_signature;
         boolean caching_write;
         boolean caching_read;
         
@@ -22,6 +29,7 @@ public class TomlParser {
             cacheLocation = "bin/";
             caching_write = true;
             caching_read = true;
+            local_repo = Paths.get(System.getProperty("user.home"),".Solomonoff").toString();
         }
 
         public static Config parse(File configFile) throws CLIException.BuildFileException, IOException {
@@ -71,5 +79,18 @@ public class TomlParser {
             this.path = path;
         }
     }
-    
+
+    public static class Package {
+        String name;
+        String version;
+        String public_key;
+
+        public Package() {}
+
+        public Package(String name, String version) {
+            this.name = name;
+            this.version = version;
+        }
+    }
+
 }

@@ -50,7 +50,10 @@ class SolomonOn implements Callable<Integer> {
     @Option(names = {"-@", "--stdin"}, description = "set stdin as script file")
     private  boolean setStdin;
 
-    private enum Mode { run, build, interactive, clean, export }
+    @Option(names = {"-l", "--install-local-pkg"}, description = "install from local drive")
+    private  boolean localInstall;
+
+    private enum Mode { run, build, interactive, clean, export, check, install, remove }
 
     private void updateConfig() throws FileNotFoundException {
         config.caching_write = !noCaching;
@@ -68,17 +71,7 @@ class SolomonOn implements Callable<Integer> {
         if (!cache.exists()) {
             return;
         }
-        FileFilter onlyFiles = new FileFilter() {
-            public boolean accept(File file) {
-                boolean isFile = file.isFile();
-                if (isFile) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        };
-        File[] files = cache.listFiles(onlyFiles);
+        File[] files = cache.listFiles(File::isFile);
         for (File f : files) {
             f.delete();
         }

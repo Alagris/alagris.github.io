@@ -124,7 +124,7 @@ public class Compiler {
     }
 
     private List<Source> loadFromPackages() {
-        return new ArrayList<>();
+        return Packages.getSources(config);
     }
     
     private List<Source> loadAllSourceFiles() {
