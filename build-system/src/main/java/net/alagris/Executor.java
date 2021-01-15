@@ -11,17 +11,19 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-public class Evaluation {
-    private final static Random RAND = new Random();
+public class Executor {
+    private final HashMap<String, CmdMeta<String>> commands = new HashMap<>();
+    private OptimisedLexTransducer.OptimisedHashLexTransducer compiler;
 
-    public interface ReplCommand<Result> {
+    private interface ReplCommand<Result> {
         Result run(OptimisedLexTransducer.OptimisedHashLexTransducer compiler, Consumer<String> log,
                    Consumer<String> debug, String args);
     }
 
-    public static final ReplCommand<String> REPL_LOAD = (compiler, log, debug, args) -> {
+    private final ReplCommand<String> REPL_LOAD = (compiler, log, debug, args) -> {
         try {
             final long parsingBegin = System.currentTimeMillis();
+            compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> {} );
             compiler.parse(CharStreams.fromFileName(args));
             debug.accept("Parsing took " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
             final long optimisingBegin = System.currentTimeMillis();
@@ -33,15 +35,23 @@ public class Evaluation {
             final long typecheckingBegin = System.currentTimeMillis();
             debug.accept("Typechecking took " + (System.currentTimeMillis() - typecheckingBegin) + " miliseconds");
             debug.accept("Total time " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
+            compiler.specs.setVariableRedefinitionCallback((prev, n, pos) -> {
+                assert prev.name.equals(n.name);
+                throw new CompilationError.DuplicateFunction(prev.pos, pos, n.name);
+            });
             return null;
         } catch (CompilationError | IOException e) {
+            compiler.specs.setVariableRedefinitionCallback((prev, n, pos) -> {
+                assert prev.name.equals(n.name);
+                throw new CompilationError.DuplicateFunction(prev.pos, pos, n.name);
+            });
             return e.toString();
         }
     };
 
-    public static final ReplCommand<String> REPL_LIST =
+    private final ReplCommand<String> REPL_LIST =
             (compiler, logs, debug, args) -> compiler.specs.variableAssignments.keySet().toString();
-    public static final ReplCommand<String> REPL_SIZE = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_SIZE = (compiler, logs, debug, args) -> {
         try {
             RangedGraph<Pos, Integer, E, P> r = compiler.getOptimisedTransducer(args);
             return r == null ? "No such function!" : String.valueOf(r.size());
@@ -49,7 +59,7 @@ public class Evaluation {
             return e.toString();
         }
     };
-    public static final ReplCommand<String> REPL_EVAL = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_EVAL = (compiler, logs, debug, args) -> {
         try {
             final String[] parts = args.split("\\s+", 2);
             if (parts.length != 2)
@@ -70,7 +80,7 @@ public class Evaluation {
             return e.toString();
         }
     };
-    public static final ReplCommand<String> REPL_RUN = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_RUN = (compiler, logs, debug, args) -> {
         final String[] parts = args.split("\\s+", 2);
         if (parts.length != 2)
             return "Two arguments required 'transducerName' and 'transducerInput' but got " + Arrays.toString(parts);
@@ -90,7 +100,7 @@ public class Evaluation {
         debug.accept("Took " + evaluationTook + " miliseconds");
         return output == null ? "No match!" : output.toStringLiteral();
     };
-    public static final ReplCommand<String> REPL_EXPORT = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_EXPORT = (compiler, logs, debug, args) -> {
         Var<net.alagris.HashMapIntermediateGraph.N<Pos, E>, HashMapIntermediateGraph<Pos, E, P>> g = compiler
                 .getTransducer(args);
         try (FileOutputStream f = new FileOutputStream(args + ".star")) {
@@ -101,7 +111,7 @@ public class Evaluation {
         }
     };
 
-    public static final ReplCommand<String> REPL_IS_DETERMINISTIC = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_IS_DETERMINISTIC = (compiler, logs, debug, args) -> {
         try {
             RangedGraph<Pos, Integer, E, P> r = compiler.getOptimisedTransducer(args);
             if (r == null)
@@ -111,11 +121,11 @@ public class Evaluation {
             return e.toString();
         }
     };
-    public static final ReplCommand<String> REPL_LIST_PIPES = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_LIST_PIPES = (compiler, logs, debug, args) -> {
         return Specification.fold(compiler.specs.pipelines.keySet(), new StringBuilder(),
                 (pipe, sb) -> sb.append("@").append(pipe).append(", ")).toString();
     };
-    public static final ReplCommand<String> REPL_EQUAL = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_EQUAL = (compiler, logs, debug, args) -> {
         try {
             final String[] parts = args.split("\\s+", 2);
             if (parts.length != 2)
@@ -137,8 +147,9 @@ public class Evaluation {
             return e.toString();
         }
     };
-    public static final ReplCommand<String> REPL_RAND_SAMPLE = (compiler, logs, debug, args) -> {
+    private final ReplCommand<String> REPL_RAND_SAMPLE = (compiler, logs, debug, args) -> {
         try {
+            final Random RAND = new Random();
             final String[] parts = args.split("\\s+", 4);
             if (parts.length != 3) {
                 return "Three arguments required: 'transducerName', 'mode' and 'size'";
@@ -178,7 +189,8 @@ public class Evaluation {
             return e.toString();
         }
     };
-    public static final ReplCommand<String> REPL_VISUALIZE = (compiler, logs, debug, args) -> {
+
+    private final ReplCommand<String> REPL_VISUALIZE = (compiler, logs, debug, args) -> {
         try {
             compiler.visualize(args);
             return null;
@@ -187,101 +199,96 @@ public class Evaluation {
         }
     };
 
-    public static class Repl {
-        private static class CmdMeta<Result> {
-            final ReplCommand<Result> cmd;
-            final String help;
+    private class CmdMeta<Result> {
+        final ReplCommand<Result> cmd;
+        final String help;
 
-            private CmdMeta(ReplCommand<Result> cmd, String help) {
-                this.cmd = cmd;
-                this.help = help;
-            }
-        }
-
-        private final HashMap<String, CmdMeta<String>> commands = new HashMap<>();
-        private final OptimisedLexTransducer.OptimisedHashLexTransducer compiler;
-
-        public ReplCommand<String> registerCommand(String name, String help, ReplCommand<String> cmd) {
-            final CmdMeta<String> prev = commands.put(name, new CmdMeta<>(cmd, help));
-            return prev == null ? null : prev.cmd;
-        }
-
-        public Repl(OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
-            this.compiler = compiler;
-            registerCommand("exit", "Exits REPL", (a, b, d, c) -> "");
-            registerCommand("load", "Loads source code from file", REPL_LOAD);
-            registerCommand("pipes", "Lists all currently defined pipelines", REPL_LIST_PIPES);
-            registerCommand("run", "Runs pipeline for the given input", REPL_RUN);
-            registerCommand("ls", "Lists all currently defined transducers", REPL_LIST);
-            registerCommand("size", "Size of transducer is the number of its states", REPL_SIZE);
-            registerCommand("equal",
-                    "Tests if two DETERMINISTIC transducers are equal. Does not work with nondeterministic ones!",
-                    REPL_EQUAL);
-            registerCommand("is_det", "Tests whether transducer is deterministic", REPL_IS_DETERMINISTIC);
-            registerCommand(
-                    "export", "Exports transducer to STAR (Subsequential Transducer ARchie) binary file",
-                    REPL_EXPORT);
-            registerCommand("eval", "Evaluates transducer on requested input", REPL_EVAL);
-            registerCommand(
-                    "rand_sample", "Generates random sample of input:output pairs produced by ths transducer",
-                    REPL_RAND_SAMPLE);
-            registerCommand("vis", "Visualizes transducer as a graph", REPL_VISUALIZE);
-        }
-
-        public String run(String line, Consumer<String> log, Consumer<String> debug) {
-            if (line.trim().isEmpty()) {
-                return "";
-            }
-            if (line.startsWith(":")) {
-                final int space = line.indexOf(' ');
-                final String firstWord;
-                final String remaining;
-                if (space >= 0) {
-                    firstWord = line.substring(1, space);
-                    remaining = line.substring(space + 1);
-                } else {
-                    firstWord = line.substring(1);
-                    remaining = "";
-                }
-                if (firstWord.startsWith("?")) {
-                    final String noQuestionmark = firstWord.substring(1);
-                    if (noQuestionmark.isEmpty()) {
-                        final StringBuilder sb = new StringBuilder();
-                        for (Map.Entry<String, CmdMeta<String>> cmd : commands.entrySet()) {
-                            final String name = cmd.getKey();
-                            sb.append(":").append(name).append("\t").append(cmd.getValue().help).append("\n");
-                        }
-                        return sb.toString();
-                    } else {
-                        final CmdMeta<String> cmd = commands.get(noQuestionmark);
-                        return cmd.help;
-                    }
-                } else {
-                    final CmdMeta<String> cmd = commands.get(firstWord);
-                    if (cmd == null) {
-                        System.err.println("Wrong commad");
-                        final StringBuilder sb = new StringBuilder();
-                        for (Map.Entry<String, CmdMeta<String>> _cmd : commands.entrySet()) {
-                            final String name = _cmd.getKey();
-                            sb.append(":").append(name).append("\t").append(_cmd.getValue().help).append("\n");
-                        }
-                        return sb.toString();
-                    }
-                    return cmd.cmd.run(compiler, log, debug, remaining);
-                }
-
-            } else {
-                try {
-                    compiler.parseREPL(CharStreams.fromString(line));
-                    return null;
-                } catch (CompilationError | NoViableAltException | EmptyStackException e) {
-                    return e.toString();
-                }
-            }
+        private CmdMeta(ReplCommand<Result> cmd, String help) {
+            this.cmd = cmd;
+            this.help = help;
         }
     }
 
-    public static void loop(Repl repl) throws IOException {
+
+    private ReplCommand<String> registerCommand(String name, String help, ReplCommand<String> cmd) {
+        final CmdMeta<String> prev = commands.put(name, new CmdMeta<>(cmd, help));
+        return prev == null ? null : prev.cmd;
+    }
+
+    public Executor(OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
+        this.compiler = compiler;
+        registerCommand("exit", "Exits REPL", (a, b, d, c) -> "");
+        registerCommand("load", "Loads source code from file", REPL_LOAD);
+        registerCommand("pipes", "Lists all currently defined pipelines", REPL_LIST_PIPES);
+        registerCommand("run", "Runs pipeline for the given input", REPL_RUN);
+        registerCommand("ls", "Lists all currently defined transducers", REPL_LIST);
+        registerCommand("size", "Size of transducer is the number of its states", REPL_SIZE);
+        registerCommand("equal",
+                "Tests if two DETERMINISTIC transducers are equal. Does not work with nondeterministic ones!",
+                REPL_EQUAL);
+        registerCommand("is_det", "Tests whether transducer is deterministic", REPL_IS_DETERMINISTIC);
+        registerCommand(
+                "export", "Exports transducer to STAR (Subsequential Transducer ARchie) binary file",
+                REPL_EXPORT);
+        registerCommand("eval", "Evaluates transducer on requested input", REPL_EVAL);
+        registerCommand(
+                "rand_sample", "Generates random sample of input:output pairs produced by ths transducer",
+                REPL_RAND_SAMPLE);
+        registerCommand("vis", "Visualizes transducer as a graph", REPL_VISUALIZE);
+    }
+
+    private String run(String line, Consumer<String> log, Consumer<String> debug) {
+        if (line.trim().isEmpty()) {
+            return "";
+        }
+        if (line.startsWith(":")) {
+            final int space = line.indexOf(' ');
+            final String firstWord;
+            final String remaining;
+            if (space >= 0) {
+                firstWord = line.substring(1, space);
+                remaining = line.substring(space + 1);
+            } else {
+                firstWord = line.substring(1);
+                remaining = "";
+            }
+            if (firstWord.startsWith("?")) {
+                final String noQuestionmark = firstWord.substring(1);
+                if (noQuestionmark.isEmpty()) {
+                    final StringBuilder sb = new StringBuilder();
+                    for (Map.Entry<String, CmdMeta<String>> cmd : commands.entrySet()) {
+                        final String name = cmd.getKey();
+                        sb.append(":").append(name).append("\t").append(cmd.getValue().help).append("\n");
+                    }
+                    return sb.toString();
+                } else {
+                    final CmdMeta<String> cmd = commands.get(noQuestionmark);
+                    return cmd.help;
+                }
+            } else {
+                final CmdMeta<String> cmd = commands.get(firstWord);
+                if (cmd == null) {
+                    System.err.println("Wrong commad");
+                    final StringBuilder sb = new StringBuilder();
+                    for (Map.Entry<String, CmdMeta<String>> _cmd : commands.entrySet()) {
+                        final String name = _cmd.getKey();
+                        sb.append(":").append(name).append("\t").append(_cmd.getValue().help).append("\n");
+                    }
+                    return sb.toString();
+                }
+                return cmd.cmd.run(compiler, log, debug, remaining);
+            }
+
+        } else {
+            try {
+                compiler.parseREPL(CharStreams.fromString(line));
+                return null;
+            } catch (CompilationError | NoViableAltException | EmptyStackException e) {
+                return e.toString();
+            }
+        }
+    }
+    public void loop() throws IOException {
         try (final BufferedReader sc = new BufferedReader(new InputStreamReader(System.in))) {
             System.err.println("Solomonoff interactive console. Type :? for help");
             System.err.flush();
@@ -291,7 +298,7 @@ public class Evaluation {
                 final String line = sc.readLine();
                 if(line==null||line.equals(":exit"))break;
                 try {
-                    final String out = repl.run(line, System.out::println, System.err::println);
+                    final String out = run(line, System.out::println, System.err::println);
                     if(out!=null)System.out.println(out);
                 }catch (Throwable e){
                     e.printStackTrace();
@@ -299,15 +306,15 @@ public class Evaluation {
             }
         }
     }
-    
-    public static void evalFileContent(Repl repl, InputStream input) throws IOException {
+
+    public void evalFileContent(InputStream input) throws IOException {
         Scanner scanner = new Scanner(input);
         Pattern pattern = Pattern.compile("(?<!\\\\)\\n|(?<!\\\\)\\r\\n");
         scanner.useDelimiter(pattern);
         String line = scanner.next();
 
         while (line != null) {
-            final String out = repl.run(line,System.out::println,System.err::println);
+            final String out = run(line,System.out::println,System.err::println);
             if(out!=null)System.out.println(out);
 
             line = scanner.next();
@@ -317,3 +324,4 @@ public class Evaluation {
         input.close();
     }
 }
+

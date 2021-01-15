@@ -3,7 +3,6 @@ package net.alagris;
 import net.alagris.TomlParser.*;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.concurrent.Callable;
 
 import picocli.CommandLine;
@@ -17,11 +16,17 @@ class SolomonOn implements Callable<Integer> {
     private Config config;
     private InputStream scriptStream;
 
-    @Parameters(index = "0", description = "${COMPLETION-CANDIDATES}")
+    @Parameters(index = "0", description =
+            "${COMPLETION-CANDIDATES}\n"
+            + "check       - test if buildable\n"
+            + "build       - just build binaries\n"
+            + "run         - build and start \n"
+            + "interactive - cos tam cos tam"
+    )
     private Mode mode;
 
-    @Parameters(index = "1", defaultValue = "__NONE__", description = "function to run")
-    private String function;
+    @Parameters(index = "1", defaultValue = "", description = "function to run")
+    private String functionName;
 
     @Option(names = {"-f", "--script-file"}, description = "script file to evaluate")
     private File scriptFile;
@@ -36,16 +41,20 @@ class SolomonOn implements Callable<Integer> {
             description = "Enable interactive mode")
     private boolean interactive;
 
-    @Option(names = {"-u", "--volatile"}, description = "Do not save any files")
+    @Option(names = {"-u", "--volatile"}, description = "Do not save compiled files")
     private boolean noCaching;
+
+    @Option(names = {"-g", "--ignore-saved"}, description = "Ignore previously saved binaries")
+    private boolean ignoreCache;
 
     @Option(names = {"-@", "--stdin"}, description = "set stdin as script file")
     private  boolean setStdin;
 
-    private enum Mode { run, build, interactive, clean }
+    private enum Mode { run, build, interactive, clean, export }
 
     private void updateConfig() throws FileNotFoundException {
-        config.cashing = !noCaching;
+        config.caching_write = !noCaching;
+        config.caching_read = !ignoreCache;
         if (scriptFile != null) {
             scriptStream = new FileInputStream(scriptFile);
         }
@@ -77,7 +86,7 @@ class SolomonOn implements Callable<Integer> {
     
     @Override
     public Integer call() throws Exception {
-        final OptimisedLexTransducer.OptimisedHashLexTransducer compiler = SolomonoffBuildSystem.getCompiler();
+        Compiler compiler;
         if (buildFile.exists()) {
             config = TomlParser.Config.parse(buildFile);
             try {
@@ -86,7 +95,7 @@ class SolomonOn implements Callable<Integer> {
                 return 2;
             }
         }
-        Evaluation.Repl repl;
+        Executor executor;
 
         switch (mode) {
             case build:
@@ -94,32 +103,41 @@ class SolomonOn implements Callable<Integer> {
                    System.err.println("Cannot find " + buildFile);
                    return 1;
                 }
-                SolomonoffBuildSystem.runCompiler(config, compiler);
+                compiler = new Compiler(config);
+                compiler.compile();
                 break;
             case run:
-                if (config == null) {
-                    System.err.println("Cannot find " + buildFile);
-                    return 1;
+                if (functionName.isEmpty()) {
+                    compiler = new Compiler(config);
+                    if (config == null) {
+                        System.err.println("Cannot find " + buildFile);
+                        return 1;
+                    }
+                    compiler.compile();
+                } else {
+                    compiler = new Compiler(new Config());
+                    compiler.loadBinary(functionName);
                 }
-                SolomonoffBuildSystem.runCompiler(config, compiler);
-                repl = new Evaluation.Repl(compiler);
+                executor = new Executor(compiler.getTransducer());
                 if (scriptFile != null) {
                     if (scriptStream != null) {
-                        Evaluation.evalFileContent(repl, scriptStream);
+                        executor.evalFileContent(scriptStream);
                     } else {
+                        System.err.println("Invalid file " + scriptFile);
                         return 2;
                     }
                 }
                 if (interactive || scriptFile == null) {
-                    Evaluation.loop(repl);
+                    executor.loop();
                 }
                 break;
             case interactive:
-                repl = new Evaluation.Repl(compiler);
+                compiler = new Compiler(new Config());
+                executor = new Executor(compiler.getTransducer());
                 if (scriptStream != null) {
-                    Evaluation.evalFileContent(repl, scriptStream);
+                    executor.evalFileContent(scriptStream);
                 }
-                Evaluation.loop(repl);
+                executor.loop();
                 break;
             case clean:
                 clean();

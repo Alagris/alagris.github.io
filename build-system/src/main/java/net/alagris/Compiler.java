@@ -6,7 +6,6 @@ import net.automatalib.automata.transducers.MealyMachine;
 import net.automatalib.words.Alphabet;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jgrapht.graph.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -20,9 +19,26 @@ import java.util.*;
 import java.util.Queue;
 import java.util.concurrent.*;
 
-public class SolomonoffBuildSystem {
+public class Compiler {
+    private final OptimisedLexTransducer.OptimisedHashLexTransducer compiler;
+    private final Config config;
 
-    static abstract class VarDef<G> {
+    public <N, G extends IntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P, N>>
+    Compiler(Config config) throws CompilationError {
+        OptimisedLexTransducer.OptimisedHashLexTransducer compiler;
+        compiler = new OptimisedLexTransducer.OptimisedHashLexTransducer(
+                0,
+                Integer.MAX_VALUE,
+                false);
+        this.compiler = compiler;
+        this.config = config;
+    }
+    
+    public OptimisedLexTransducer.OptimisedHashLexTransducer getTransducer() {
+        return compiler;
+    }
+
+    private abstract class VarDef<G> {
         final String id;
         final String hashedName;
         final Path cacheFilePath;
@@ -34,11 +50,17 @@ public class SolomonoffBuildSystem {
             this.id = id;
             this.hashedName = Integer.toHexString(id.hashCode());
             this.cacheFilePath = Paths.get(cacheLocation, hashedName);
+            if (sourceFile == null) {
+                this.needsRecompilation = false;
+                return;
+            }
             final Path sourceFilePath = Paths.get(sourceFile);
             final FileTime sourceFileModificationTime =
                     (FileTime) Files.getAttribute(sourceFilePath, "lastModifiedTime");
             final boolean needsRecompilation;
-            if (Files.exists(cacheFilePath)) {
+            if (!config.caching_read && config.caching_write) {
+                needsRecompilation = true;
+            } else if (Files.exists(cacheFilePath)) {
                 final FileTime cacheModificationTime =
                         (FileTime) Files.getAttribute(cacheFilePath, "lastModifiedTime");
                 final int diff = cacheModificationTime.compareTo(sourceFileModificationTime);
@@ -50,21 +72,20 @@ public class SolomonoffBuildSystem {
         }
     }
 
-    static class VarDefInfer<G> extends VarDef<G> {
+    private class VarDefInfer<G> extends VarDef<G> {
 
         VarDefInfer(String id, String sourceFile, String cacheLocation) throws IOException {
             super(id, sourceFile, cacheLocation);
         }
     }
 
-    static class VarDefAST<G> extends VarDef<G> {
+    private class VarDefAST<G> extends VarDef<G> {
 
         final SolomonoffWeighted def;
 
         VarDefAST(String id, SolomonoffWeighted def, String sourceFile, String cacheLocation) throws IOException {
             super(id, sourceFile, cacheLocation);
             this.def = def;
-
         }
     }
 
@@ -87,10 +108,53 @@ public class SolomonoffBuildSystem {
         return informant;
     }
 
+    public <N, G extends IntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P, N>> void
+    loadBinary(String ID) throws IOException, CLIException.BinFileException, CompilationError {
+        final VarDefInfer<G> def = new VarDefInfer<G>(ID, null, config.cacheLocation);
+        File bin = def.cacheFilePath.toFile();
+        if (!bin.exists()) {
+            throw new CLIException.BinFileException(ID);
+        }
+        final HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P> g;
+        DataInputStream dis = new DataInputStream(new FileInputStream(bin));
+        g = compiler.specs.decompressBinary(Pos.NONE, dis);
+        assert compiler.specs.borrowVariable(ID) == null : ID;
+        System.err.println("Read to use " + ID);
+        compiler.specs.introduceVariable(ID, Pos.NONE, g, false);
+    }
 
-    public static <N, G extends IntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P, N>> void
-    runCompiler(Config config, OptimisedLexTransducer<N, G> specs)
-            throws ExecutionException, InterruptedException, CompilationError, IOException {
+    private List<Source> loadFromPackages() {
+        return new ArrayList<>();
+    }
+    
+    private List<Source> loadAllSourceFiles() {
+        config.source.addAll(loadFromPackages());
+       return config.source;
+    }
+
+    List<Source> loadFile(String fileName) {
+        config.source.add(new Source(fileName));
+        return config.source;
+    }
+
+    public void compileFile(String fileName)
+            throws InterruptedException, ExecutionException, IOException, CompilationError {
+        compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> {} );
+        _compile(compiler, loadFile(fileName), false);
+        compiler.specs.setVariableRedefinitionCallback((prev, n, pos) -> {
+            assert prev.name.equals(n.name);
+            throw new CompilationError.DuplicateFunction(prev.pos, pos, n.name);
+        });
+    }
+
+    public void compile()
+            throws InterruptedException, ExecutionException, IOException, CompilationError {
+        _compile(compiler, loadAllSourceFiles(), config.caching_write);
+   }
+
+    private <N, G extends IntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P, N>> void
+    _compile(OptimisedLexTransducer<N, G> compiler, List<Source> sourceFiles, boolean buildBin)
+            throws ExecutionException, InterruptedException, IOException, CompilationError {
 
         final ExecutorService pool = Executors.newWorkStealingPool();
         final Queue<Future<Void>> queue = new LinkedList<>();
@@ -101,14 +165,14 @@ public class SolomonoffBuildSystem {
         final ConcurrentHashMap<String, Future<G>> compiled = new ConcurrentHashMap<>();
         final HashMap<String, VarDef<G>> definitions = new HashMap<>();
         // parse user's mealy files
-        for (final Source sourceFile : config.source) {
+        for (final Source sourceFile : sourceFiles) {
             final Path path = Paths.get(sourceFile.path);
             final String extension = FilenameUtils.getExtension(sourceFile.path);
-            final String name = FilenameUtils.removeExtension(sourceFile.path);
+            final String name = FilenameUtils.getBaseName(sourceFile.path);
 
             switch (extension) {
                 case "mealy": {
-                    System.out.println("Reading " + sourceFile.path);
+                    System.err.println("Reading " + sourceFile.path);
                     queue.add(pool.submit(() -> {
                         final File mealyFile = new File(sourceFile.path);
                         if (!mealyFile.exists()) {
@@ -127,7 +191,7 @@ public class SolomonoffBuildSystem {
                         });
 
                         final SolomonoffWeightedParser listener =
-                                new SolomonoffWeightedParser(collector, sourceFile.path,specs);
+                                new SolomonoffWeightedParser(collector, sourceFile.path, compiler);
                         ParseTreeWalker.DEFAULT.walk(listener, parser.start());
                         assert listener.stack.isEmpty();
                         return null;
@@ -139,7 +203,7 @@ public class SolomonoffBuildSystem {
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
-                            System.out.println("Inferring " + sourceFile.path);
+                            System.err.println("Inferring " + sourceFile.path);
                             try {
                                 final HashMap<Integer, Integer> symbolToIndex = new HashMap<>();
                                 final ArrayList<Pair<IntSeq, IntSeq>> informant = loadStringFile(path);
@@ -152,23 +216,25 @@ public class SolomonoffBuildSystem {
                                         LearnLibCompatibility.mapSymbolsToIndices(informant.iterator(), symbolToIndex);
                                 final OSTIA.State ptt = OSTIA.buildPtt(symbolToIndex.size(), mapped);
                                 OSTIA.ostia(ptt);
-                                final G g = specs.specs.compileIntermediateOSTIA(ptt,
+                                final G g = compiler.specs.compileIntermediateOSTIA(ptt,
                                         i -> indexToSymbol[i], x -> Pos.NONE);
-                                try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
-                                    specs.specs.compressBinary(g, new DataOutputStream(f));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    def.cacheFilePath.toFile().deleteOnExit();
+                                if (buildBin) {
+                                    try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
+                                        compiler.specs.compressBinary(g, new DataOutputStream(f));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        def.cacheFilePath.toFile().deleteOnExit();
+                                    }
                                 }
                                 return g;
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            System.out.println("Loaded from cache " + sourceFile.path);
+                            System.err.println("Loaded from cache " + sourceFile.path);
                             try (DataInputStream dis =
                                          new DataInputStream(new FileInputStream(def.cacheFilePath.toFile()))) {
-                                return specs.specs.decompressBinary(Pos.NONE, dis);
+                                return compiler.specs.decompressBinary(Pos.NONE, dis);
                             }
                         }
                     }));
@@ -179,25 +245,27 @@ public class SolomonoffBuildSystem {
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
-                            System.out.println("Inferring " + sourceFile.path);
+                            System.err.println("Inferring " + sourceFile.path);
                             try {
-                                final G g = OptimisedLexTransducer.dfaToIntermediate(specs.specs,
+                                final G g = OptimisedLexTransducer.dfaToIntermediate(compiler.specs,
                                         Pos.NONE, LearnLibCompatibility.rpni(loadStringFile(path)));
-                                try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
-                                    specs.specs.compressBinary(g, new DataOutputStream(f));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    def.cacheFilePath.toFile().deleteOnExit();
+                                if (buildBin) {
+                                    try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
+                                        compiler.specs.compressBinary(g, new DataOutputStream(f));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        def.cacheFilePath.toFile().deleteOnExit();
+                                    }
                                 }
                                 return g;
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            System.out.println("Loaded from cache " + sourceFile.path);
+                            System.err.println("Loaded from cache " + sourceFile.path);
                             try (DataInputStream dis =
                                          new DataInputStream(new FileInputStream(def.cacheFilePath.toFile()))) {
-                                return specs.specs.decompressBinary(Pos.NONE, dis);
+                                return compiler.specs.decompressBinary(Pos.NONE, dis);
                             }
                         }
                     }));
@@ -208,30 +276,32 @@ public class SolomonoffBuildSystem {
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
-                            System.out.println("Inferring " + sourceFile.path);
+                            System.err.println("Inferring " + sourceFile.path);
                             try {
                                 Pair<Alphabet<Integer>, MealyMachine<?, Integer, ?, Integer>> alphAndMealy =
                                         LearnLibCompatibility.rpniMealy(loadStringFile(path));
-                                G g = LearnLibCompatibility.mealyToIntermediate(specs.specs, alphAndMealy.l(),
+                                G g = LearnLibCompatibility.mealyToIntermediate(compiler.specs, alphAndMealy.l(),
                                         alphAndMealy.r(), s -> Pos.NONE,
-                                        (in, out) -> specs.specs.createFullEdgeOverSymbol(in,
-                                                specs.specs.createPartialEdge(new IntSeq(out), 0)),
+                                        (in, out) -> compiler.specs.createFullEdgeOverSymbol(in,
+                                                compiler.specs.createPartialEdge(new IntSeq(out), 0)),
                                         s -> new LexUnicodeSpecification.P(IntSeq.Epsilon, 0));
-                                try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
-                                    specs.specs.compressBinary(g, new DataOutputStream(f));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    def.cacheFilePath.toFile().deleteOnExit();
+                                if (buildBin) {
+                                    try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
+                                        compiler.specs.compressBinary(g, new DataOutputStream(f));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        def.cacheFilePath.toFile().deleteOnExit();
+                                    }
                                 }
                                 return g;
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            System.out.println("Loaded from cache " + sourceFile.path);
+                            System.err.println("Loaded from cache " + sourceFile.path);
                             try (DataInputStream dis =
                                          new DataInputStream(new FileInputStream(def.cacheFilePath.toFile()))) {
-                                return specs.specs.decompressBinary(Pos.NONE, dis);
+                                return compiler.specs.decompressBinary(Pos.NONE, dis);
                             }
                         }
                     }));
@@ -242,25 +312,27 @@ public class SolomonoffBuildSystem {
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
-                            System.out.println("Inferring " + sourceFile.path);
+                            System.err.println("Inferring " + sourceFile.path);
                             try {
-                                final G g = OptimisedLexTransducer.dfaToIntermediate(specs.specs, Pos.NONE,
+                                final G g = OptimisedLexTransducer.dfaToIntermediate(compiler.specs, Pos.NONE,
                                         LearnLibCompatibility.rpniEDSM(loadStringFile(path)));
-                                try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
-                                    specs.specs.compressBinary(g, new DataOutputStream(f));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    def.cacheFilePath.toFile().deleteOnExit();
+                                if (buildBin) {
+                                    try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
+                                        compiler.specs.compressBinary(g, new DataOutputStream(f));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        def.cacheFilePath.toFile().deleteOnExit();
+                                    }
                                 }
                                 return g;
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            System.out.println("Loaded from cache " + sourceFile.path);
+                            System.err.println("Loaded from cache " + sourceFile.path);
                             try (DataInputStream dis =
                                          new DataInputStream(new FileInputStream(def.cacheFilePath.toFile()))) {
-                                return specs.specs.decompressBinary(Pos.NONE, dis);
+                                return compiler.specs.decompressBinary(Pos.NONE, dis);
                             }
                         }
                     }));
@@ -282,8 +354,11 @@ public class SolomonoffBuildSystem {
         // initialize dependency graph
         final DirectedAcyclicGraph<String, Object> dependencyOf =
                 new DirectedAcyclicGraph<>(null, null, false);
-        for (String builtInVariable : specs.specs.variableAssignments.keySet()) {
+        for (String builtInVariable : compiler.specs.variableAssignments.keySet()) {
             dependencyOf.addVertex(builtInVariable);
+        }
+        for (String inferredVariable : definitions.keySet()) {
+            dependencyOf.addVertex(inferredVariable);
         }
 
         // collect all definitions into a single hashmap together with their respective type judgements
@@ -354,22 +429,22 @@ public class SolomonoffBuildSystem {
             final VarDef<G> varDef = definitions.get(id);
 
             if (varDef == null) {//This may only be true for built-in variables
-                assert specs.specs.borrowVariable(id) != null : id;
-            }else if(varDef instanceof VarDefAST){
+                assert compiler.specs.borrowVariable(id) != null : id;
+            } else if (varDef instanceof VarDefAST) {
                 VarDefAST<G> var = (VarDefAST<G>) varDef;
                 assert var.def != null : id;
                 compiled.put(id, pool.submit(() -> {
                     if (var.needsRecompilation) {
-                        final G compiledGraph = var.def.compile(specs.specs, i -> {
+                        final G compiledGraph = var.def.compile(compiler.specs, i -> {
                             try {
                                 final Future<G> f = compiled.get(i);
                                 if (f == null) {//this can only be true for built-in variables
-                                    final LexUnicodeSpecification.Var<N, G> v = specs.specs.copyVariable(i);
+                                    final LexUnicodeSpecification.Var<N, G> v = compiler.specs.copyVariable(i);
                                     assert v != null;
-                                    final G graph = specs.specs.getGraph(v);
+                                    final G graph = compiler.specs.getGraph(v);
                                     return graph;
                                 } else {
-                                    final G graph = specs.specs.deepClone(f.get());
+                                    final G graph = compiler.specs.deepClone(f.get());
                                     return graph;
                                 }
                             } catch (InterruptedException | ExecutionException e) {
@@ -377,21 +452,22 @@ public class SolomonoffBuildSystem {
                             }
                         });
 
-                        System.out.println("Compiled " + id);
+                        System.err.println("Compiled " + id);
 
-
-                        try (FileOutputStream f = new FileOutputStream(var.cacheFilePath.toFile())) {
-                            specs.specs.compressBinary(compiledGraph, new DataOutputStream(f));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            var.cacheFilePath.toFile().deleteOnExit();
+                        if (buildBin) {
+                            try (FileOutputStream f = new FileOutputStream(var.cacheFilePath.toFile())) {
+                                compiler.specs.compressBinary(compiledGraph, new DataOutputStream(f));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                var.cacheFilePath.toFile().deleteOnExit();
+                            }
                         }
                         return compiledGraph;
                     } else {
-                        System.out.println("Loaded from cache " + id);
+                        System.err.println("Loaded from cache " + id);
                         try (DataInputStream dis =
                                      new DataInputStream(new FileInputStream(var.cacheFilePath.toFile()))) {
-                            return specs.specs.decompressBinary(Pos.NONE, dis);
+                            return compiler.specs.decompressBinary(Pos.NONE, dis);
                         }
                     }
                 }));
@@ -401,25 +477,9 @@ public class SolomonoffBuildSystem {
         for (Map.Entry<String, Future<G>> v : compiled.entrySet()) {
             final G g = v.getValue().get();
             final String id = v.getKey();
-            assert specs.specs.borrowVariable(id) == null : id;
-            System.out.println("Read to use " + id);
-            specs.specs.introduceVariable(id, Pos.NONE, g, false);
+            assert compiler.specs.borrowVariable(id) == null : id;
+            System.err.println("Read to use " + id);
+            compiler.specs.introduceVariable(id, Pos.NONE, g, false);
         }
     }
-
-    private static void importFromPackages() {
-    }
-
-
-    public static OptimisedLexTransducer.OptimisedHashLexTransducer
-    getCompiler() throws CompilationError, ExecutionException, InterruptedException {
-        final OptimisedLexTransducer.OptimisedHashLexTransducer compiler =
-                new OptimisedLexTransducer.OptimisedHashLexTransducer(
-                        0,
-                        Integer.MAX_VALUE,
-                        false);
-        return compiler;
-    }
-
-
 }

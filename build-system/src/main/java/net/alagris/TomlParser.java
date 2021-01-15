@@ -5,21 +5,23 @@ import com.moandjiezana.toml.Toml;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
+import java.util.ArrayList;
 
 public class TomlParser {
     public static class Config {
         String projectName;
-        Source[] source;
+        ArrayList<Source> source;
 //        Target[] target;
         String cacheLocation;
-        boolean cashing;
+        boolean caching_write;
+        boolean caching_read;
+        
         
         public Config() {
             cacheLocation = "bin/";
-            cashing = true;
+            caching_write = true;
+            caching_read = true;
         }
 
         public static Config parse(File configFile) throws CLIException.BuildFileException, IOException {
@@ -62,5 +64,12 @@ public class TomlParser {
         String path;
         String algorithm; //"RPNI", "OSTIA"
         String name;//name of produced transducer
+
+        public Source() {}
+
+        public Source(String path) {
+            this.path = path;
+        }
     }
+    
 }

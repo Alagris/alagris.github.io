@@ -39,4 +39,11 @@ public class CLIException extends Exception{
             super("Cannot find " + fileName);
         }
     }
+
+    public static class BinFileException extends CLIException {
+
+        public BinFileException(String id) {
+            super("Cannot find compiled file for " + id);
+        }
+    }
 }
