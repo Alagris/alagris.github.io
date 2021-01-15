@@ -132,7 +132,8 @@ inputField.commands.bindKey("Up", function(e) {
 });
 
 function update(event) {
-    var shouldShow = !inputField.session.getValue().length;
+    var value = inputField.session.getValue()
+    var shouldShow = !value.length;
     var node = inputField.renderer.emptyMessageNode;
     if (!shouldShow && node) {
         inputField.renderer.scroller.removeChild(inputField.renderer.emptyMessageNode);
@@ -146,6 +147,9 @@ function update(event) {
         node.style.zIndex = 9
         node.style.opacity = 0.5
         inputField.renderer.scroller.appendChild(node);
+    }
+    if(value.startsWith('::')){
+       inputField.session.setValue(value.substr(1))
     }
 }
 
