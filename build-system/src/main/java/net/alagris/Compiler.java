@@ -124,7 +124,12 @@ public class Compiler {
     }
 
     private List<Source> loadFromPackages() {
-        return Packages.getSources(config);
+        try {
+            return Packages.getSources(config);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     private List<Source> loadAllSourceFiles() {

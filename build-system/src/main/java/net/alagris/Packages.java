@@ -17,19 +17,22 @@ import java.util.zip.ZipInputStream;
 public class Packages {
     public static List<Source> getSources(Config config) throws Exception {
         ArrayList<Source> sources = new ArrayList<>();
-        for (TomlParser.Package p : config.pkg) {
-            if (config.verify_signature) {
-                Path pkgPath = Paths.get(config.local_repo, p.name + "-" + p.version + ".slm");
-                if (!verifyPackage(pkgPath, p.public_key)) {
-                    throw new KeyException();
-                }
-            }
-            final ZipInputStream zis = new ZipInputStream(new FileInputStream(p));
-            ZipEntry zipEntry = zis.getNextEntry();
-            while (zipEntry != null) {
-                sources.add(new Source())
-            }
-        }
+//        for (TomlParser.Package p : config.pkg) {
+//            final String pkgFileName = p + "-" + p.version + ".slm";
+//            final Path pkgPath = Paths.get(config.local_repo, pkgFileName);
+//
+//            if (config.verify_signature) {
+//                if (!verifyPackage(pkgPath, p.public_key)) {
+//                    throw new KeyException();
+//                }
+//            }
+//            final ZipInputStream zis = new ZipInputStream(new FileInputStream(pkgPath.toString()));
+//            ZipEntry zipEntry = zis.getNextEntry();
+//            while (zipEntry != null) {
+//                sources.add(new Source());
+//            }
+//        }
+        return sources;
     }
 
     private static boolean verifyPackage(Path pkg, String pk) throws Exception {
