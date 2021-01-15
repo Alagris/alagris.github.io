@@ -2,6 +2,8 @@ package com.compiler.Compiler.controllers;
 
 import net.alagris.*;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.InputMismatchException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -113,8 +115,12 @@ public class NewRestController {
         final String transducerName = parts[0].trim();
         final String mode = parts[1];
         final int param = Integer.parseInt(parts[2].trim());
+
         final Specification.RangedGraph<Pos, Integer, LexUnicodeSpecification.E, LexUnicodeSpecification.P> transducer = compiler.getOptimisedTransducer(transducerName);
         if (mode.equals("of_size")) {
+            if(param>100){
+                throw new IllegalArgumentException("The parameter "+param+" is too large. It's recommended to download compiler and run such expensive operations locally.");
+            }
             final int sampleSize = param;
             compiler.specs.generateRandomSampleOfSize(transducer, sampleSize, RAND, (backtrack, finalState) -> {
                 final LexUnicodeSpecification.BacktrackingHead head = new LexUnicodeSpecification.BacktrackingHead(
@@ -126,6 +132,9 @@ public class NewRestController {
             });
             return null;
         } else if (mode.equals("of_length")) {
+            if(param>12){
+                throw new IllegalArgumentException("The parameter "+param+" is too large. It's recommended to download compiler and run such expensive operations locally.");
+            }
             final int maxLength = param;
             compiler.specs.generateRandomSampleBoundedByLength(transducer, maxLength, 10, RAND,
                     (backtrack, finalState) -> {
@@ -141,11 +150,6 @@ public class NewRestController {
             return "Choose one of the generation modes: 'of_size' or 'of_length'";
         }
 
-    };
-    public static final ReplCommand<String> REPL_VISUALIZE = (httpSession, compiler, logs, debug, args) -> {
-        final Specification.RangedGraph<Pos, Integer, LexUnicodeSpecification.E, LexUnicodeSpecification.P> r = compiler.getOptimisedTransducer(args);
-        LearnLibCompatibility.visualize(r);
-        return null;
     };
 
     public static final ReplCommand<String> REPL_CLEAR = (httpSession, compiler, logs, debug, args) -> {
@@ -244,7 +248,7 @@ public class NewRestController {
                     final String firstWord;
                     final String remaining;
                     if (space >= 0) {
-                        firstWord = line.substring(1, space);
+                        firstWord = line.substring(1, space).trim();
                         remaining = line.substring(space + 1);
                     } else {
                         firstWord = line.substring(1);
@@ -306,7 +310,9 @@ public class NewRestController {
         }
 
         public ReplResponse(Throwable exception) {
-            if (exception.getClass().equals(RuntimeException.class) && exception.getCause() != null) {
+            if ((exception.getClass().equals(RuntimeException.class) ||
+                    exception.getClass().equals(ParseCancellationException.class) ) &&
+                    exception.getCause() != null) {
                 exception = exception.getCause();
             }
             this.wasError = true;
@@ -362,6 +368,16 @@ public class NewRestController {
                     row = e.typePos.getLine();
                 }
                 output = "[line " + row + ":" + col + "] Function "+e.name+" does not conform to type";
+            }else if(exception instanceof ParseError) {
+                ParseError e = (ParseError) exception;
+                col = e.charPositionInLine;
+                row = e.line;
+                output = "[line " + row + ":" + col + "] "+e.msg+" ("+e.e.toString()+")";
+            } else if(exception instanceof InputMismatchException) {
+                InputMismatchException e = (InputMismatchException) exception;
+                col = e.getOffendingToken().getCharPositionInLine();
+                row = e.getOffendingToken().getLine();
+                output = "[line " + row + ":" + col + "] Input mismatch. Expected one of "+e.getExpectedTokens();
             }else if(exception instanceof RecognitionException) {
                 RecognitionException e = (RecognitionException) exception;
                 output = e.toString();
@@ -369,11 +385,6 @@ public class NewRestController {
                     col = e.getOffendingToken().getCharPositionInLine();
                     row = e.getOffendingToken().getLine();
                 }
-            }else if(exception instanceof ParseError) {
-                ParseError e = (ParseError) exception;
-                col = e.charPositionInLine;
-                row = e.line;
-                output = "[line " + row + ":" + col + "] "+e.msg+" ("+e.e.toString()+")";
             }
         }
     }
@@ -458,7 +469,7 @@ public class NewRestController {
             httpSession.setAttribute("repl", repl);
         }
         final LexUnicodeSpecification.Var<HashMapIntermediateGraph.N<Pos, LexUnicodeSpecification.E>, HashMapIntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P>> tr = repl.compiler.getTransducer(name);
-        if (tr == null) return "ERR:NOT FOUND";
+        if (tr == null) return "Variable "+name+" not found!";
 
         final Graph<?, ?> graph = LearnLibCompatibility.intermediateAsGraph(tr.graph, Pos.NONE);
         final StringWriter writer = new StringWriter();

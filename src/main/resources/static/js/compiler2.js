@@ -96,7 +96,6 @@ function getCookie(key) {
 
 
 async function repl(replCommand) {
-    replCommand = replCommand.trim()
     if (replCommand === "") {
         replCommand = " "
     }
@@ -105,7 +104,7 @@ async function repl(replCommand) {
     if (firstWord == ":clear") {
         outputField.value = ""
     } else if (firstWord == ":load") {
-        const code = editor.getValue().trim()
+        const code = editor.getValue()
         setCookie('code', code)
         const response = await fetch('upload_code', {
             method: 'POST',
