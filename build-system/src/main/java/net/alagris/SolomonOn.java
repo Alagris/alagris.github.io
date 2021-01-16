@@ -9,8 +9,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.*;
 
 
-@Command(name = "solomonoff", mixinStandardHelpOptions = true,
-        description = "Solomonoff compiler")
+@Command(name = "solomonoff", mixinStandardHelpOptions = true, description = "Solomonoff compiler")
 class SolomonOn implements Callable<Integer> {
 
     private Config config;
@@ -101,7 +100,11 @@ class SolomonOn implements Callable<Integer> {
                    return 1;
                 }
                 compiler = new Compiler(config);
-                compiler.compile();
+                try {
+                    compiler.compile();
+                } catch (Exception e) {
+                    return 5;
+                }
                 break;
             case run:
                 if (functionName.isEmpty()) {
@@ -110,7 +113,11 @@ class SolomonOn implements Callable<Integer> {
                         System.err.println("Cannot find " + buildFile);
                         return 1;
                     }
-                    compiler.compile();
+                    try {
+                        compiler.compile();
+                    } catch (Exception e) {
+                        return 6;
+                    }
                 } else {
                     compiler = new Compiler(new Config());
                     compiler.loadBinary(functionName);

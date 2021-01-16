@@ -32,6 +32,15 @@ public class Compiler {
                 false);
         this.compiler = compiler;
         this.config = config;
+        compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> {
+        });
+        compiler.parser.addErrorListener(new BaseErrorListener() {
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+                                    int charPositionInLine, String msg, RecognitionException e) {
+                throw new RuntimeException("line " + line + ":" + charPositionInLine + " " + msg + " " + e, e);
+            }
+        });
+
     }
     
     public OptimisedLexTransducer.OptimisedHashLexTransducer getTransducer() {
@@ -123,11 +132,12 @@ public class Compiler {
         compiler.specs.introduceVariable(ID, Pos.NONE, g, false);
     }
 
-    private List<Source> loadFromPackages() throws IOException {
+    private List<Source> loadFromPackages() throws IOException, CLIException.BinFileException {
         return Source.fromPackages(config.pkg);
     }
     
-    private List<Source> loadAllSourceFiles() throws IOException {
+    private List<Source> loadAllSourceFiles()
+            throws IOException, CLIException.MealyFileException, CLIException.BinFileException {
        List<Source> sources = Source.fromSourceFiles(config.source);
        sources.addAll(loadFromPackages());
        return sources;
@@ -149,7 +159,8 @@ public class Compiler {
 //    }
 
     public void compile()
-            throws InterruptedException, ExecutionException, IOException, CompilationError {
+            throws InterruptedException, ExecutionException, IOException, CompilationError,
+            CLIException.MealyFileException, CLIException.BinFileException {
         _compile(compiler, loadAllSourceFiles(), config.caching_write, config);
    }
 
@@ -167,11 +178,7 @@ public class Compiler {
         final HashMap<String, VarDef<G>> definitions = new HashMap<>();
         // parse user's mealy files
         for (final Source sourceFile : sourceFiles) {
-
-            final String extension = FilenameUtils.getExtension(sourceFile.path);
-            final String name = FilenameUtils.getBaseName(sourceFile.path);
-
-            switch (extension) {
+            switch (sourceFile.extension) {
                 case "mealy": {
                     System.err.println("Reading " + sourceFile.path);
                     queue.add(pool.submit(() -> {
@@ -196,9 +203,9 @@ public class Compiler {
                     break;
                 }
                 case "ostia": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
-                    definitions.put(name, def);
-                    compiled.put(name, pool.submit(() -> {
+                    final VarDefInfer<G> def = new VarDefInfer<G>(sourceFile.name, sourceFile.path, config);
+                    definitions.put(sourceFile.name, def);
+                    compiled.put(sourceFile.name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {
@@ -239,9 +246,9 @@ public class Compiler {
                     break;
                 }
                 case "rpni": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
-                    definitions.put(name, def);
-                    compiled.put(name, pool.submit(() -> {
+                    final VarDefInfer<G> def = new VarDefInfer<G>(sourceFile.name, sourceFile.path, config);
+                    definitions.put(sourceFile.name, def);
+                    compiled.put(sourceFile.name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {
@@ -270,9 +277,9 @@ public class Compiler {
                     break;
                 }
                 case "rpni_mealy": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
-                    definitions.put(name, def);
-                    compiled.put(name, pool.submit(() -> {
+                    final VarDefInfer<G> def = new VarDefInfer<G>(sourceFile.name, sourceFile.path, config);
+                    definitions.put(sourceFile.name, def);
+                    compiled.put(sourceFile.name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {
@@ -306,9 +313,9 @@ public class Compiler {
                     break;
                 }
                 case "rpni_edsm": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
-                    definitions.put(name, def);
-                    compiled.put(name, pool.submit(() -> {
+                    final VarDefInfer<G> def = new VarDefInfer<G>(sourceFile.name, sourceFile.path, config);
+                    definitions.put(sourceFile.name, def);
+                    compiled.put(sourceFile.name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {

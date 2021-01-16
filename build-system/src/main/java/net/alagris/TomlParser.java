@@ -12,7 +12,6 @@ public class TomlParser {
     public static class Config {
         String projectName;
         String version;
-        String remote_repo;
         String private_key;
         String local_repo;
         List<SourceFile> source;
@@ -54,6 +53,9 @@ public class TomlParser {
                     } else if (!Paths.get(pkg.path).isAbsolute()) {
                         pkg.path = Paths.get(buildFilePath, pkg.path).toString();
                     }
+                    if (pkg.remote_repo != null && !(new File(pkg.path).exists())) {
+                        ;
+                    }
                 }
             }
             Files.createDirectories(Paths.get(config.cache_location));
@@ -91,6 +93,7 @@ public class TomlParser {
         String public_key;
         boolean verify_signature;
         String path;
+        String remote_repo;
 
         public Package() {
             this.verify_signature = true;
