@@ -38,7 +38,7 @@ public class Compiler {
         return compiler;
     }
 
-    private abstract class VarDef<G> {
+    private static abstract class VarDef<G> {
         final String id;
         final String hashedName;
         final Path cacheFilePath;
@@ -46,10 +46,10 @@ public class Compiler {
         ArrayList<Pair<SolomonoffWeighted, SolomonoffWeighted>> productTypes = new ArrayList<>();
         boolean needsRecompilation;
 
-        protected VarDef(String id, String sourceFile, String cacheLocation) throws IOException {
+        protected VarDef(String id, String sourceFile, Config config) throws IOException {
             this.id = id;
             this.hashedName = Integer.toHexString(id.hashCode());
-            this.cacheFilePath = Paths.get(cacheLocation, hashedName);
+            this.cacheFilePath = Paths.get(config.cache_location, hashedName);
             if (sourceFile == null) {
                 this.needsRecompilation = false;
                 return;
@@ -72,19 +72,19 @@ public class Compiler {
         }
     }
 
-    private class VarDefInfer<G> extends VarDef<G> {
+    private static class VarDefInfer<G> extends VarDef<G> {
 
-        VarDefInfer(String id, String sourceFile, String cacheLocation) throws IOException {
-            super(id, sourceFile, cacheLocation);
+        VarDefInfer(String id, String sourceFile, Config config) throws IOException {
+            super(id, sourceFile, config);
         }
     }
 
-    private class VarDefAST<G> extends VarDef<G> {
+    private static class VarDefAST<G> extends VarDef<G> {
 
         final SolomonoffWeighted def;
 
-        VarDefAST(String id, SolomonoffWeighted def, String sourceFile, String cacheLocation) throws IOException {
-            super(id, sourceFile, cacheLocation);
+        VarDefAST(String id, SolomonoffWeighted def, String sourceFile, Config config) throws IOException {
+            super(id, sourceFile, config);
             this.def = def;
         }
     }
@@ -110,7 +110,7 @@ public class Compiler {
 
     public <N, G extends IntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P, N>> void
     loadBinary(String ID) throws IOException, CLIException.BinFileException, CompilationError {
-        final VarDefInfer<G> def = new VarDefInfer<G>(ID, null, config.cacheLocation);
+        final VarDefInfer<G> def = new VarDefInfer<G>(ID, null, config);
         File bin = def.cacheFilePath.toFile();
         if (!bin.exists()) {
             throw new CLIException.BinFileException(ID);
@@ -123,42 +123,38 @@ public class Compiler {
         compiler.specs.introduceVariable(ID, Pos.NONE, g, false);
     }
 
-    private List<Source> loadFromPackages() {
-        try {
-            return Packages.getSources(config);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    private List<Source> loadFromPackages() throws IOException {
+        return Source.fromPackages(config.pkg);
     }
     
-    private List<Source> loadAllSourceFiles() {
-        config.source.addAll(loadFromPackages());
-       return config.source;
+    private List<Source> loadAllSourceFiles() throws IOException {
+       List<Source> sources = Source.fromSourceFiles(config.source);
+       sources.addAll(loadFromPackages());
+       return sources;
     }
 
-    List<Source> loadFile(String fileName) {
-        config.source.add(new Source(fileName));
-        return config.source;
-    }
-
-    public void compileFile(String fileName)
-            throws InterruptedException, ExecutionException, IOException, CompilationError {
-        compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> {} );
-        _compile(compiler, loadFile(fileName), false);
-        compiler.specs.setVariableRedefinitionCallback((prev, n, pos) -> {
-            assert prev.name.equals(n.name);
-            throw new CompilationError.DuplicateFunction(prev.pos, pos, n.name);
-        });
-    }
+//    List<Source> loadFile(String fileName) throws IOException {
+//        config.source.add(new Source(fileName, CharStreams.fromFileName(fileName));
+//        return config.source;
+//    }
+//
+//    public void compileFile(String fileName)
+//            throws InterruptedException, ExecutionException, IOException, CompilationError {
+//        compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> {} );
+//        _compile(compiler, loadFile(fileName), false);
+//        compiler.specs.setVariableRedefinitionCallback((prev, n, pos) -> {
+//            assert prev.name.equals(n.name);
+//            throw new CompilationError.DuplicateFunction(prev.pos, pos, n.name);
+//        });
+//    }
 
     public void compile()
             throws InterruptedException, ExecutionException, IOException, CompilationError {
-        _compile(compiler, loadAllSourceFiles(), config.caching_write);
+        _compile(compiler, loadAllSourceFiles(), config.caching_write, config);
    }
 
-    private <N, G extends IntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P, N>> void
-    _compile(OptimisedLexTransducer<N, G> compiler, List<Source> sourceFiles, boolean buildBin)
+    private static <N, G extends IntermediateGraph<Pos, LexUnicodeSpecification.E, LexUnicodeSpecification.P, N>> void
+    _compile(OptimisedLexTransducer<N, G> compiler, List<Source> sourceFiles, boolean buildBin, Config config)
             throws ExecutionException, InterruptedException, IOException, CompilationError {
 
         final ExecutorService pool = Executors.newWorkStealingPool();
@@ -171,7 +167,7 @@ public class Compiler {
         final HashMap<String, VarDef<G>> definitions = new HashMap<>();
         // parse user's mealy files
         for (final Source sourceFile : sourceFiles) {
-            final Path path = Paths.get(sourceFile.path);
+
             final String extension = FilenameUtils.getExtension(sourceFile.path);
             final String name = FilenameUtils.getBaseName(sourceFile.path);
 
@@ -179,12 +175,8 @@ public class Compiler {
                 case "mealy": {
                     System.err.println("Reading " + sourceFile.path);
                     queue.add(pool.submit(() -> {
-                        final File mealyFile = new File(sourceFile.path);
-                        if (!mealyFile.exists()) {
-                            throw new CLIException.MealyFileException(mealyFile.getPath());
-                        }
                         final SolomonoffGrammarLexer lexer =
-                                new SolomonoffGrammarLexer(CharStreams.fromPath(mealyFile.toPath()));
+                                new SolomonoffGrammarLexer(sourceFile.data);
                         final SolomonoffGrammarParser parser =
                                 new SolomonoffGrammarParser(new CommonTokenStream(lexer));
 
@@ -204,14 +196,15 @@ public class Compiler {
                     break;
                 }
                 case "ostia": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config.cacheLocation);
+                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {
                                 final HashMap<Integer, Integer> symbolToIndex = new HashMap<>();
-                                final ArrayList<Pair<IntSeq, IntSeq>> informant = loadStringFile(path);
+                                final ArrayList<Pair<IntSeq, IntSeq>> informant =
+                                        loadStringFile(Paths.get(sourceFile.path));
                                 LearnLibCompatibility.inferAlphabet(informant.iterator(), symbolToIndex);
                                 final int[] indexToSymbol = new int[symbolToIndex.size()];
                                 for (Map.Entry<Integer, Integer> e : symbolToIndex.entrySet()) {
@@ -246,14 +239,14 @@ public class Compiler {
                     break;
                 }
                 case "rpni": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config.cacheLocation);
+                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {
-                                final G g = OptimisedLexTransducer.dfaToIntermediate(compiler.specs,
-                                        Pos.NONE, LearnLibCompatibility.rpni(loadStringFile(path)));
+                                final G g = OptimisedLexTransducer.dfaToIntermediate(compiler.specs, Pos.NONE,
+                                        LearnLibCompatibility.rpni(loadStringFile(Paths.get(sourceFile.path))));
                                 if (buildBin) {
                                     try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
                                         compiler.specs.compressBinary(g, new DataOutputStream(f));
@@ -277,14 +270,14 @@ public class Compiler {
                     break;
                 }
                 case "rpni_mealy": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config.cacheLocation);
+                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {
                                 Pair<Alphabet<Integer>, MealyMachine<?, Integer, ?, Integer>> alphAndMealy =
-                                        LearnLibCompatibility.rpniMealy(loadStringFile(path));
+                                        LearnLibCompatibility.rpniMealy(loadStringFile(Paths.get(sourceFile.path)));
                                 G g = LearnLibCompatibility.mealyToIntermediate(compiler.specs, alphAndMealy.l(),
                                         alphAndMealy.r(), s -> Pos.NONE,
                                         (in, out) -> compiler.specs.createFullEdgeOverSymbol(in,
@@ -313,14 +306,14 @@ public class Compiler {
                     break;
                 }
                 case "rpni_edsm": {
-                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config.cacheLocation);
+                    final VarDefInfer<G> def = new VarDefInfer<G>(name, sourceFile.path, config);
                     definitions.put(name, def);
                     compiled.put(name, pool.submit(() -> {
                         if (def.needsRecompilation) {
                             System.err.println("Inferring " + sourceFile.path);
                             try {
                                 final G g = OptimisedLexTransducer.dfaToIntermediate(compiler.specs, Pos.NONE,
-                                        LearnLibCompatibility.rpniEDSM(loadStringFile(path)));
+                                        LearnLibCompatibility.rpniEDSM(loadStringFile(Paths.get(sourceFile.path))));
                                 if (buildBin) {
                                     try (FileOutputStream f = new FileOutputStream(def.cacheFilePath.toFile())) {
                                         compiler.specs.compressBinary(g, new DataOutputStream(f));
@@ -371,7 +364,7 @@ public class Compiler {
             final String id = def.getKey();
             dependencyOf.addVertex(id);
             final String sourceFile = collector.sourceFiles.get(id);
-            definitions.put(id, new VarDefAST<G>(id, def.getValue(), sourceFile, config.cacheLocation));
+            definitions.put(id, new VarDefAST<G>(id, def.getValue(), sourceFile, config));
         }
 
 

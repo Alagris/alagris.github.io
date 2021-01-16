@@ -5,9 +5,8 @@ import com.moandjiezana.toml.Toml;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.List;
 
 public class TomlParser {
     public static class Config {
@@ -16,23 +15,22 @@ public class TomlParser {
         String remote_repo;
         String private_key;
         String local_repo;
-        ArrayList<Source> source;
-        ArrayList<Package> pkg;
+        List<SourceFile> source;
+        List<Package> pkg;
 //        Target[] target;
-        String cacheLocation;
-        boolean verify_signature;
+        String cache_location;
         boolean caching_write;
         boolean caching_read;
         
         
         public Config() {
-            cacheLocation = "bin/";
+            cache_location = "bin/";
             caching_write = true;
             caching_read = true;
             local_repo = Paths.get(System.getProperty("user.home"),".Solomonoff").toString();
         }
 
-        public static Config parse(File configFile) throws CLIException.BuildFileException, IOException {
+        public static Config parse(File configFile) throws IOException, CLIException.PKFileException {
             final Toml toml = new Toml().read(configFile);
             Config config;
             config = toml.to(Config.class);
@@ -41,17 +39,24 @@ public class TomlParser {
 //            }
             if (config.source != null) {
                 String buildFilePath = configFile.getAbsoluteFile().getParent();
-                for (Source src : config.source) {
+                for (SourceFile src : config.source) {
                     if (!Paths.get(src.path).isAbsolute()) {
                         src.path = Paths.get(buildFilePath, src.path).toString();
                     }
                 }
             }
-//            if (config.target==null || config.target.length==0){
-//                System.err.println("No targets specified. Defaulting to 'main'");
-//                config.target = new Target[]{new Target("main","bin/main.star")};
-//            }
-            Files.createDirectories(Paths.get(config.cacheLocation));
+            if (config.pkg != null) {
+                final String repoPath = Paths.get(config.local_repo).toAbsolutePath().toString();
+                final String buildFilePath = configFile.getAbsoluteFile().getParent();
+                for (Package pkg : config.pkg) {
+                    if (pkg.path == null) {
+                        pkg.path = Paths.get(repoPath, pkg.name + "-" + pkg.version + ".slm").toString();
+                    } else if (!Paths.get(pkg.path).isAbsolute()) {
+                        pkg.path = Paths.get(buildFilePath, pkg.path).toString();
+                    }
+                }
+            }
+            Files.createDirectories(Paths.get(config.cache_location));
             return config;
         }
     }
@@ -68,14 +73,14 @@ public class TomlParser {
 
     }
 
-    public static class Source {
+    public static class SourceFile {
         String path;
         String algorithm; //"RPNI", "OSTIA"
         String name;//name of produced transducer
 
-        public Source() {}
+        public SourceFile() {}
 
-        public Source(String path) {
+        public SourceFile(String path) {
             this.path = path;
         }
     }
@@ -84,12 +89,24 @@ public class TomlParser {
         String name;
         String version;
         String public_key;
+        boolean verify_signature;
+        String path;
 
-        public Package() {}
+        public Package() {
+            this.verify_signature = true;
+        }
 
         public Package(String name, String version) {
             this.name = name;
             this.version = version;
+            this.verify_signature = false;
+        }
+
+        public Package(String name, String version, String public_key) {
+            this.name = name;
+            this.version = version;
+            this.verify_signature = true;
+            this.public_key = public_key;
         }
     }
 

@@ -17,11 +17,14 @@ class SolomonOn implements Callable<Integer> {
     private InputStream scriptStream;
 
     @Parameters(index = "0", description =
-            "${COMPLETION-CANDIDATES}\n"
+            "${COMPLETION-CANDIDATES}\n\n"
             + "check       - test if buildable\n"
-            + "build       - just build binaries\n"
-            + "run         - build and start \n"
-            + "interactive - cos tam cos tam"
+            + "build       - binaries building\n"
+            + "run         - evaluate built binaries (interactive session or from script)\n"
+            + "interactive - empty interactive session - REPL\n"
+            + "package     - package building\n"
+            + "clean       - binaries removing\n"
+            +"\n\n"
     )
     private Mode mode;
 
@@ -67,7 +70,7 @@ class SolomonOn implements Callable<Integer> {
     }
 
     private void clean() {
-        final File cache = new File(config.cacheLocation);
+        final File cache = new File(config.cache_location);
         if (!cache.exists()) {
             return;
         }

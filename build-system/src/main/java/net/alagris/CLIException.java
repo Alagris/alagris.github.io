@@ -46,4 +46,18 @@ public class CLIException extends Exception{
             super("Cannot find compiled file for " + id);
         }
     }
+
+    public static class PKFileException extends CLIException {
+
+        public PKFileException(String pkg) {
+            super("Cannot find public key file for " + pkg);
+        }
+    }
+
+    public static class PkgVerifyException extends CLIException {
+
+        public PkgVerifyException(String pkg) {
+            super("Cannot verify " + pkg);
+        }
+    }
 }
