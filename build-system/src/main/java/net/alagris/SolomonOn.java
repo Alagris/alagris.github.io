@@ -84,6 +84,7 @@ class SolomonOn implements Callable<Integer> {
     public Integer call() throws Exception {
         Compiler compiler;
         if (buildFile.exists()) {
+            buildFile = buildFile.getAbsoluteFile();
             config = TomlParser.Config.parse(buildFile);
             try {
                 updateConfig();
@@ -114,7 +115,7 @@ class SolomonOn implements Callable<Integer> {
                     compiler = new Compiler(new Config());
                     compiler.loadBinary(functionName);
                 }
-                executor = new Executor(compiler.getTransducer());
+                executor = new Executor(compiler.getTransducer(), buildFile.getParentFile());
                 if (scriptFile != null) {
                     if (scriptStream != null) {
                         executor.evalFileContent(scriptStream);
@@ -129,7 +130,7 @@ class SolomonOn implements Callable<Integer> {
                 break;
             case interactive:
                 compiler = new Compiler(new Config());
-                executor = new Executor(compiler.getTransducer());
+                executor = new Executor(compiler.getTransducer(), buildFile.getParentFile());
                 if (scriptStream != null) {
                     executor.evalFileContent(scriptStream);
                 }

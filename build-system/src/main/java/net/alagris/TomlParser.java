@@ -50,7 +50,7 @@ public class TomlParser {
                 final String buildFilePath = configFile.getAbsoluteFile().getParent();
                 for (Package pkg : config.pkg) {
                     if (pkg.path == null) {
-                        pkg.path = Paths.get(repoPath, pkg.name + "-" + pkg.version + ".slm").toString();
+                        pkg.path = Paths.get(repoPath, pkg.name + "-" + pkg.version + ".zip").toString();
                     } else if (!Paths.get(pkg.path).isAbsolute()) {
                         pkg.path = Paths.get(buildFilePath, pkg.path).toString();
                     }

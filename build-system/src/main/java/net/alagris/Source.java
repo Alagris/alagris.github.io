@@ -30,6 +30,9 @@ public class Source {
     
     public static List<Source> fromSourceFiles(List<TomlParser.SourceFile> sourceFiles) throws IOException {
         List<Source> sources = new LinkedList<Source>();
+        if (sourceFiles == null) {
+            return sources;
+        }
         for (TomlParser.SourceFile s : sourceFiles) {
             sources.add(new Source(s.path, CharStreams.fromFileName(s.path)));
         }

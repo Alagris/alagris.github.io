@@ -14,32 +14,13 @@ import java.util.regex.Pattern;
 public class Executor {
     private final HashMap<String, CmdMeta<String>> commands = new HashMap<>();
     private OptimisedLexTransducer.OptimisedHashLexTransducer compiler;
-
+    /**The parent directory of TOML file*/
+    private final File tomlLocation;
     private interface ReplCommand<Result> {
         Result run(OptimisedLexTransducer.OptimisedHashLexTransducer compiler, Consumer<String> log,
                    Consumer<String> debug, String args);
     }
 
-    private final ReplCommand<String> REPL_LOAD = (compiler, log, debug, args) -> {
-        try {
-            final long parsingBegin = System.currentTimeMillis();
-            compiler.specs.setVariableRedefinitionCallback((var, var1, pos) -> {} );
-            compiler.parse(CharStreams.fromFileName(args));
-            debug.accept("Parsing took " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
-            final long optimisingBegin = System.currentTimeMillis();
-            debug.accept("Optimising took " + (System.currentTimeMillis() - optimisingBegin) + " miliseconds");
-            final long ambiguityCheckingBegin = System.currentTimeMillis();
-            compiler.checkStrongFunctionality();
-            debug.accept(
-                    "Checking ambiguity " + (System.currentTimeMillis() - ambiguityCheckingBegin) + " miliseconds");
-            final long typecheckingBegin = System.currentTimeMillis();
-            debug.accept("Typechecking took " + (System.currentTimeMillis() - typecheckingBegin) + " miliseconds");
-            debug.accept("Total time " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
-            return null;
-        } catch (CompilationError | IOException e) {
-            return e.toString();
-        }
-    };
 
     private final ReplCommand<String> REPL_LIST =
             (compiler, logs, debug, args) -> compiler.specs.variableAssignments.keySet().toString();
@@ -96,7 +77,7 @@ public class Executor {
         Var<net.alagris.HashMapIntermediateGraph.N<Pos, E>, HashMapIntermediateGraph<Pos, E, P>> g = compiler
                 .getTransducer(args);
         try (FileOutputStream f = new FileOutputStream(args + ".star")) {
-            compiler.specs.compressBinary(g.graph, new DataOutputStream(new BufferedOutputStream(f)));
+            compiler.specs.compressBinary(g.graph, new DataOutputStream(f));
             return null;
         } catch (IOException e) {
             return e.toString();
@@ -207,10 +188,29 @@ public class Executor {
         return prev == null ? null : prev.cmd;
     }
 
-    public Executor(OptimisedLexTransducer.OptimisedHashLexTransducer compiler) {
+    public Executor(OptimisedLexTransducer.OptimisedHashLexTransducer compiler, File tomlLocation) {
         this.compiler = compiler;
+        this.tomlLocation = tomlLocation;
         registerCommand("exit", "Exits REPL", (a, b, d, c) -> "");
-        registerCommand("load", "Loads source code from file", REPL_LOAD);
+        registerCommand("load", "Loads source code from file", (c, log, debug, args) -> {
+            try {
+                final long parsingBegin = System.currentTimeMillis();
+                compiler.parse(CharStreams.fromPath(tomlLocation.toPath().resolve(args)));
+                debug.accept("Parsing took " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
+                final long optimisingBegin = System.currentTimeMillis();
+                debug.accept("Optimising took " + (System.currentTimeMillis() - optimisingBegin) + " miliseconds");
+                final long ambiguityCheckingBegin = System.currentTimeMillis();
+                compiler.checkStrongFunctionality();
+                debug.accept(
+                        "Checking ambiguity " + (System.currentTimeMillis() - ambiguityCheckingBegin) + " miliseconds");
+                final long typecheckingBegin = System.currentTimeMillis();
+                debug.accept("Typechecking took " + (System.currentTimeMillis() - typecheckingBegin) + " miliseconds");
+                debug.accept("Total time " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
+                return null;
+            } catch (CompilationError | IOException e) {
+                return e.toString();
+            }
+        });
         registerCommand("pipes", "Lists all currently defined pipelines", REPL_LIST_PIPES);
         registerCommand("run", "Runs pipeline for the given input", REPL_RUN);
         registerCommand("ls", "Lists all currently defined transducers", REPL_LIST);
@@ -273,7 +273,7 @@ public class Executor {
 
         } else {
             try {
-                compiler.parseREPL(CharStreams.fromString(line));
+                compiler.parse(CharStreams.fromString(line));
                 return null;
             } catch (CompilationError | NoViableAltException | EmptyStackException e) {
                 return e.toString();
