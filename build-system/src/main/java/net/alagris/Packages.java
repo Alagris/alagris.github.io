@@ -3,6 +3,7 @@ package net.alagris;
 import net.alagris.TomlParser.*;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class Packages {
     public static boolean verifyPackage(TomlParser.Package pkg)
@@ -78,6 +80,75 @@ public class Packages {
         X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePublic(spec);
+    }
+
+    public static void downloadPackage(TomlParser.Package pkg)
+            throws CLIException.PkgDowloadExcetion, CLIException.PkgSigDowloadExcetion {
+        final String pkgURL = pkg.remote_repo + pkg.name + "-" + pkg.version + ".zip";
+        final String pkgSigURL = pkg.remote_repo + pkg.name + "-" + pkg.version + ".zip.sig";
+
+        try (BufferedInputStream in = new BufferedInputStream(new URL(pkgURL).openStream());
+             FileOutputStream fileOutputStream = new FileOutputStream(pkg.path)) {
+            byte dataBuffer[] = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                fileOutputStream.write(dataBuffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            throw new CLIException.PkgDowloadExcetion(pkgURL);
+        }
+        if (pkg.verify_signature) {
+            try (BufferedInputStream in = new BufferedInputStream(new URL(pkgSigURL).openStream());
+                 FileOutputStream fileOutputStream = new FileOutputStream(pkg.path + ".sig")) {
+                byte dataBuffer[] = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                    fileOutputStream.write(dataBuffer, 0, bytesRead);
+                }
+            } catch (IOException e) {
+                throw new CLIException.PkgSigDowloadExcetion(pkgSigURL);
+            }
+        }
+    }
+
+    public static void buildPackage(Config config)
+            throws CLIException.PkgNameException, CLIException.PkgCreatePkgExcetipn, CLIException.PkgAddToPkgException,
+            IOException {
+        final String pkgFileName = config.projectName + ".zip";
+        if (config.projectName == null) {
+            throw new CLIException.PkgNameException();
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(pkgFileName);
+        } catch (FileNotFoundException e) {
+            throw new CLIException.PkgCreatePkgExcetipn(pkgFileName);
+        }
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        for (SourceFile srcFile : config.source) {
+            File fileToZip = new File(srcFile.path);
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(fileToZip);
+            } catch (FileNotFoundException e) {
+                throw new CLIException.PkgAddToPkgException(srcFile.path);
+            }
+            ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+            try {
+                zipOut.putNextEntry(zipEntry);
+            } catch (IOException e) {
+                throw new CLIException.PkgAddToPkgException(srcFile.path);
+            }
+
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
+        }
+        zipOut.close();
+        fos.close();
     }
 }
 

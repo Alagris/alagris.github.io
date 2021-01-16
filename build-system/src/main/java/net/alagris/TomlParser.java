@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 public class TomlParser {
@@ -29,7 +33,10 @@ public class TomlParser {
             local_repo = Paths.get(System.getProperty("user.home"),".Solomonoff").toString();
         }
 
-        public static Config parse(File configFile) throws IOException, CLIException.PKFileException {
+        public static Config parse(File configFile) throws IOException, CLIException.PKFileException,
+                CLIException.InvalidSignatureException, InvalidKeySpecException, NoSuchAlgorithmException,
+                InvalidKeyException, SignatureException, CLIException.PkgDowloadExcetion,
+                CLIException.PkgSigDowloadExcetion {
             final Toml toml = new Toml().read(configFile);
             Config config;
             config = toml.to(Config.class);
@@ -54,7 +61,10 @@ public class TomlParser {
                         pkg.path = Paths.get(buildFilePath, pkg.path).toString();
                     }
                     if (pkg.remote_repo != null && !(new File(pkg.path).exists())) {
-                        ;
+                        Packages.downloadPackage(pkg);
+                        if (!Packages.verifyPackage(pkg)) {
+                            throw new CLIException.InvalidSignatureException(pkg.path);
+                        }
                     }
                 }
             }

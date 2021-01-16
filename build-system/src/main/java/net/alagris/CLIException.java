@@ -60,4 +60,44 @@ public class CLIException extends Exception{
             super("Cannot verify " + pkg);
         }
     }
+
+    public static class InvalidSignatureException extends CLIException {
+
+        public InvalidSignatureException(String pkg) {
+            super("Bad signature " + pkg);
+        }
+    }
+
+    public static class PkgDowloadExcetion extends CLIException {
+
+        public PkgDowloadExcetion(String url) {
+            super("Cannot download package " + url);
+        }
+    }
+    
+    public static class PkgSigDowloadExcetion extends CLIException {
+
+        public PkgSigDowloadExcetion(String url) {
+            super("Cannot download package signature " + url);
+        }
+    }
+
+    public static class PkgNameException extends CLIException {
+
+        public PkgNameException() {
+            super("Invalid project name");
+        }
+    }
+
+    public static class PkgAddToPkgException extends CLIException {
+        public PkgAddToPkgException(String file) {
+            super("Cannot add " + file + "to package");
+        }
+    }
+
+    public static class PkgCreatePkgExcetipn extends CLIException {
+        public PkgCreatePkgExcetipn(String file) {
+            super("Cannot create " + file);
+        }
+    }
 }

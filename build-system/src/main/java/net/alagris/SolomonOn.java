@@ -21,7 +21,7 @@ class SolomonOn implements Callable<Integer> {
             + "build       - binaries building\n"
             + "run         - evaluate built binaries (interactive session or from script)\n"
             + "interactive - empty interactive session - REPL\n"
-            + "package     - package building\n"
+            + "export      - package building\n"
             + "clean       - binaries removing\n"
             +"\n\n"
     )
@@ -55,7 +55,7 @@ class SolomonOn implements Callable<Integer> {
     @Option(names = {"-l", "--install-local-pkg"}, description = "install from local drive")
     private  boolean localInstall;
 
-    private enum Mode { run, build, interactive, clean, export, check, install, remove }
+    private enum Mode { run, build, interactive, clean, export, check }
 
     private void updateConfig() throws FileNotFoundException {
         config.caching_write = !noCaching;
@@ -84,7 +84,11 @@ class SolomonOn implements Callable<Integer> {
         Compiler compiler;
         if (buildFile.exists()) {
             buildFile = buildFile.getAbsoluteFile();
-            config = TomlParser.Config.parse(buildFile);
+            try {
+                config = TomlParser.Config.parse(buildFile);
+            } catch (Exception e) {
+                return 7;
+            }
             try {
                 updateConfig();
             } catch (FileNotFoundException e) {
@@ -94,6 +98,26 @@ class SolomonOn implements Callable<Integer> {
         Executor executor;
 
         switch (mode) {
+            case export:
+                try {
+                    Packages.buildPackage(config);
+                } catch (Exception e) {
+                    return 8;
+                }
+                break;
+            case check:
+                if (config == null) {
+                    System.err.println("Cannot find " + buildFile);
+                    return 1;
+                }
+                config.caching_write = false;
+                compiler = new Compiler(config);
+                try {
+                    compiler.compile();
+                } catch (Exception e) {
+                    return 5;
+                }
+                break;
             case build:
                 if (config == null) {
                    System.err.println("Cannot find " + buildFile);
