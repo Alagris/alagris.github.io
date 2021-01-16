@@ -78,53 +78,51 @@
     <link href="css/blog.css" rel="stylesheet">
 </head>
 <body data-new-gr-c-s-check-loaded="14.984.0" data-gr-ext-installed="">
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="/">Start</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="/">Start</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" href="/compiler">Compiler </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/DocPage">Documentation</a>
-            </li>
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+          <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                  <a class="nav-link" href="/compiler">Compiler </a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="/DocPage">Documentation</a>
+              </li>
 
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a><span class="sr-only">(current)</span>
-                <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    <a class="dropdown-item" href="/Contact">Contact</a>
-                    <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">GitHub</a>
-                    <a class="dropdown-item" href="/Download">Download</a>
-                </div>
-            </li>
-        </ul>
+              <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More</a><span class="sr-only">(current)</span>
+                  <div class="dropdown-menu" aria-labelledby="dropdown01">
+                      <a class="dropdown-item" href="/Contact">Contact</a>
+                      <a class="dropdown-item" href="https://github.com/aleksander-mendoza/SolomonoffLib">GitHub</a>
+                      <a class="dropdown-item" href="/Download">Download</a>
+                  </div>
+              </li>
+          </ul>
 
-    </div>
-</nav>
+      </div>
+  </nav>
 
-<main role="main">
-    <div class="jumbotron">
-        <div class="container">
-            <h1 class="display-3">Get Solomonoff</h1>
-            <br/>
-        </div>
+  <main role="main">
+      <div class="jumbotron">
+          <div class="container">
+              <h1 class="display-3">Get Solomonoff</h1>
+              <br/>
+          </div>
 
-    </div>
-    <div class="centerDiv">
-        <button class="btn" onclick="document.location='https://drive.google.com/file/d/1irvdvQrwI4p1zL-P9i_yd-GJP6zqX7fJ/view?usp=sharing'"><i class="fa fa-download"></i> Download (version 1.8)</button>
-    </div>
-    <div style="margin-top: 20%; background-color: aliceblue;margin-left: 5%;margin-right:5% ;  padding: 2%;">
+      </div>
+      <div class="centerDiv">
+        <button class="btn" onclick="window.open('/solomonoff.jar')"><i class="fa fa-download"></i> Download (version 1.0)</button>
+      </div>
+        <div style="margin-top: 20%; background-color: aliceblue;margin-left: 5%;margin-right:5% ;  padding: 2%;">
         <h5>Command-line usage</h5>
-        <p>Download prepackaged jar above and run the following command to start up REPL</p>
-        <pre>java -jar solomonoff.jar</pre>
-        <p>You can specify file to compile</p>
-        <pre>java -jar solomonoff.jar source.mealy</pre>
-        <p>Or you can point to some TOML build script</p>
-        <pre>java -jar solomonoff.jar build.toml</pre>
+        <p>Download prepackaged jar above and run the following command to start up REPL</p> 
+        <pre>java -jar solomonoff.jar interactive</pre>
+        <p>You can specify entire project to compile</p>
+        <pre>java -jar solomonoff.jar run -b build.toml</pre>
         <p>Alternatively you can use Java API directly</p>
         <h5>Maven</h5>
         <pre>
@@ -166,10 +164,10 @@ final OptimisedHashLexTransducer compiled = new OptimisedHashLexTransducer(
     CharStreams.fromFileName("some/file/path.mealy"),true);
 String output = compiled.run("function name","input string");
         </pre>
-
+        
         <p>Clone our <a href="https://github.com/aleksander-mendoza/SolomonoffLib">GitHub</a> repo from</p>
         <pre>git clone https://github.com/aleksander-mendoza/SolomonoffLib.git</pre>
-
+       
         <h5>Syntax highlighting</h5>
         <p>Download syntax highlighting rules for Solomonoff. You may find one of these a formats compatible with your editor</p>
         <p><a download="solomonoff_highlighting.cson" href="data:application/cson,https://alagris.github.io/mealy_highlighting/mealy.cson">Atom</a></p>
@@ -177,12 +175,12 @@ String output = compiled.run("function name","input string");
         <p><a download="solomonoff_highlighting.xml" href="data:application/xml,https://alagris.github.io/mealy_highlighting/mealy.xml">Textmate .XML</a></p>
         <p><a download="solomonoff_highlighting.json" href="data:application/json,https://alagris.github.io/mealy_highlighting/mealy.json">Textmate .json (compatible with VS code)</a></p>
         <p><a download="solomonoff_highlighting.js" href="data:application/js,https://alagris.github.io/mealy_highlighting/mealy.js">Ace</a></p>
-    </div>
+      </div>
 
-    <footer style="margin-top: 50px;">
+      <footer style="margin-top: 50px;">
         <p style="color: rgba(73, 73, 73, 0.788);">© AMU 2019-2020</p>
     </footer>
 
-</main>
+  </main>
 </body>
 </html>
