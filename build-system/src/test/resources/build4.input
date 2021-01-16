@@ -1,7 +1,7 @@
 :load sample.mealy
 :eval function1 '01'
 :eval function1 ''
-:eval function2 'this function has no type, hence it defaults to using .* as alphabet'
+:eval function3 'functions can be reused like thisthis function has no type, hence it defaults to using .* as alphabet'
 :eval mirror 'reflect a input'
 :eval mirror 'reflect b input'
 :eval mirror 'reflect z input'

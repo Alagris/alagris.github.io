@@ -1,0 +1,5 @@
+projectName = "test project 1"
+[[source]]
+path = "mirror.star"
+[[source]]
+path = "function3.star"

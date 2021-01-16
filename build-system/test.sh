@@ -1,6 +1,8 @@
 #!/bin/bash
 
 rm -rf bin
+rm src/test/resources/project7.zip
+rm src/test/resources/*.output
 for toml in src/test/resources/build*.toml ; do
     echo "$toml"
     file="$(basename "$toml")"

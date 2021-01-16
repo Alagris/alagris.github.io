@@ -12,8 +12,4 @@
 :eval used_ahead_of_definition 'terabckabckre'
 :eval used_ahead_of_definition 'terabckkre'
 :eval used_ahead_of_definition 'terkredredredkre'
-:eval sample3 'aaaaaaa'
-:eval from_ostia 'aaaaaaa0'
-x = !!function1 '1'
-:eval x '011'
-//ignore this comment
+:eval function3 'functions can be reused like thisthis function has no type, hence it defaults to using .* as alphabet'
