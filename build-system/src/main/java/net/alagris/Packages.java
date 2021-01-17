@@ -25,7 +25,7 @@ public class Packages {
             if (pkg.public_key == null) {
                 throw new CLIException.PKFileException(pkg.name);
             }
-            return Packages._verifyPackage(Paths.get(pkg.path), pkg.public_key);
+            return Packages._verifyPackage(pkg.path, pkg.public_key);
         }
         return true;
     }
@@ -39,13 +39,13 @@ public class Packages {
         return verifySignature(pkgData, sigData, pk);
     }
 
-    private static byte[] sign(String pkg, String pkgSigFile, String keyFile)
+    private static void sign(String pkg, String pkgSigFile, String keyFile)
             throws InvalidKeyException, SignatureException, InvalidKeySpecException, NoSuchAlgorithmException,
             IOException {
         Signature rsa = Signature.getInstance("SHA256withRSA");
         rsa.initSign(getPrivate(keyFile));
         rsa.update(Files.readAllBytes(Paths.get(pkg)));
-        return rsa.sign();
+        writeToFile(pkgSigFile, rsa.sign());
     }
 
     private static PrivateKey getPrivate(String filename)
@@ -151,7 +151,7 @@ public class Packages {
         zipOut.close();
         fos.close();
         try {
-            byte[] sign = sign(pkgFileName, pkgSigFileName, config.private_key);
+            sign(pkgFileName, pkgSigFileName, config.private_key);
         } catch (InvalidKeyException e) {
             throw new CLIException.PkgSigningExcetipn(pkgFileName);
         } catch (SignatureException e) {

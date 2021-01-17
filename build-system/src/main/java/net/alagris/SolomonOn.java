@@ -68,17 +68,6 @@ class SolomonOn implements Callable<Integer> {
         }
     }
 
-    private void clean() {
-        final File cache = new File(config.cache_location);
-        if (!cache.exists()) {
-            return;
-        }
-        File[] files = cache.listFiles(File::isFile);
-        for (File f : files) {
-            f.delete();
-        }
-    }
-    
     @Override
     public Integer call() throws Exception {
         Compiler compiler;
@@ -168,7 +157,7 @@ class SolomonOn implements Callable<Integer> {
                 executor.loop();
                 break;
             case clean:
-                clean();
+                Helpers.clean(config);
         }
         return 0;
     }
