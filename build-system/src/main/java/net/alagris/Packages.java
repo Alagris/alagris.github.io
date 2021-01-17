@@ -3,7 +3,10 @@ package net.alagris;
 import net.alagris.TomlParser.*;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,10 +14,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Packages {
@@ -58,8 +58,8 @@ public class Packages {
 
     private static void writeToFile(String filename, byte[] signature) throws IOException {
         File f = new File(filename);
-        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename));
-        out.writeObject(signature);
+        FileOutputStream out = new FileOutputStream(filename);
+        out.write(signature);
         out.close();
         System.err.println("Signature created");
     }
@@ -83,22 +83,29 @@ public class Packages {
     }
 
     public static void downloadPackage(TomlParser.Package pkg)
-            throws CLIException.PkgDowloadExcetion, CLIException.PkgSigDowloadExcetion {
-        final String pkgURL = pkg.remote_repo + pkg.name + "-" + pkg.version + ".zip";
-        final String pkgSigURL = pkg.remote_repo + pkg.name + "-" + pkg.version + ".zip.sig";
+            throws CLIException.PkgDowloadExcetion, CLIException.PkgSigDownloadExcetion, UnsupportedEncodingException,
+            MalformedURLException {
+        final String pkgURL = URLEncoder.encode(pkg.name + "-" + pkg.version + ".zip",
+                StandardCharsets.UTF_8.toString());
+        final String pkgSigURL = URLEncoder.encode(pkg.name + "-" + pkg.version + ".zip.sig",
+                StandardCharsets.UTF_8.toString());
 
-        try (BufferedInputStream in = new BufferedInputStream(new URL(pkgURL).openStream());
-             FileOutputStream fileOutputStream = new FileOutputStream(pkg.path)) {
+        URL url = new URL(new URL(pkg.remote_repo), pkgURL);
+        try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+            FileOutputStream fileOutputStream = new FileOutputStream(pkg.path)) {
             byte dataBuffer[] = new byte[1024];
             int bytesRead;
             while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
             }
         } catch (IOException e) {
-            throw new CLIException.PkgDowloadExcetion(pkgURL);
+            throw new CLIException.PkgDowloadExcetion(url.toString());
         }
+        System.err.println("Package " + pkg.name + " " + pkg.version + "downloaded");
         if (pkg.verify_signature) {
-            try (BufferedInputStream in = new BufferedInputStream(new URL(pkgSigURL).openStream());
+            URL sigURL = new URL(new URL(pkg.remote_repo), pkgSigURL);
+            try (BufferedInputStream in =
+                         new BufferedInputStream(sigURL.openStream());
                  FileOutputStream fileOutputStream = new FileOutputStream(pkg.path + ".sig")) {
                 byte dataBuffer[] = new byte[1024];
                 int bytesRead;
@@ -106,18 +113,22 @@ public class Packages {
                     fileOutputStream.write(dataBuffer, 0, bytesRead);
                 }
             } catch (IOException e) {
-                throw new CLIException.PkgSigDowloadExcetion(pkgSigURL);
+                throw new CLIException.PkgSigDownloadExcetion(sigURL.toString());
             }
+            System.err.println("Signature for " + pkg.name + " " + pkg.version + " downloaded");
         }
     }
 
     public static void buildPackage(Config config)
             throws CLIException.PkgNameException, CLIException.PkgCreatePkgExcetipn, CLIException.PkgAddToPkgException,
-            IOException, CLIException.PkgSigningExcetipn {
-        final String pkgFileName = config.projectName + ".zip";
-        final String pkgSigFileName = config.projectName + ".zip.sig";
-        if (config.projectName == null) {
+            IOException, CLIException.PkgSigningExcetipn, CLIException.PkgVersionException {
+        final String pkgFileName = config.project_name;
+        final String pkgSigFileName = pkgFileName + ".sig";
+        if (config.project_name == null) {
             throw new CLIException.PkgNameException();
+        }
+        if (config.version == null) {
+            throw new CLIException.PkgVersionException();
         }
         FileOutputStream fos = null;
         try {
@@ -150,6 +161,7 @@ public class Packages {
         }
         zipOut.close();
         fos.close();
+        System.err.println("Package " + pkgFileName + " created");
         try {
             sign(pkgFileName, pkgSigFileName, config.private_key);
         } catch (InvalidKeyException e) {

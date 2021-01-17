@@ -29,7 +29,7 @@ public class Executor {
             RangedGraph<Pos, Integer, E, P> r = compiler.getOptimisedTransducer(args);
             return r == null ? "No such function!" : String.valueOf(r.size());
         } catch (CompilationError e) {
-            return e.toString();
+            return e.getMessage();
         }
     };
     private final ReplCommand<String> REPL_EVAL = (compiler, logs, debug, args) -> {
@@ -50,7 +50,7 @@ public class Executor {
             debug.accept("Took " + evaluationTook + " miliseconds");
             return output == null ? "No match!" : output.toStringLiteral();
         } catch (WeightConflictingToThirdState e) {
-            return e.toString();
+            return e.getMessage();
         }
     };
     private final ReplCommand<String> REPL_RUN = (compiler, logs, debug, args) -> {
@@ -80,7 +80,7 @@ public class Executor {
             compiler.specs.compressBinary(g.graph, new DataOutputStream(f));
             return null;
         } catch (IOException e) {
-            return e.toString();
+            return e.getMessage();
         }
     };
 
@@ -91,7 +91,7 @@ public class Executor {
                 return "No such function!";
             return r.isDeterministic() == null ? "true" : "false";
         } catch (CompilationError e) {
-            return e.toString();
+            return e.getMessage();
         }
     };
     private final ReplCommand<String> REPL_LIST_PIPES = (compiler, logs, debug, args) -> {
@@ -117,7 +117,7 @@ public class Executor {
                 return "true";
             return "false";
         } catch (CompilationError e) {
-            return e.toString();
+            return e.getMessage();
         }
     };
     private final ReplCommand<String> REPL_RAND_SAMPLE = (compiler, logs, debug, args) -> {
@@ -159,7 +159,7 @@ public class Executor {
             }
 
         } catch (WeightConflictingToThirdState | NumberFormatException e) {
-            return e.toString();
+            return e.getMessage();
         }
     };
 
@@ -168,7 +168,7 @@ public class Executor {
             compiler.visualize(args);
             return null;
         } catch (CompilationError e) {
-            return e.toString();
+            return e.getMessage();
         }
     };
 
@@ -208,7 +208,7 @@ public class Executor {
                 debug.accept("Total time " + (System.currentTimeMillis() - parsingBegin) + " miliseconds");
                 return null;
             } catch (CompilationError | IOException e) {
-                return e.toString();
+                return e.getMessage();
             }
         });
         registerCommand("pipes", "Lists all currently defined pipelines", REPL_LIST_PIPES);
@@ -276,7 +276,7 @@ public class Executor {
                 compiler.parse(CharStreams.fromString(line));
                 return null;
             } catch (CompilationError | NoViableAltException | EmptyStackException e) {
-                return e.toString();
+                return e.getMessage();
             }
         }
     }

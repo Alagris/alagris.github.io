@@ -75,9 +75,9 @@ public class CLIException extends Exception{
         }
     }
     
-    public static class PkgSigDowloadExcetion extends CLIException {
+    public static class PkgSigDownloadExcetion extends CLIException {
 
-        public PkgSigDowloadExcetion(String url) {
+        public PkgSigDownloadExcetion(String url) {
             super("Cannot download package signature " + url);
         }
     }
@@ -104,6 +104,12 @@ public class CLIException extends Exception{
     public static class PkgSigningExcetipn extends CLIException {
         public PkgSigningExcetipn(String file) {
             super("Cannot sign " + file);
+        }
+    }
+
+    public static class PkgVersionException extends CLIException {
+        public PkgVersionException() {
+            super("Unspecified version");
         }
     }
 }

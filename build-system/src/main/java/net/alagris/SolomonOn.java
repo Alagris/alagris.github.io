@@ -19,7 +19,9 @@ class SolomonOn implements Callable<Integer> {
             "${COMPLETION-CANDIDATES}\n\n"
             + "check       - test if buildable\n"
             + "build       - binaries building\n"
-            + "run         - evaluate built binaries (interactive session or from script)\n"
+            + "run         - build if build.toml exists and\n"
+            + "              evaluate built binaries\n"
+            + "              (interactive session or from script)\n"
             + "interactive - empty interactive session - REPL\n"
             + "export      - package building\n"
             + "clean       - binaries removing\n"
@@ -76,11 +78,13 @@ class SolomonOn implements Callable<Integer> {
             try {
                 config = TomlParser.Config.parse(buildFile);
             } catch (Exception e) {
+                System.err.println(e.getMessage());
                 return 7;
             }
             try {
                 updateConfig();
             } catch (FileNotFoundException e) {
+                System.err.println(e.getMessage());
                 return 2;
             }
         }
@@ -91,6 +95,7 @@ class SolomonOn implements Callable<Integer> {
                 try {
                     Packages.buildPackage(config);
                 } catch (Exception e) {
+                    System.err.println(e.getMessage());
                     return 8;
                 }
                 break;
@@ -104,6 +109,7 @@ class SolomonOn implements Callable<Integer> {
                 try {
                     compiler.compile();
                 } catch (Exception e) {
+                    System.err.println(e.getMessage());
                     return 5;
                 }
                 break;
@@ -116,6 +122,7 @@ class SolomonOn implements Callable<Integer> {
                 try {
                     compiler.compile();
                 } catch (Exception e) {
+                    System.err.println(e.getMessage());
                     return 5;
                 }
                 break;
@@ -129,6 +136,7 @@ class SolomonOn implements Callable<Integer> {
                     try {
                         compiler.compile();
                     } catch (Exception e) {
+                        System.err.println(e.getMessage());
                         return 6;
                     }
                 } else {

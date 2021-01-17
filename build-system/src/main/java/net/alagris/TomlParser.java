@@ -14,7 +14,7 @@ import java.util.List;
 
 public class TomlParser {
     public static class Config {
-        String projectName;
+        String project_name;
         String version;
         String private_key;
         String local_repo;
@@ -36,13 +36,18 @@ public class TomlParser {
         public static Config parse(File configFile) throws IOException, CLIException.PKFileException,
                 CLIException.InvalidSignatureException, InvalidKeySpecException, NoSuchAlgorithmException,
                 InvalidKeyException, SignatureException, CLIException.PkgDowloadExcetion,
-                CLIException.PkgSigDowloadExcetion {
+                CLIException.PkgSigDownloadExcetion {
             final Toml toml = new Toml().read(configFile);
             Config config;
             config = toml.to(Config.class);
-//            if (config.projectName == null) {
-//                throw new IllegalArgumentException( "projectName is missing from " + configFile);
-//            }
+            if (config.project_name != null) {
+                String buildFilePath = configFile.getAbsoluteFile().getParent();
+                config.project_name = Paths.get(buildFilePath,
+                    config.project_name + "-" + config.version + ".zip").toString();
+                if (config.private_key != null && !Paths.get(config.private_key).isAbsolute()) {
+                    config.private_key = Paths.get(buildFilePath, config.private_key).toString();
+                }
+            }
             if (config.source != null) {
                 String buildFilePath = configFile.getAbsoluteFile().getParent();
                 for (SourceFile src : config.source) {
@@ -61,6 +66,15 @@ public class TomlParser {
                         pkg.path = Paths.get(buildFilePath, pkg.path).toString();
                     }
                     if (pkg.remote_repo != null && !(new File(pkg.path).exists())) {
+                        File repoDir = new File(config.local_repo);
+                        if (! repoDir.exists()){
+                            repoDir.mkdirs();
+                        }
+                        if ((new File(Paths.get(config.local_repo, pkg.name + "-" + pkg.version + ".zip")
+                                .toString()))
+                                .exists()) {
+                            continue;
+                        }
                         Packages.downloadPackage(pkg);
                         if (!Packages.verifyPackage(pkg)) {
                             throw new CLIException.InvalidSignatureException(pkg.path);
