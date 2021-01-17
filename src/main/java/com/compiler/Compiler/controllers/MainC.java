@@ -3,12 +3,21 @@ package com.compiler.Compiler.controllers;
 import net.alagris.OptimisedLexTransducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Map;
 
 
@@ -61,7 +70,19 @@ public class MainC {
         return "DownloadPage";
 
     }
-
+    final String filename = "solomonoff.jar";
+    final File file = new File(filename);
+    final long fileLength =  file.length();
+    @RequestMapping(path = "/solomonoff.jar", method = RequestMethod.GET)
+    public ResponseEntity<Resource> download(String param) throws IOException {
+        HttpHeaders headers = new HttpHeaders(); headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="+filename);
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(fileLength)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
 
 
 }
