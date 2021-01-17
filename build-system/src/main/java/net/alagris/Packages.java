@@ -30,21 +30,21 @@ public class Packages {
         return true;
     }
 
-    private static boolean _verifyPackage(Path pkg, String pk)
+    private static boolean _verifyPackage(String pkg, String pk)
             throws InvalidKeySpecException, SignatureException, NoSuchAlgorithmException, InvalidKeyException,
             IOException {
-        byte[] pkgData = Files.readAllBytes(pkg);
+        byte[] pkgData = Files.readAllBytes(Paths.get(pkg));
         Path sigPath = Paths.get(pkg.toString() + ".sig");
         byte[] sigData = Files.readAllBytes(sigPath);
         return verifySignature(pkgData, sigData, pk);
     }
 
-    private static byte[] sign(String data, String keyFile)
+    private static byte[] sign(String pkg, String pkgSigFile, String keyFile)
             throws InvalidKeyException, SignatureException, InvalidKeySpecException, NoSuchAlgorithmException,
             IOException {
         Signature rsa = Signature.getInstance("SHA256withRSA");
         rsa.initSign(getPrivate(keyFile));
-        rsa.update(data.getBytes());
+        rsa.update(Files.readAllBytes(Paths.get(pkg)));
         return rsa.sign();
     }
 
@@ -67,7 +67,7 @@ public class Packages {
     private static boolean verifySignature(byte[] data, byte[] signature, String keyFile)
             throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidKeyException,
             SignatureException {
-        Signature sig = Signature.getInstance("SHA1withRSA");
+        Signature sig = Signature.getInstance("SHA256withRSA");
         sig.initVerify(getPublic(keyFile));
         sig.update(data);
 
@@ -113,8 +113,9 @@ public class Packages {
 
     public static void buildPackage(Config config)
             throws CLIException.PkgNameException, CLIException.PkgCreatePkgExcetipn, CLIException.PkgAddToPkgException,
-            IOException {
+            IOException, CLIException.PkgSigningExcetipn {
         final String pkgFileName = config.projectName + ".zip";
+        final String pkgSigFileName = config.projectName + ".zip.sig";
         if (config.projectName == null) {
             throw new CLIException.PkgNameException();
         }
@@ -149,6 +150,18 @@ public class Packages {
         }
         zipOut.close();
         fos.close();
+        try {
+            byte[] sign = sign(pkgFileName, pkgSigFileName, config.private_key);
+        } catch (InvalidKeyException e) {
+            throw new CLIException.PkgSigningExcetipn(pkgFileName);
+        } catch (SignatureException e) {
+            throw new CLIException.PkgSigningExcetipn(pkgFileName);
+        } catch (InvalidKeySpecException e) {
+            throw new CLIException.PkgSigningExcetipn(pkgFileName);
+        } catch (NoSuchAlgorithmException e) {
+            throw new CLIException.PkgSigningExcetipn(pkgFileName);
+        }
+
     }
 }
 

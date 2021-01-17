@@ -100,4 +100,10 @@ public class CLIException extends Exception{
             super("Cannot create " + file);
         }
     }
+
+    public static class PkgSigningExcetipn extends CLIException {
+        public PkgSigningExcetipn(String file) {
+            super("Cannot sign " + file);
+        }
+    }
 }
