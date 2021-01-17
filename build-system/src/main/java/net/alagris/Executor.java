@@ -293,7 +293,7 @@ public class Executor {
                     final String out = run(line, System.out::println, System.err::println);
                     if(out!=null)System.out.println(out);
                 }catch (Throwable e){
-                    e.printStackTrace();
+                    System.err.println("Syntax error. Type :? for help");
                 }
             }
         }
