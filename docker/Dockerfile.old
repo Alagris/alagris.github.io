@@ -1,0 +1,27 @@
+FROM nginx:stable
+
+RUN export DEBIAN_FRONTEND=noninteractive && \
+    && apt update \
+    && apt install -y cron bash wget certbot \
+    && mkdir -p /webroots /scripts /repo /app \
+    && mkdir -p /webroots/solomonoff.projektstudencki.pl/.well-known/acme-challenge \
+    && rm -f /etc/nginx/conf.d/default.conf
+
+COPY register.sh renew.sh /scripts/
+RUN chmod +x /scripts/*.sh
+
+VOLUME /webroots
+VOLUME /etc/letsencrypt
+VOLUME /etc/nginx/conf.d
+VOLUME /app
+VOLUME /repo
+
+WORKDIR /scripts
+
+# This installs a Crontab entry which 
+# runs "certbot renew" on several days a week at 03:22 AM
+
+RUN echo "22 03 * * 2,7 root /usr/bin/certbot renew" > /etc/cron.d/certbot-renew
+
+# Run both nginx and cron together
+CMD [ "sh", "-c", "cron && nginx -g && " ]
