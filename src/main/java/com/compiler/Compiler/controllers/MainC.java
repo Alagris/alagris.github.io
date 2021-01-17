@@ -52,12 +52,12 @@ public class MainC {
     }
     @GetMapping("/Contact")
     public String contact(Model model) {
-        model.addAttribute("title", "Solomonoff - Documentation");
+        model.addAttribute("title", "Solomonoff - Contact");
         return "contactPage";
     }
     @GetMapping("/Download")
     public String download(Model model) {
-        model.addAttribute("title", "Solomonoff - Documentation");
+        model.addAttribute("title", "Solomonoff - Download");
         return "DownloadPage";
 
     }
