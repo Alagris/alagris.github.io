@@ -1,0 +1,13 @@
+
+name="Test project 3"
+authors = ["Willy Wonka"]
+version = "1.0.0"
+
+[[source]]
+path = "sample.mealy"
+[[source]]
+path = "sample2.mealy"
+[[source]]
+path = "sample3.ostia"
+[[source]]
+path = "sample3.mealy"
