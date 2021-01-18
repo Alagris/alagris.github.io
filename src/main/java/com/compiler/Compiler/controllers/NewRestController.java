@@ -319,6 +319,7 @@ public class NewRestController {
             output = exception.toString();
             col = -1;
             row = -1;
+            exception.printStackTrace();
             if (exception instanceof CompilationError.DuplicateFunction) {
                 CompilationError.DuplicateFunction e = (CompilationError.DuplicateFunction) exception;
                 output = "Variable " + e.getName() + " already exists! You cannot redefine it unless you either consume it or run ':unset " + e.getName() + "' command in REPL.";
