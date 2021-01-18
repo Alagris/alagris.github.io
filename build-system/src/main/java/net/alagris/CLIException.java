@@ -112,4 +112,10 @@ public class CLIException extends Exception{
             super("Unspecified version");
         }
     }
+
+    public static class PubKeyException extends CLIException {
+        public PubKeyException(String pk) {
+            super("Cannot load " + pk);
+        }
+    }
 }

@@ -101,7 +101,7 @@ public class Packages {
         } catch (IOException e) {
             throw new CLIException.PkgDowloadExcetion(url.toString());
         }
-        System.err.println("Package " + pkg.name + " " + pkg.version + "downloaded");
+        System.err.println("Package " + pkg.name + " " + pkg.version + " downloaded");
         if (pkg.verify_signature) {
             URL sigURL = new URL(new URL(pkg.remote_repo), pkgSigURL);
             try (BufferedInputStream in =
@@ -163,7 +163,9 @@ public class Packages {
         fos.close();
         System.err.println("Package " + pkgFileName + " created");
         try {
-            sign(pkgFileName, pkgSigFileName, config.private_key);
+            if (config.sign_pkg) {
+                sign(pkgFileName, pkgSigFileName, config.private_key);
+            }
         } catch (InvalidKeyException e) {
             throw new CLIException.PkgSigningExcetipn(pkgFileName);
         } catch (SignatureException e) {

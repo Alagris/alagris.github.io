@@ -54,9 +54,6 @@ class SolomonOn implements Callable<Integer> {
     @Option(names = {"-@", "--stdin"}, description = "set stdin as script file")
     private  boolean setStdin;
 
-    @Option(names = {"-l", "--install-local-pkg"}, description = "install from local drive")
-    private  boolean localInstall;
-
     private enum Mode { run, build, interactive, clean, export, check }
 
     private void updateConfig() throws FileNotFoundException {

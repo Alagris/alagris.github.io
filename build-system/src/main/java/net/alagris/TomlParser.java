@@ -20,16 +20,17 @@ public class TomlParser {
         String local_repo;
         List<SourceFile> source;
         List<Package> pkg;
-//        Target[] target;
         String cache_location;
         boolean caching_write;
         boolean caching_read;
+        boolean sign_pkg;
         
         
         public Config() {
             cache_location = "bin/";
             caching_write = true;
             caching_read = true;
+            sign_pkg = false;
             local_repo = Paths.get(System.getProperty("user.home"),".Solomonoff").toString();
         }
 
@@ -76,6 +77,12 @@ public class TomlParser {
                             continue;
                         }
                         Packages.downloadPackage(pkg);
+                        if (!Paths.get(pkg.public_key).isAbsolute()) {
+                            pkg.public_key = Paths.get(buildFilePath, pkg.public_key).toString();
+                        }
+                        if (pkg.verify_signature && !Files.exists(Paths.get(pkg.public_key))) {
+                            throw new CLIException.PKFileException(pkg.public_key);
+                        }
                         if (!Packages.verifyPackage(pkg)) {
                             throw new CLIException.InvalidSignatureException(pkg.path);
                         }

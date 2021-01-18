@@ -303,13 +303,12 @@ public class Executor {
         Scanner scanner = new Scanner(input);
         Pattern pattern = Pattern.compile("(?<!\\\\)\\n|(?<!\\\\)\\r\\n");
         scanner.useDelimiter(pattern);
-        String line = scanner.next();
+        String line;
 
-        while (line != null) {
+        while (scanner.hasNext()) {
+            line = scanner.next();
             final String out = run(line,System.out::println,System.err::println);
             if(out!=null)System.out.println(out);
-
-            line = scanner.next();
         }
 
         scanner.close();
