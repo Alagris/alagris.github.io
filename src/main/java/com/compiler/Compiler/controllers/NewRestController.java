@@ -151,7 +151,6 @@ public class NewRestController {
         }
 
     };
-
     public static final ReplCommand<String> REPL_CLEAR = (httpSession, compiler, logs, debug, args) -> {
         StringBuilder history = (StringBuilder) httpSession.getAttribute("repl_history");
         if (history == null) {
@@ -161,7 +160,6 @@ public class NewRestController {
         history.setLength(0);
         return null;
     };
-
     public static final ReplCommand<String> REPL_UNSET = (httpSession, compiler, logs, debug, args) -> {
         compiler.specs.variableAssignments.remove(args);
         return null;
